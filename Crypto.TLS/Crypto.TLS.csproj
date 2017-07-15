@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Crypto.Certificates\Crypto.Certificates.csproj" />
+    <ProjectReference Include="..\Crypto.Core\Crypto.Core.csproj" />
+    <ProjectReference Include="..\Crypto.Utils\Crypto.Utils.csproj" />
+  </ItemGroup>
+
+</Project>

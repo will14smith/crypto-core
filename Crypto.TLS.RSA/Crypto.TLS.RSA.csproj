@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DebugType>full</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Crypto.Certificates\Crypto.Certificates.csproj" />
+    <ProjectReference Include="..\Crypto.RSA\Crypto.RSA.csproj" />
+    <ProjectReference Include="..\Crypto.TLS.KeyExchange\Crypto.TLS.KeyExchange.csproj" />
+    <ProjectReference Include="..\Crypto.TLS\Crypto.TLS.csproj" />
+  </ItemGroup>
+
+</Project>
