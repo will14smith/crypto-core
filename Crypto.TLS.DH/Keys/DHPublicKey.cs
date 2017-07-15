@@ -2,6 +2,7 @@ using System.IO;
 using System.Numerics;
 using Crypto.ASN1;
 using Crypto.Certificates.Keys;
+using Crypto.TLS.DH.Config;
 using Crypto.Utils;
 
 namespace Crypto.TLS.DH.Keys
@@ -10,11 +11,13 @@ namespace Crypto.TLS.DH.Keys
     {
         public BigInteger P { get; }
         public BigInteger G { get; }
+        public BigInteger Y { get; }
 
-        public DHPublicKey(BigInteger p, BigInteger g)
+        public DHPublicKey(DHParameterConfig parameters, BigInteger y)
         {
-            P = p;
-            G = g;
+            P = parameters.P;
+            G = parameters.G;
+            Y = y;
         }
 
         protected override bool Equal(PublicKey key)
@@ -22,16 +25,14 @@ namespace Crypto.TLS.DH.Keys
             var other = key as DHPublicKey;
             if (other == null) return false;
 
-            return P == other.P && G == other.G;
+            return P == other.P
+                   && G == other.G
+                   && Y == other.Y;
         }
 
         public override byte[] GetBytes()
         {
-            var asn1 = new ASN1Sequence(new[]
-            {
-                new ASN1Integer(P),
-                new ASN1Integer(G),
-            });
+            var asn1 = new ASN1Integer(Y);
 
             using (var ms = new MemoryStream())
             {
@@ -41,6 +42,6 @@ namespace Crypto.TLS.DH.Keys
             }
         }
 
-        protected override int HashCode => HashCodeHelper.ToInt(P ^ G);
+        protected override int HashCode => HashCodeHelper.ToInt(P ^ G ^ Y);
     }
 }

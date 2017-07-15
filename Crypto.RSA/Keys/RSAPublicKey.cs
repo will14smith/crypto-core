@@ -6,7 +6,7 @@ using Crypto.Utils;
 
 namespace Crypto.RSA.Keys
 {
-    internal class RSAPublicKey : PublicKey
+    public class RSAPublicKey : PublicKey
     {
         public RSAPublicKey(BigInteger modulus, BigInteger exponent)
         {

@@ -4,6 +4,7 @@ using System.IO;
 using Crypto.ASN1;
 using Crypto.Certificates;
 using Crypto.Certificates.Keys;
+using Crypto.TLS.DH.Config;
 using Crypto.Utils;
 
 namespace Crypto.TLS.DH.Keys
@@ -12,20 +13,35 @@ namespace Crypto.TLS.DH.Keys
     {
         public PublicKey ReadPublicKey(X509AlgorithmIdentifier algorithm, BitArray bits)
         {
-            return CreatePublicKey(algorithm);
+            var parameters = CreateParameters(algorithm);
+
+            var data = bits.ToArray();
+
+            ASN1Object asn1;
+            using (var ms = new MemoryStream(data))
+            {
+                asn1 = new DERReader(ms).Read();
+            }
+
+            var y = asn1 as ASN1Integer;
+            SecurityAssert.NotNull(y);
+
+            return new DHPublicKey(parameters, y.Value);
         }
 
         public PrivateKey ReadPrivateKey(X509AlgorithmIdentifier algorithm, byte[] input)
         {
+            var parameters = CreateParameters(algorithm);
+
             using (var ms = new MemoryStream(input))
             {
                 var asn1 = new DERReader(ms);
 
-                return new DHPrivateKey(CreatePublicKey(algorithm), asn1.Read());
+                return new DHPrivateKey(parameters, asn1.Read());
             }
         }
-        
-        private static PublicKey CreatePublicKey(X509AlgorithmIdentifier algorithm)
+
+        private static DHParameterConfig CreateParameters(X509AlgorithmIdentifier algorithm)
         {
             SecurityAssert.Assert(algorithm.Algorithm == DHIdentifiers.DHKeyAgreement);
             SecurityAssert.Assert(algorithm.Parameters.Count == 1);
@@ -38,7 +54,7 @@ namespace Crypto.TLS.DH.Keys
             var g = keySeq.Elements[1] as ASN1Integer;
             SecurityAssert.NotNull(g);
 
-            return new DHPublicKey(p.Value, g.Value);
+            return new DHParameterConfig(p.Value, g.Value);
         }
     }
 }
