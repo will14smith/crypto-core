@@ -7,9 +7,12 @@ namespace Crypto.RSA
     public static class RSARegister
     {
         public static void AddRSAKeyReaders(this IServiceCollection services)
-        {           
-            services.RegisterPublicKeyReader<RSAKeyReader>(RSAKeyReader.RSAEncryption);
-            services.RegisterPrivateKeyReader<RSAKeyReader>(RSAKeyReader.RSAEncryption);
+        {
+            foreach (var identifier in RSAKeyReader.RSAIdentifiers)
+            {
+                services.RegisterPublicKeyReader<RSAKeyReader>(identifier);
+                services.RegisterPrivateKeyReader<RSAKeyReader>(identifier);
+            }
         }
     }
 }

@@ -1,8 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Crypto.Certificates;
 using Crypto.Certificates.Parameters;
 using Crypto.Core.Randomness;
 using Crypto.RSA.Encryption;
+using Crypto.RSA.Keys;
 using Crypto.TLS.Config;
 using Crypto.TLS.KeyExchange;
 using Crypto.TLS.Messages.Handshakes;
@@ -15,7 +17,7 @@ namespace Crypto.TLS.RSA
         private readonly IRandom _random;
         private readonly CertificateManager _certificateManager;
         private readonly MasterSecretCalculator _masterSecretCalculator;
-        
+
         private readonly VersionConfig _versionConfig;
         private readonly CertificateConfig _certificateConfig;
 
@@ -23,15 +25,34 @@ namespace Crypto.TLS.RSA
             IRandom random,
             CertificateManager certificateManager,
             MasterSecretCalculator masterSecretCalculator,
-            
+
             VersionConfig versionConfig,
             CertificateConfig certificateConfig)
         {
-            _certificateManager = certificateManager;
             _random = random;
+            _certificateManager = certificateManager;
             _masterSecretCalculator = masterSecretCalculator;
+            
             _versionConfig = versionConfig;
             _certificateConfig = certificateConfig;
+        }
+
+        public bool IsCompatible(CipherSuite cipherSuite, X509Certificate certificate)
+        {
+            // cert signed with RSA
+            if (!RSAKeyReader.IsRSAIdentifier(certificate.SignatureAlgorithm.Algorithm))
+            {
+                return false;
+            }
+
+            // cert has RSA public key
+            if (!(certificate.SubjectPublicKey is RSAPublicKey))
+            {
+                return false;
+            }
+            
+            // TODO ?
+            return true;
         }
 
         public IEnumerable<HandshakeMessage> GenerateHandshakeMessages()

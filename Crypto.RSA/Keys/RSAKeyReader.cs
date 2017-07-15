@@ -1,5 +1,7 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Crypto.ASN1;
 using Crypto.Certificates;
 using Crypto.Certificates.Keys;
@@ -9,11 +11,20 @@ namespace Crypto.RSA.Keys
 {
     public class RSAKeyReader : IPublicKeyReader, IPrivateKeyReader
     {
-        public static readonly ASN1ObjectIdentifier RSAEncryption = new ASN1ObjectIdentifier("1.2.840.113549.1.1.1"); // PKCS#1
+        public static IReadOnlyCollection<ASN1ObjectIdentifier> RSAIdentifiers = new List<ASN1ObjectIdentifier>
+        {
+            new ASN1ObjectIdentifier("1.2.840.113549.1.1.1"),
+            new ASN1ObjectIdentifier("1.2.840.113549.1.1.11"),
+        };
+
+        public static bool IsRSAIdentifier(ASN1ObjectIdentifier identifier)
+        {
+            return RSAIdentifiers.Contains(identifier);
+        }
 
         public PublicKey ReadPublicKey(X509AlgorithmIdentifier algorithm, BitArray bits)
         {
-            SecurityAssert.Assert(algorithm.Algorithm == RSAEncryption);
+            SecurityAssert.Assert(IsRSAIdentifier(algorithm.Algorithm));
             SecurityAssert.Assert(algorithm.Parameters.Count == 1 && algorithm.Parameters[0] is ASN1Null);
 
             var data = bits.ToArray();

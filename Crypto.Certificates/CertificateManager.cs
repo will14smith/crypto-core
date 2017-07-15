@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using Crypto.Certificates.Keys;
 using Crypto.Certificates.Services;
@@ -34,7 +35,7 @@ namespace Crypto.Certificates
         {
             var reader = new X509Reader(_publicKeyReaderRegistry, _serviceProvider, input);
             var cert = reader.ReadCertificate();
-            
+
             if (_certificates.Count == 0)
             {
                 _defaultCertificate = cert;
@@ -53,6 +54,11 @@ namespace Crypto.Certificates
         public X509Certificate GetDefaultCertificate()
         {
             return _defaultCertificate;
+        }
+
+        public IReadOnlyCollection<X509Certificate> GetAllCertificates()
+        {
+            return _certificates;
         }
 
         public PrivateKey GetPrivateKey(PublicKey publicKey)

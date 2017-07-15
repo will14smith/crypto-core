@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using Crypto.Certificates;
+using Crypto.TLS.Config;
 using Crypto.TLS.Services;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -35,11 +36,37 @@ namespace Crypto.TLS
 
         public X509Certificate[] DecideCertificateChain()
         {
-            // TODO SNI
-            return new[]
+            var certificateManager = _serviceProvider.GetRequiredService<CertificateManager>();
+
+            foreach (var certificate in certificateManager.GetAllCertificates())
             {
-                _serviceProvider.GetRequiredService<CertificateManager>().GetDefaultCertificate()
-            };
+                if (IsSuitable(certificate))
+                {
+                    // TODO build actual chain
+                    return new[]
+                    {
+                        certificate
+                    };
+                }
+            }
+            
+            throw new InvalidOperationException("No suitable certificates found");
+        }
+
+        private bool IsSuitable(X509Certificate certificate)
+        {
+            // TODO SNI
+            // TODO Compatible with signature
+
+            var cipherSuite = _serviceProvider.GetRequiredService<CipherSuiteConfig>().CipherSuite;
+
+            var keyExchange = _serviceProvider.ResolveKeyExchange(cipherSuite);
+            if (!keyExchange.IsCompatible(cipherSuite, certificate))
+            {
+                return false;
+            }
+
+            return true;
         }
     }
 }
