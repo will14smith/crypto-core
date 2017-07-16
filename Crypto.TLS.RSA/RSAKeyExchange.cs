@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Crypto.Certificates;
-using Crypto.Certificates.Parameters;
 using Crypto.Core.Randomness;
 using Crypto.RSA.Encryption;
 using Crypto.RSA.Keys;
@@ -65,9 +63,9 @@ namespace Crypto.TLS.RSA
             var length = EndianBitConverter.Big.ToUInt16(body, 0);
             SecurityAssert.Assert(body.Length == length + 2);
 
-            var key = _certificateManager.GetPrivateKey(_certificateConfig.Certificate.SubjectPublicKey);
+            var key = (RSAPrivateKey)_certificateManager.GetPrivateKey(_certificateConfig.Certificate.SubjectPublicKey);
             var rsa = new RSACipher(_random);
-            rsa.Init(new PrivateKeyParameter(key));
+            rsa.Init(new RSAPrivateKeyParameter(key));
 
             var preMasterSecret = new byte[48];
 

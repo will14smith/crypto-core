@@ -1,9 +1,11 @@
-﻿using Crypto.Core.Registry;
+﻿using Crypto.Certificates.Services;
+using Crypto.Core.Registry;
 using Crypto.EC.Encryption;
 using Crypto.TLS.EC.Config;
 using Crypto.TLS.EC.Curves;
 using Crypto.TLS.EC.Extensions;
 using Crypto.TLS.EC.KeyExchanges;
+using Crypto.TLS.EC.Keys;
 using Crypto.TLS.EC.Services;
 using Crypto.TLS.Extensions;
 using Crypto.TLS.Services;
@@ -15,16 +17,23 @@ namespace Crypto.TLS.EC
     {
         public static void AddEC(this IServiceCollection services)
         {
-            services.RegisterExtension<SupportedGroupsExtension>(ECIdentifiers.SupportedGroups)
+            services
+                .RegisterExtension<SupportedGroupsExtension>(ECIdentifiers.SupportedGroups)
                 .AddScoped<SupportedGroupsConfig>();
-            services.RegisterExtension<ECPointFormatsExtension>(ECIdentifiers.ECPointFormats)
+            services
+                .RegisterExtension<ECPointFormatsExtension>(ECIdentifiers.ECPointFormats)
                 .AddScoped<ECPointFormatsConfig>();
 
-            services.RegisterSignatureAlgorithms<ECDSA>(ECIdentifiers.ECDSA)
+            services
+                .RegisterSignatureAlgorithms<ECDSA>(ECIdentifiers.ECDSA)
                 .RegisterSignatureCipherParameterFactory<ECDSACipherParameterFactory>(ECIdentifiers.ECDSA);
 
             services.RegisterKeyExchange<ECDHEKeyExchange>(ECIdentifiers.ECDHE)
                 .AddScoped<ECDHExchangeConfig>();
+
+            services
+                .RegisterPublicKeyReader<ECKeyReader>(ECIdentifiers.ECPublickey)
+                .RegisterPrivateKeyReader<ECKeyReader>(ECIdentifiers.ECPublickey);
 
             services.Update<NamedCurvesRegistry>(prev =>
             {

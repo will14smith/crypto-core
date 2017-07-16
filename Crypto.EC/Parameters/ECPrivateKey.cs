@@ -1,25 +1,30 @@
-﻿using System.Numerics;
-using Crypto.Certificates.Keys;
+﻿using Crypto.Certificates.Keys;
+using Crypto.EC.Maths.Prime;
+using Crypto.Utils;
 
 namespace Crypto.EC.Parameters
 {
     public class ECPrivateKey : PrivateKey
     {
-        public ECPrivateKey(BigInteger key, ECPublicKey pKey)
+        public ECPrivateKey(ECPublicKey pub, PrimeValue d)
         {
-            Key = key;
-            PublicKey = pKey;
+            ECPublicKey = pub;
+            D = d;
         }
 
-        public BigInteger Key { get; }
-        public override PublicKey PublicKey { get; }
+        public PrimeValue D { get; }
+
+        public ECPublicKey ECPublicKey { get; }
+        public override PublicKey PublicKey => ECPublicKey;
 
         protected override bool Equal(PrivateKey key)
         {
             var other = key as ECPrivateKey;
-            return !ReferenceEquals(other, null) && other.Key == Key;
+            if (other == null) return false;
+
+            return D == other.D && PublicKey.Equals(other.PublicKey);
         }
 
-        protected override int HashCode => Key.GetHashCode();
+        protected override int HashCode => HashCodeHelper.ToInt(D.ToInt()) ^ PublicKey.GetHashCode();
     }
 }

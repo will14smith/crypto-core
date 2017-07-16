@@ -7,25 +7,29 @@ namespace Crypto.EC.Parameters
 {
     public class ECPublicKey : PublicKey
     {
+        public PrimeDomainParameters Parameters { get; }
         public Point<PrimeValue> Point { get; }
 
-        public ECPublicKey(Point<PrimeValue> point)
+        public ECPublicKey(PrimeDomainParameters parameters, Point<PrimeValue> point)
         {
+            Parameters = parameters;
             Point = point;
         }
 
-        protected override int HashCode => Point.GetHashCode();
         protected override bool Equal(PublicKey key)
         {
             var other = key as ECPublicKey;
-            if (ReferenceEquals(other, null)) return false;
-            
-            return other.Point == Point;
+            if (other == null) return false;
+
+            return Parameters.Equals(other.Parameters)
+                   && Point.Equals(other.Point);
         }
 
         public override byte[] GetBytes()
         {
-            throw new NotImplementedException();
+            return Point.ToBytes();
         }
+
+        protected override int HashCode => Parameters.GetHashCode() ^ Point.GetHashCode();
     }
 }

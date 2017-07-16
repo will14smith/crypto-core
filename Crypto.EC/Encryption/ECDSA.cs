@@ -1,8 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
-using System.Numerics;
+using System.Linq;
 using Crypto.ASN1;
-using Crypto.Core.Encryption;
 using Crypto.Core.Encryption.Parameters;
 using Crypto.Core.Hashing;
 using Crypto.Core.Randomness;
@@ -11,7 +11,6 @@ using Crypto.EC.Maths;
 using Crypto.EC.Maths.Prime;
 using Crypto.EC.Parameters;
 using Crypto.Utils;
-using Crypto.Utils.IO;
 
 namespace Crypto.EC.Encryption
 {
@@ -22,7 +21,7 @@ namespace Crypto.EC.Encryption
 
         private PrimeDomainParameters _domain;
         private Point<PrimeValue> _publicKey;
-        private BigInteger? _privateKey;
+        private PrimeValue _privateKey;
 
         private readonly IRandom _random;
 
@@ -41,7 +40,7 @@ namespace Crypto.EC.Encryption
 
             _domain = ecParams.Domain;
             _publicKey = ecParams.PublicKey.Point;
-            _privateKey = ecParams.PrivateKey?.Key;
+            _privateKey = ecParams.PrivateKey?.D;
 
             _ln = _domain.Order.GetBitLength();
             _nField = new PrimeField(_domain.Order);
@@ -49,7 +48,7 @@ namespace Crypto.EC.Encryption
 
         public byte[] Sign(byte[] input, IDigest hash)
         {
-            if (!_privateKey.HasValue)
+            if (_privateKey == null)
             {
                 throw new InvalidOperationException("ECDSA not initialised with private key");
             }
@@ -101,14 +100,16 @@ namespace Crypto.EC.Encryption
             }
         }
 
-        private PrimeValue ToZ(byte[] bytes, int i)
+        private PrimeValue ToZ(IEnumerable<byte> e, int ln)
         {
-            if (i / 8 != bytes.Length)
+            // TODO handle sub byte lengths
+
+            if (ln % 8 != 0)
             {
                 throw new NotImplementedException();
             }
 
-            return _domain.Field.Int(bytes.ToBigInteger());
+            return _domain.Field.Int(e.Take(ln / 8).ToBigInteger());
         }
 
         public bool Verify(byte[] input, byte[] signature, IDigest hash)

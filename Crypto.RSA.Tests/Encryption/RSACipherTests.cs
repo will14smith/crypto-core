@@ -1,8 +1,6 @@
-﻿using Crypto.Certificates.Keys;
-using Crypto.RSA.Keys;
+﻿using Crypto.RSA.Keys;
 using System;
 using System.Text;
-using Crypto.Certificates.Parameters;
 using Crypto.Core.Randomness;
 using Crypto.RSA.Encryption;
 using Xunit;
@@ -13,15 +11,15 @@ namespace Crypto.RSA.Tests.Encryption
 {
     public class RSACipherTests
     {
-        private static readonly PrivateKey Key = new RSAKeyReader().ReadPrivateKey(null, Convert.FromBase64String("MIIBOwIBAAJBAMrK7ObRkpDkRgfjPRN2fFhVvfHByK4VCo+X7qOmcaYdP1ekHXfOQYcwwPLUwM6iZoYM0QGpGoJLJiJeWM8rkpECAwEAAQJAewlXZktsk0AMRSjXm4Fdu/J5hb4+1W+qsqhJfzyy40byZW1RVZ6nf9VQwg21sB0PCPZpPqwDR8582BAd4VQcqQIhAPLoGNX9CRxBfNzuHiP3k+vMOCC3lVpPp7CGVm629+azAiEA1blKT9FNEF7R2cxmn/HImn4MWlgG/YfBIsVLVjXOI6sCIQCzXiQI0CLMFKepVMQ49vbp5hGER0woNi2zsl9cvgts9QIhAMqyrTP+QaShCU4TedGAMs2zdmvIyPhzZE1h6Q2egh95AiA+MprDyZjZ+zjqgSD/Kkp82vSy04iF5ZBvrBhtS0vK0Q=="));
+        private static readonly RSAPrivateKey Key = (RSAPrivateKey) new RSAKeyReader().ReadPrivateKey(null, Convert.FromBase64String("MIIBOwIBAAJBAMrK7ObRkpDkRgfjPRN2fFhVvfHByK4VCo+X7qOmcaYdP1ekHXfOQYcwwPLUwM6iZoYM0QGpGoJLJiJeWM8rkpECAwEAAQJAewlXZktsk0AMRSjXm4Fdu/J5hb4+1W+qsqhJfzyy40byZW1RVZ6nf9VQwg21sB0PCPZpPqwDR8582BAd4VQcqQIhAPLoGNX9CRxBfNzuHiP3k+vMOCC3lVpPp7CGVm629+azAiEA1blKT9FNEF7R2cxmn/HImn4MWlgG/YfBIsVLVjXOI6sCIQCzXiQI0CLMFKepVMQ49vbp5hGER0woNi2zsl9cvgts9QIhAMqyrTP+QaShCU4TedGAMs2zdmvIyPhzZE1h6Q2egh95AiA+MprDyZjZ+zjqgSD/Kkp82vSy04iF5ZBvrBhtS0vK0Q=="));
 
         [Fact]
         public void EncryptDecrypt_ShouldRoundTrip()
         {
             var input = new byte[] { 0, 1, 5, 30, 244, 255, 193 };
-
+            
             var rsa = new RSACipher(new DefaultRandomGenerator());
-            rsa.Init(new PrivateKeyParameter(Key));
+            rsa.Init(new RSAPrivateKeyParameter(Key));
 
             var encryptOutput = new byte[rsa.KeySize];
             var decryptOutput = new byte[input.Length];
@@ -38,7 +36,7 @@ namespace Crypto.RSA.Tests.Encryption
             var input = Encoding.UTF8.GetBytes("Hello World");
 
             var rsa = new RSASignatureCipher();
-            rsa.Init(new PrivateKeyParameter(Key));
+            rsa.Init(new RSAPrivateKeyParameter(Key));
 
             var signature = rsa.Sign(input, new SHA1Digest());
 
@@ -53,7 +51,7 @@ namespace Crypto.RSA.Tests.Encryption
             var input = Encoding.UTF8.GetBytes("Hello World");
 
             var rsa = new RSASignatureCipher();
-            rsa.Init(new PrivateKeyParameter(Key));
+            rsa.Init(new RSAPrivateKeyParameter(Key));
 
             var signature = rsa.Sign(input, new SHA1Digest());
 

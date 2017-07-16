@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 using Crypto.ASN1;
-using Crypto.Certificates.Parameters;
 using Crypto.Core.Encryption.Parameters;
 using Crypto.Core.Hashing;
 using Crypto.RSA.Keys;
@@ -21,18 +20,12 @@ namespace Crypto.RSA.Encryption
         {
             switch (parameters)
             {
-                case PublicKeyParameter pubKeyParams:
-                    SecurityAssert.Assert(pubKeyParams.Key is RSAPublicKey);
-
-                    PublicKey = (RSAPublicKey)pubKeyParams.Key;
-
+                case RSAPublicKeyParameter pubKeyParams:
+                    PublicKey = pubKeyParams.Key;
                     return;
-                case PrivateKeyParameter privKeyParams:
-                    SecurityAssert.Assert(privKeyParams.Key is RSAPrivateKey);
-
-                    PrivateKey = (RSAPrivateKey)privKeyParams.Key;
+                case RSAPrivateKeyParameter privKeyParams:
+                    PrivateKey = privKeyParams.Key;
                     PublicKey = (RSAPublicKey)PrivateKey.PublicKey;
-
                     return;
                 default:
                     throw new InvalidCastException();

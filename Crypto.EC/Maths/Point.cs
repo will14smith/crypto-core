@@ -1,4 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Crypto.Utils.IO;
+using Crypto.Utils;
 
 namespace Crypto.EC.Maths
 {
@@ -14,6 +18,43 @@ namespace Crypto.EC.Maths
             Y = y;
         }
 
+        // TODO type
+        public byte[] ToBytes()
+        {
+            var x = X.ToInt().ToByteArray(Endianness.BigEndian);
+            var y = Y.ToInt().ToByteArray(Endianness.BigEndian);
+
+            SecurityAssert.Assert(x.Length == y.Length);
+
+            return new[]
+            {
+                // Type
+                (byte) 0x4
+            }.Concat(x).Concat(y).ToArray();
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            var other = obj as Point<TFieldValue>;
+            return other != null && Equals(other);
+        }
+
+        protected bool Equals(Point<TFieldValue> other)
+        {
+            return EqualityComparer<TFieldValue>.Default.Equals(X, other.X)
+                && EqualityComparer<TFieldValue>.Default.Equals(Y, other.Y);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return (EqualityComparer<TFieldValue>.Default.GetHashCode(X) * 397) ^ EqualityComparer<TFieldValue>.Default.GetHashCode(Y);
+            }
+        }
+
         public static Point<TFieldValue> Add(Curve<TFieldValue> curve, Point<TFieldValue> a, Point<TFieldValue> b)
         {
             if (a == null) { return b; }
@@ -23,7 +64,7 @@ namespace Crypto.EC.Maths
 
             TFieldValue m;
 
-            if (a == b)
+            if (Equals(a, b))
             {
                 var mt = field.Add(field.Multiply(field.Int(3), field.Multiply(a.X, a.X)), curve.A);
                 var mb = field.Multiply(field.Int(2), a.Y);

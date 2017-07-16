@@ -1,7 +1,7 @@
 ﻿using System;
 using Crypto.Certificates;
-using Crypto.Certificates.Parameters;
 using Crypto.Core.Encryption.Parameters;
+using Crypto.RSA.Keys;
 using Crypto.TLS.Config;
 using Crypto.TLS.Services;
 
@@ -13,7 +13,7 @@ namespace Crypto.TLS.RSA
         private readonly CertificateConfig _certificateConfig;
 
         public RSACipherParameterFactory(
-            CertificateManager certificateManager, 
+            CertificateManager certificateManager,
             CertificateConfig certificateConfig)
         {
             _certificateManager = certificateManager;
@@ -22,14 +22,14 @@ namespace Crypto.TLS.RSA
 
         public ICipherParameters Create(ConnectionEnd end, ConnectionDirection direction)
         {
-            var publicKey = _certificateConfig.Certificate.SubjectPublicKey;
-            
+            var publicKey = (RSAPublicKey)_certificateConfig.Certificate.SubjectPublicKey;
+
             switch (end)
             {
                 case ConnectionEnd.Client:
-                    return new PublicKeyParameter(publicKey);
+                    return new RSAPublicKeyParameter(publicKey);
                 case ConnectionEnd.Server:
-                    return new PrivateKeyParameter(_certificateManager.GetPrivateKey(publicKey));
+                    return new RSAPrivateKeyParameter((RSAPrivateKey)_certificateManager.GetPrivateKey(publicKey));
                 default:
                     throw new ArgumentOutOfRangeException(nameof(end), end, null);
             }

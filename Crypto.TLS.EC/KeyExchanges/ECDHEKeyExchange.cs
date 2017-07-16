@@ -4,6 +4,7 @@ using Crypto.Certificates;
 using Crypto.Core.Randomness;
 using Crypto.EC.Maths;
 using Crypto.EC.Maths.Prime;
+using Crypto.EC.Parameters;
 using Crypto.RSA.Keys;
 using Crypto.TLS.Config;
 using Crypto.TLS.EC.Config;
@@ -44,7 +45,7 @@ namespace Crypto.TLS.EC.KeyExchanges
         {
             _serviceProvider = serviceProvider;
             _random = random;
-            
+
             _masterSecretCalculator = masterSecretCalculator;
             _cipherSuiteRegistry = cipherSuiteRegistry;
             _namedCurvesRegistry = namedCurvesRegistry;
@@ -60,8 +61,18 @@ namespace Crypto.TLS.EC.KeyExchanges
 
             if (signatureAlgorithm.Equals(ECIdentifiers.ECDSA))
             {
-                // TODO check ECDSA pubkey, signed with ECDSA
-                throw new NotImplementedException();
+                if (certificate.SignatureAlgorithm.Algorithm != ECIdentifiers.ECDSAWithSHA256)
+                {
+                    return false;
+                }
+
+                if (!(certificate.SubjectPublicKey is ECPublicKey))
+                {
+                    return false;
+                }
+
+                return true;
+
             }
 
             if (signatureAlgorithm.Equals(RSAIdentifiers.RSASig))
@@ -132,7 +143,7 @@ namespace Crypto.TLS.EC.KeyExchanges
                 _ecdhExchangeConfig.Parameters.Curve,
                 _ecdhExchangeConfig.D,
                 qc);
-            
+
             var preMasterSecret = sharedSecret.X.ToInt().ToByteArray(Endianness.BigEndian);
 
             var masterSecret = _masterSecretCalculator.Compute(preMasterSecret);

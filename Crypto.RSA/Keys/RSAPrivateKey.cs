@@ -5,7 +5,7 @@ using Crypto.Utils;
 
 namespace Crypto.RSA.Keys
 {
-    internal class RSAPrivateKey : PrivateKey
+    public class RSAPrivateKey : PrivateKey
     {
         public RSAPrivateKey(ASN1Object asn1Key)
         {

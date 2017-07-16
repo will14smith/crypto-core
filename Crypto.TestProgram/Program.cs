@@ -57,7 +57,15 @@ namespace Crypto.TestProgram
             var rsaKey = PEMReader.TryConvertFromBase64(File.ReadAllBytes("localhost_rsa.key"));
             SecurityAssert.Assert(rsaKey.Count == 1);
             certificates.AddPrivateKey(rsaKey[0].RawData);
-            
+
+            var ecCert = PEMReader.TryConvertFromBase64(File.ReadAllBytes("localhost_ec.cert"));
+            SecurityAssert.Assert(ecCert.Count == 1);
+            certificates.AddCertificate(ecCert[0].RawData);
+
+            var ecKey = PEMReader.TryConvertFromBase64(File.ReadAllBytes("localhost_ec.key"));
+            SecurityAssert.Assert(ecKey.Count == 1);
+            certificates.AddPrivateKey(ecKey[0].RawData);
+
             var dhCert = PEMReader.TryConvertFromBase64(File.ReadAllBytes("localhost_dh.cert"));
             SecurityAssert.Assert(dhCert.Count == 1);
             certificates.AddCertificate(dhCert[0].RawData);
