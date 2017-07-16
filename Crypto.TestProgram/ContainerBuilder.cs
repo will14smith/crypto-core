@@ -6,6 +6,7 @@ using Crypto.TLS;
 using Crypto.TLS.AES;
 using Crypto.TLS.DH;
 using Crypto.TLS.DH.Config;
+using Crypto.TLS.EC;
 using Crypto.TLS.GCM;
 using Crypto.TLS.RSA;
 using Crypto.TLS.SHA;
@@ -30,6 +31,7 @@ namespace Crypto.TestProgram
             // features
             services.AddAES();
             services.AddDHKeyExchange(CreateDHParameters());
+            services.AddEC();
             services.AddGCM();
             services.AddRSAKeyReaders();
             services.AddRSAKeyExchange();
