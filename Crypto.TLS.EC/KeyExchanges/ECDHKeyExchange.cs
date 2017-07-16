@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Crypto.Certificates;
 using Crypto.Core.Randomness;
 using Crypto.EC.Maths;
@@ -18,12 +19,13 @@ using Crypto.Utils.IO;
 
 namespace Crypto.TLS.EC.KeyExchanges
 {
-    public class ECDHEKeyExchange : IKeyExchange
+    public class ECDHKeyExchange : IKeyExchange
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly IRandom _random;
 
         private readonly MasterSecretCalculator _masterSecretCalculator;
+        private readonly CertificateManager _certificateManager;
         private readonly CipherSuiteRegistry _cipherSuiteRegistry;
         private readonly NamedCurvesRegistry _namedCurvesRegistry;
 
@@ -31,11 +33,12 @@ namespace Crypto.TLS.EC.KeyExchanges
         private readonly SupportedGroupsConfig _supportedGroupsConfig;
         private readonly CertificateConfig _certificateConfig;
 
-        public ECDHEKeyExchange(
+        public ECDHKeyExchange(
             IServiceProvider serviceProvider,
             IRandom random,
 
             MasterSecretCalculator masterSecretCalculator,
+            CertificateManager certificateManager,
             CipherSuiteRegistry cipherSuiteRegistry,
             NamedCurvesRegistry namedCurvesRegistry,
 
@@ -47,6 +50,7 @@ namespace Crypto.TLS.EC.KeyExchanges
             _random = random;
 
             _masterSecretCalculator = masterSecretCalculator;
+            _certificateManager = certificateManager;
             _cipherSuiteRegistry = cipherSuiteRegistry;
             _namedCurvesRegistry = namedCurvesRegistry;
 
@@ -72,7 +76,6 @@ namespace Crypto.TLS.EC.KeyExchanges
                 }
 
                 return true;
-
             }
 
             if (signatureAlgorithm.Equals(RSAIdentifiers.RSASig))
@@ -82,7 +85,7 @@ namespace Crypto.TLS.EC.KeyExchanges
                     return false;
                 }
 
-                if (!(certificate.SubjectPublicKey is RSAPublicKey))
+                if (!(certificate.SubjectPublicKey is ECPublicKey))
                 {
                     return false;
                 }
@@ -97,43 +100,33 @@ namespace Crypto.TLS.EC.KeyExchanges
         {
             yield return new CertificateMessage(_certificateConfig.CertificateChain);
 
-            var ecParameters = NegotiateParameters();
-
-            var qs = Point<PrimeValue>.Multiply(
-                _ecdhExchangeConfig.Parameters.Curve,
-                _ecdhExchangeConfig.D,
-                _ecdhExchangeConfig.Parameters.Generator);
-
-            var serverParams = new ServerECDHParams(ecParameters, qs);
-
-            yield return new ServerKeyExchangeMessage(_serviceProvider, serverParams);
+            NegotiateParameters();
         }
 
-        private ECParameters NegotiateParameters()
+        private void NegotiateParameters()
         {
-            var namedCurve = GetFirstSupportedCurve();
-            SecurityAssert.Assert(namedCurve.HasValue);
-
-            _ecdhExchangeConfig.Parameters = _namedCurvesRegistry.Resolve(namedCurve.Value);
-
-            // must be in range [1, n-1] hence the -2 and +1
-            var d = _random.RandomBig(_ecdhExchangeConfig.Parameters.Order - 2) + 1;
-            _ecdhExchangeConfig.D = _ecdhExchangeConfig.Parameters.Field.Int(d);
-
-            return new ECParameters.Named(namedCurve.Value);
-        }
-
-        private Option<NamedCurve> GetFirstSupportedCurve()
-        {
-            foreach (var group in _supportedGroupsConfig.SupportedGroups)
+            var key = GetPrivateKey();
+            var parameters = key.ECPublicKey.Parameters;
+            
+            var name = GetCurveName(parameters);
+            if (name.HasValue)
             {
-                if (_namedCurvesRegistry.IsSupported(group))
-                {
-                    return Option.Some(group);
-                }
+                SecurityAssert.Assert(_supportedGroupsConfig.SupportedGroups.Contains(name.Value));
+            }
+            else
+            {
+                throw new NotImplementedException("EXPLICIT");
             }
 
-            return Option.None<NamedCurve>();
+            _ecdhExchangeConfig.Parameters = parameters;
+            _ecdhExchangeConfig.D = key.D;
+        }
+
+        private Option<NamedCurve> GetCurveName(PrimeDomainParameters parameters)
+        {
+            return _namedCurvesRegistry.FindNameByParameters(parameters, out var name) 
+                ? Option.Some(name) 
+                : Option.None<NamedCurve>();
         }
 
         public void HandleClientKeyExchange(ClientKeyExchangeMessage message)
@@ -162,6 +155,17 @@ namespace Crypto.TLS.EC.KeyExchanges
             Array.Copy(message.Body, 1, param, 0, length);
 
             return _ecdhExchangeConfig.Parameters.Curve.PointFromBinary(param);
+        }
+
+        private ECPrivateKey GetPrivateKey()
+        {
+            var cert = _certificateConfig.Certificate;
+            var key = _certificateManager.GetPrivateKey(cert.SubjectPublicKey);
+
+            var ecKey = key as ECPrivateKey;
+            SecurityAssert.NotNull(ecKey);
+
+            return ecKey;
         }
     }
 }

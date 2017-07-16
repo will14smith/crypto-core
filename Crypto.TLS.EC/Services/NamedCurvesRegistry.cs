@@ -46,5 +46,20 @@ namespace Crypto.TLS.EC.Services
             Register(id, parameters);
             Register(oid, parameters);
         }
+
+        public bool FindNameByParameters(PrimeDomainParameters parameters, out NamedCurve name)
+        {
+            foreach (var entry in _curvesByEnum)
+            {
+                if (entry.Value.Equals(parameters))
+                {
+                    name = entry.Key;
+                    return true;
+                }
+            }
+
+            name = default(NamedCurve);
+            return false;
+        }
     }
 }

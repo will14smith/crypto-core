@@ -12,6 +12,7 @@ namespace Crypto.TLS.EC
 
         public static readonly TLSSignatureAlgorithm ECDSA = new TLSSignatureAlgorithm(3);
         
+        public static readonly TLSKeyExchange ECDH = new TLSKeyExchange(Guid.NewGuid());
         public static readonly TLSKeyExchange ECDHE = new TLSKeyExchange(Guid.NewGuid());
 
         public static readonly ASN1ObjectIdentifier ECPublickey = new ASN1ObjectIdentifier("1.2.840.10045.2.1");

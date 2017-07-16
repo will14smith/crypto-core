@@ -165,31 +165,31 @@ namespace Crypto.TestProgram
 
         public static void AddEC(IServiceCollection services)
         {
-            //TODO services.RegisterCipherSuite(TLS_ECDH_ECDSA_WITH_NULL_SHA, TLSCipherAlgorithm.Null, SHAIdentifiers.SHA1, ECIdentifiers.ECDSA, null);
-            //TODO services.RegisterCipherSuite(TLS_ECDH_ECDSA_WITH_RC4_128_SHA, null, SHAIdentifiers.SHA1, ECIdentifiers.ECDSA, null);
-            //TODO services.RegisterCipherSuite(TLS_ECDH_ECDSA_WITH_3DES_EDE_CBC_SHA, null, SHAIdentifiers.SHA1, ECIdentifiers.ECDSA, null);
-            //TODO services.RegisterCipherSuite(TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA, AESIdentifiers.AES128_CBC, SHAIdentifiers.SHA1, ECIdentifiers.ECDSA, null);
-            //TODO services.RegisterCipherSuite(TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA, AESIdentifiers.AES256_CBC, SHAIdentifiers.SHA1, ECIdentifiers.ECDSA, null);
+            services.RegisterCipherSuite(TLS_ECDH_ECDSA_WITH_NULL_SHA, TLSCipherAlgorithm.Null, SHAIdentifiers.SHA1, ECIdentifiers.ECDSA, ECIdentifiers.ECDH);
+            //TODO services.RegisterCipherSuite(TLS_ECDH_ECDSA_WITH_RC4_128_SHA, null, SHAIdentifiers.SHA1, ECIdentifiers.ECDSA, ECIdentifiers.ECDH);
+            //TODO services.RegisterCipherSuite(TLS_ECDH_ECDSA_WITH_3DES_EDE_CBC_SHA, null, SHAIdentifiers.SHA1, ECIdentifiers.ECDSA, ECIdentifiers.ECDH);
+            services.RegisterCipherSuite(TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA, AESIdentifiers.AES128_CBC, SHAIdentifiers.SHA1, ECIdentifiers.ECDSA, ECIdentifiers.ECDH);
+            services.RegisterCipherSuite(TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA, AESIdentifiers.AES256_CBC, SHAIdentifiers.SHA1, ECIdentifiers.ECDSA, ECIdentifiers.ECDH);
             services.RegisterCipherSuite(TLS_ECDHE_ECDSA_WITH_NULL_SHA, TLSCipherAlgorithm.Null, SHAIdentifiers.SHA1, ECIdentifiers.ECDSA, ECIdentifiers.ECDHE);
             //TODO services.RegisterCipherSuite(TLS_ECDHE_ECDSA_WITH_RC4_128_SHA, null, SHAIdentifiers.SHA1, ECIdentifiers.ECDSA, ECIdentifiers.ECDHE);
             //TODO services.RegisterCipherSuite(TLS_ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA, null, SHAIdentifiers.SHA1, ECIdentifiers.ECDSA, ECIdentifiers.ECDHE);
             services.RegisterCipherSuite(TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA, AESIdentifiers.AES128_CBC, SHAIdentifiers.SHA1, ECIdentifiers.ECDSA, ECIdentifiers.ECDHE);
             services.RegisterCipherSuite(TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA, AESIdentifiers.AES256_CBC, SHAIdentifiers.SHA1, ECIdentifiers.ECDSA, ECIdentifiers.ECDHE);
-            //TODO services.RegisterCipherSuite(TLS_ECDH_RSA_WITH_NULL_SHA, TLSCipherAlgorithm.Null, SHAIdentifiers.SHA1, RSAIdentifiers.RSASig, null);
-            //TODO services.RegisterCipherSuite(TLS_ECDH_RSA_WITH_RC4_128_SHA, null, SHAIdentifiers.SHA1, RSAIdentifiers.RSASig, null);
-            //TODO services.RegisterCipherSuite(TLS_ECDH_RSA_WITH_3DES_EDE_CBC_SHA, null, SHAIdentifiers.SHA1, RSAIdentifiers.RSASig, null);
-            //TODO services.RegisterCipherSuite(TLS_ECDH_RSA_WITH_AES_128_CBC_SHA, AESIdentifiers.AES128_CBC, SHAIdentifiers.SHA1, RSAIdentifiers.RSASig, null);
-            //TODO services.RegisterCipherSuite(TLS_ECDH_RSA_WITH_AES_256_CBC_SHA, AESIdentifiers.AES256_CBC, SHAIdentifiers.SHA1, RSAIdentifiers.RSASig, null);
+            services.RegisterCipherSuite(TLS_ECDH_RSA_WITH_NULL_SHA, TLSCipherAlgorithm.Null, SHAIdentifiers.SHA1, RSAIdentifiers.RSASig, ECIdentifiers.ECDH);
+            //TODO services.RegisterCipherSuite(TLS_ECDH_RSA_WITH_RC4_128_SHA, null, SHAIdentifiers.SHA1, RSAIdentifiers.RSASig, ECIdentifiers.ECDH);
+            //TODO services.RegisterCipherSuite(TLS_ECDH_RSA_WITH_3DES_EDE_CBC_SHA, null, SHAIdentifiers.SHA1, RSAIdentifiers.RSASig, ECIdentifiers.ECDH);
+            services.RegisterCipherSuite(TLS_ECDH_RSA_WITH_AES_128_CBC_SHA, AESIdentifiers.AES128_CBC, SHAIdentifiers.SHA1, RSAIdentifiers.RSASig, ECIdentifiers.ECDH);
+            services.RegisterCipherSuite(TLS_ECDH_RSA_WITH_AES_256_CBC_SHA, AESIdentifiers.AES256_CBC, SHAIdentifiers.SHA1, RSAIdentifiers.RSASig, ECIdentifiers.ECDH);
             services.RegisterCipherSuite(TLS_ECDHE_RSA_WITH_NULL_SHA, TLSCipherAlgorithm.Null, SHAIdentifiers.SHA1, RSAIdentifiers.RSASig, ECIdentifiers.ECDHE);
             //TODO services.RegisterCipherSuite(TLS_ECDHE_RSA_WITH_RC4_128_SHA, null, SHAIdentifiers.SHA1, RSAIdentifiers.RSASig, ECIdentifiers.ECDHE);
             //TODO services.RegisterCipherSuite(TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA, null, SHAIdentifiers.SHA1, RSAIdentifiers.RSASig, ECIdentifiers.ECDHE);
             services.RegisterCipherSuite(TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA, AESIdentifiers.AES128_CBC, SHAIdentifiers.SHA1, RSAIdentifiers.RSASig, ECIdentifiers.ECDHE);
             services.RegisterCipherSuite(TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA, AESIdentifiers.AES256_CBC, SHAIdentifiers.SHA1, RSAIdentifiers.RSASig, ECIdentifiers.ECDHE);
-            //TODO services.RegisterCipherSuite(TLS_ECDH_anon_WITH_NULL_SHA, TLSCipherAlgorithm.Null, SHAIdentifiers.SHA1, TLSSignatureAlgorithm.Anonymous, null);
-            //TODO services.RegisterCipherSuite(TLS_ECDH_anon_WITH_RC4_128_SHA, null, SHAIdentifiers.SHA1, TLSSignatureAlgorithm.Anonymous, null);
-            //TODO services.RegisterCipherSuite(TLS_ECDH_anon_WITH_3DES_EDE_CBC_SHA, null, SHAIdentifiers.SHA1, TLSSignatureAlgorithm.Anonymous, null);
-            //TODO services.RegisterCipherSuite(TLS_ECDH_anon_WITH_AES_128_CBC_SHA, AESIdentifiers.AES128_CBC, SHAIdentifiers.SHA1, TLSSignatureAlgorithm.Anonymous, null);
-            //TODO services.RegisterCipherSuite(TLS_ECDH_anon_WITH_AES_256_CBC_SHA, AESIdentifiers.AES256_CBC, SHAIdentifiers.SHA1, TLSSignatureAlgorithm.Anonymous, null);
+            services.RegisterCipherSuite(TLS_ECDH_anon_WITH_NULL_SHA, TLSCipherAlgorithm.Null, SHAIdentifiers.SHA1, TLSSignatureAlgorithm.Anonymous, ECIdentifiers.ECDH);
+            //TODO services.RegisterCipherSuite(TLS_ECDH_anon_WITH_RC4_128_SHA, null, SHAIdentifiers.SHA1, TLSSignatureAlgorithm.Anonymous, ECIdentifiers.ECDH);
+            //TODO services.RegisterCipherSuite(TLS_ECDH_anon_WITH_3DES_EDE_CBC_SHA, null, SHAIdentifiers.SHA1, TLSSignatureAlgorithm.Anonymous, ECIdentifiers.ECDH);
+            services.RegisterCipherSuite(TLS_ECDH_anon_WITH_AES_128_CBC_SHA, AESIdentifiers.AES128_CBC, SHAIdentifiers.SHA1, TLSSignatureAlgorithm.Anonymous, ECIdentifiers.ECDH);
+            services.RegisterCipherSuite(TLS_ECDH_anon_WITH_AES_256_CBC_SHA, AESIdentifiers.AES256_CBC, SHAIdentifiers.SHA1, TLSSignatureAlgorithm.Anonymous, ECIdentifiers.ECDH);
         }
 
         #endregion
@@ -217,20 +217,20 @@ namespace Crypto.TestProgram
         {
             services.RegisterCipherSuite(TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256, AESIdentifiers.AES128_CBC, SHAIdentifiers.SHA256, ECIdentifiers.ECDSA, ECIdentifiers.ECDHE);
             services.RegisterCipherSuite(TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA384, AESIdentifiers.AES256_CBC, SHAIdentifiers.SHA384, ECIdentifiers.ECDSA, ECIdentifiers.ECDHE);
-            //TODO services.RegisterCipherSuite(TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA256, AESIdentifiers.AES128_CBC, SHAIdentifiers.SHA256, ECIdentifiers.ECDSA, null);
-            //TODO services.RegisterCipherSuite(TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA384, AESIdentifiers.AES256_CBC, SHAIdentifiers.SHA384, ECIdentifiers.ECDSA, null);
+            services.RegisterCipherSuite(TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA256, AESIdentifiers.AES128_CBC, SHAIdentifiers.SHA256, ECIdentifiers.ECDSA, ECIdentifiers.ECDH);
+            services.RegisterCipherSuite(TLS_ECDH_ECDSA_WITH_AES_256_CBC_SHA384, AESIdentifiers.AES256_CBC, SHAIdentifiers.SHA384, ECIdentifiers.ECDSA, ECIdentifiers.ECDH);
             services.RegisterCipherSuite(TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256, AESIdentifiers.AES128_CBC, SHAIdentifiers.SHA256, RSAIdentifiers.RSASig, ECIdentifiers.ECDHE);
             services.RegisterCipherSuite(TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384, AESIdentifiers.AES256_CBC, SHAIdentifiers.SHA384, RSAIdentifiers.RSASig, ECIdentifiers.ECDHE);
-            //TODO services.RegisterCipherSuite(TLS_ECDH_RSA_WITH_AES_128_CBC_SHA256, AESIdentifiers.AES128_CBC, SHAIdentifiers.SHA256, RSAIdentifiers.RSASig, null);
-            //TODO services.RegisterCipherSuite(TLS_ECDH_RSA_WITH_AES_256_CBC_SHA384, AESIdentifiers.AES256_CBC, SHAIdentifiers.SHA384, RSAIdentifiers.RSASig, null);
+            services.RegisterCipherSuite(TLS_ECDH_RSA_WITH_AES_128_CBC_SHA256, AESIdentifiers.AES128_CBC, SHAIdentifiers.SHA256, RSAIdentifiers.RSASig, ECIdentifiers.ECDH);
+            services.RegisterCipherSuite(TLS_ECDH_RSA_WITH_AES_256_CBC_SHA384, AESIdentifiers.AES256_CBC, SHAIdentifiers.SHA384, RSAIdentifiers.RSASig, ECIdentifiers.ECDH);
             services.RegisterCipherSuite(TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256, GCMIdentifiers.AES128_GCM, SHAIdentifiers.SHA256, ECIdentifiers.ECDSA, ECIdentifiers.ECDHE);
             services.RegisterCipherSuite(TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384, GCMIdentifiers.AES256_GCM, SHAIdentifiers.SHA384, ECIdentifiers.ECDSA, ECIdentifiers.ECDHE);
-            //TODO services.RegisterCipherSuite(TLS_ECDH_ECDSA_WITH_AES_128_GCM_SHA256, GCMIdentifiers.AES128_GCM, SHAIdentifiers.SHA256, ECIdentifiers.ECDSA, null);
-            //TODO services.RegisterCipherSuite(TLS_ECDH_ECDSA_WITH_AES_256_GCM_SHA384, GCMIdentifiers.AES256_GCM, SHAIdentifiers.SHA384, ECIdentifiers.ECDSA, null);
+            services.RegisterCipherSuite(TLS_ECDH_ECDSA_WITH_AES_128_GCM_SHA256, GCMIdentifiers.AES128_GCM, SHAIdentifiers.SHA256, ECIdentifiers.ECDSA, ECIdentifiers.ECDH);
+            services.RegisterCipherSuite(TLS_ECDH_ECDSA_WITH_AES_256_GCM_SHA384, GCMIdentifiers.AES256_GCM, SHAIdentifiers.SHA384, ECIdentifiers.ECDSA, ECIdentifiers.ECDH);
             services.RegisterCipherSuite(TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256, GCMIdentifiers.AES128_GCM, SHAIdentifiers.SHA256, RSAIdentifiers.RSASig, ECIdentifiers.ECDHE);
             services.RegisterCipherSuite(TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384, GCMIdentifiers.AES256_GCM, SHAIdentifiers.SHA384, RSAIdentifiers.RSASig, ECIdentifiers.ECDHE);
-            //TODO services.RegisterCipherSuite(TLS_ECDH_RSA_WITH_AES_128_GCM_SHA256, GCMIdentifiers.AES128_GCM, SHAIdentifiers.SHA256, RSAIdentifiers.RSASig, null);
-            //TODO services.RegisterCipherSuite(TLS_ECDH_RSA_WITH_AES_256_GCM_SHA384, GCMIdentifiers.AES256_GCM, SHAIdentifiers.SHA384, RSAIdentifiers.RSASig, null);
+            services.RegisterCipherSuite(TLS_ECDH_RSA_WITH_AES_128_GCM_SHA256, GCMIdentifiers.AES128_GCM, SHAIdentifiers.SHA256, RSAIdentifiers.RSASig, ECIdentifiers.ECDH);
+            services.RegisterCipherSuite(TLS_ECDH_RSA_WITH_AES_256_GCM_SHA384, GCMIdentifiers.AES256_GCM, SHAIdentifiers.SHA384, RSAIdentifiers.RSASig, ECIdentifiers.ECDH);
         }
 
         #endregion

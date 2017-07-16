@@ -38,7 +38,5 @@ namespace Crypto.TLS.DH.KeyExchanges
 
             return dhKey;
         }
-
-
     }
 }

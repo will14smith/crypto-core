@@ -91,5 +91,23 @@ namespace Crypto.EC.Maths.Prime
 
             return Tuple.Create(oldR, oldS, oldT);
         }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            var other = obj as PrimeField;
+            return other != null && Equals(other);
+        }
+
+        protected bool Equals(PrimeField other)
+        {
+            return Prime.Equals(other.Prime);
+        }
+
+        public override int GetHashCode()
+        {
+            return Prime.GetHashCode();
+        }
     }
 }

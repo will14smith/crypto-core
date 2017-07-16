@@ -28,7 +28,9 @@ namespace Crypto.TLS.EC
                 .RegisterSignatureAlgorithms<ECDSA>(ECIdentifiers.ECDSA)
                 .RegisterSignatureCipherParameterFactory<ECDSACipherParameterFactory>(ECIdentifiers.ECDSA);
 
-            services.RegisterKeyExchange<ECDHEKeyExchange>(ECIdentifiers.ECDHE)
+            services
+                .RegisterKeyExchange<ECDHKeyExchange>(ECIdentifiers.ECDH)
+                .RegisterKeyExchange<ECDHEKeyExchange>(ECIdentifiers.ECDHE)
                 .AddScoped<ECDHExchangeConfig>();
 
             services

@@ -39,7 +39,7 @@ namespace Crypto.EC.Maths.Prime
         {
             unchecked
             {
-                var hashCode = (Field != null ? Field.GetHashCode() : 0);
+                var hashCode = Field != null ? Field.GetHashCode() : 0;
                 hashCode = (hashCode * 397) ^ (Curve != null ? Curve.GetHashCode() : 0);
                 hashCode = (hashCode * 397) ^ (Generator != null ? Generator.GetHashCode() : 0);
                 hashCode = (hashCode * 397) ^ Order.GetHashCode();
