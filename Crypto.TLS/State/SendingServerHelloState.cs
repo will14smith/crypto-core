@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Crypto.TLS.Config;
+using Crypto.TLS.Extensions;
 using Crypto.TLS.Messages.Handshakes;
 using Crypto.TLS.Services;
 using Microsoft.Extensions.DependencyInjection;
@@ -62,8 +64,7 @@ namespace Crypto.TLS.State
 
         private HandshakeMessage CreateHello()
         {
-            // TODO extensions
-            var extensionHellos = new HelloExtension[0];
+            var extensionHellos = CreateHelloExtensions();
 
             return new ServerHelloMessage(
                 _versionConfig.Version,
@@ -72,6 +73,15 @@ namespace Crypto.TLS.State
                 extensionHellos,
                 _cipherSuiteConfig.CipherSuite,
                 _cipherSuiteConfig.CompressionMethod);
+        }
+
+        private HelloExtension[] CreateHelloExtensions()
+        {
+            var extensions = _serviceProvider.ResolveAllExtensions();
+
+            return extensions
+                .SelectMany(x => x.GenerateHelloExtensions())
+                .ToArray();
         }
 
         private IEnumerable<HandshakeMessage> CreateKeyExchangeMessages()

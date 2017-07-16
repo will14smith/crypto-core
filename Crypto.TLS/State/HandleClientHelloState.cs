@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using Crypto.Core.Randomness;
 using Crypto.TLS.Config;
+using Crypto.TLS.Extensions;
 using Crypto.TLS.Messages.Handshakes;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -81,9 +83,21 @@ namespace Crypto.TLS.State
             // TODO Generate a session id
             _sessionConfig.Id = new byte[0];
 
-            //TODO HandleClientExtensions(message.Extensions);
+            HandleClientExtensions(_handshake.Extensions);
 
             return _serviceProvider.GetRequiredService<SendingServerHelloState>();
+        }
+
+        private void HandleClientExtensions(IEnumerable<HelloExtension> extensions)
+        {
+            foreach (var extensionMessage in extensions)
+            {
+                var extension = _serviceProvider.TryResolveExtension(extensionMessage.Type);
+                if (extension.HasValue)
+                {
+                    extension.Value.HandleHello(extensionMessage);
+                }
+            }
         }
     }
 }

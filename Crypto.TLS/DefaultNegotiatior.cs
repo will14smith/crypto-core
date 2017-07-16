@@ -56,7 +56,8 @@ namespace Crypto.TLS
         private bool IsSuitable(X509Certificate certificate)
         {
             // TODO SNI
-            // TODO Compatible with signature
+            // TODO is compatible with signature_algorithms extn
+            // TODO is compatible with signature
 
             var cipherSuite = _serviceProvider.GetRequiredService<CipherSuiteConfig>().CipherSuite;
 

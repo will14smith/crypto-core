@@ -1,4 +1,5 @@
-﻿using Crypto.Utils;
+﻿using Crypto.TLS.Extensions;
+using Crypto.Utils;
 
 namespace Crypto.TLS.Messages.Handshakes
 {
@@ -6,14 +7,14 @@ namespace Crypto.TLS.Messages.Handshakes
     {
         public HelloExtension(ushort type, byte[] data)
         {
-            Type = type;
+            Type = (ExtensionType) type;
 
             SecurityAssert.NotNull(data);
             SecurityAssert.Assert(data.Length >= 0 && data.Length <= 0xFFFF);
             Data = data;
         }
 
-        public ushort Type { get; }
+        public ExtensionType Type { get; }
         public byte[] Data { get; }
     }
 }

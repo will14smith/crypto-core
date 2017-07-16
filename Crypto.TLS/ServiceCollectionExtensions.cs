@@ -2,6 +2,7 @@
 using System.Linq;
 using Crypto.Certificates;
 using Crypto.TLS.Config;
+using Crypto.TLS.Extensions;
 using Crypto.TLS.Messages.Handshakes;
 using Crypto.TLS.Records.Strategy;
 using Crypto.TLS.Services;
@@ -17,7 +18,8 @@ namespace Crypto.TLS
             services.AddCipherSuiteServices();
             services.AddStates();
             services.AddRecordStrategies();
-
+            services.AddCoreExtensions();
+            
             services.AddScopedConfig();
             services.AddScoped(connectionFactory);
 

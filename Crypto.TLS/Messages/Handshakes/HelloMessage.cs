@@ -46,7 +46,7 @@ namespace Crypto.TLS.Messages.Handshakes
             
             foreach (var extension in Extensions)
             {
-                writer.Write(extension.Type);
+                writer.Write((ushort)extension.Type);
                 writer.Write((ushort)extension.Data.Length);
                 writer.Write(extension.Data);
             }

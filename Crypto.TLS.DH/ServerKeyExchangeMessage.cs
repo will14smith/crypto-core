@@ -2,6 +2,7 @@
 using System.Numerics;
 using Crypto.Core.Signing;
 using Crypto.TLS.Config;
+using Crypto.TLS.Identifiers;
 using Crypto.TLS.Messages.Handshakes;
 using Crypto.TLS.Services;
 using Crypto.Utils;
@@ -33,8 +34,13 @@ namespace Crypto.TLS.DH
         protected override void Write(EndianBinaryWriter baseWriter)
         {
             var cipherSuiteConfig = _serviceProvider.GetRequiredService<CipherSuiteConfig>();
+            var cipherSuites = _serviceProvider.GetRequiredService<CipherSuiteRegistry>();
+
+            // TODO check these are compatible with signature_algorithms extension & certificate
+            var hashAlgorithm = cipherSuites.ResolveHashAlgorithm(cipherSuiteConfig.CipherSuite);
+            var signatureAlgorithm = cipherSuites.ResolveSignatureAlgorithm(cipherSuiteConfig.CipherSuite);
             
-            var stream = CreateSignedStream(baseWriter, cipherSuiteConfig);
+            var stream = CreateSignedStream(baseWriter, hashAlgorithm, signatureAlgorithm);
             var writer = new EndianBinaryWriter(baseWriter.BitConverter, stream);
 
             var randomConfig = _serviceProvider.GetRequiredService<RandomConfig>();
@@ -55,19 +61,17 @@ namespace Crypto.TLS.DH
             writer.Write(pubBuffer);
 
             stream.Flush();
-
-            var cipherSuites = _serviceProvider.GetRequiredService<CipherSuiteRegistry>();
-
+            
             stream.WriteTlsSignature(
                 cipherSuites.ResolveHashAlgorithm(cipherSuiteConfig.CipherSuite),
-                cipherSuites.ResolveSignatureAlgorithm(cipherSuiteConfig.CipherSuite));
+                signatureAlgorithm);
         }
 
-        private SignedStream CreateSignedStream(EndianBinaryWriter baseWriter, CipherSuiteConfig cipherSuiteConfig)
+        private SignedStream CreateSignedStream(EndianBinaryWriter baseWriter, TLSHashAlgorithm hashAlgorithm, TLSSignatureAlgorithm signatureAlgorithm)
         {
-            var signature = _serviceProvider.ResolveSignatureAlgorithm(cipherSuiteConfig.CipherSuite);
-            var signatureCipherFactory = _serviceProvider.ResolveSignatureCipherParameterFactory(cipherSuiteConfig.CipherSuite);
-            var digest = _serviceProvider.ResolveHashAlgorithm(cipherSuiteConfig.CipherSuite);
+            var signature = _serviceProvider.ResolveSignatureAlgorithm(signatureAlgorithm);
+            var signatureCipherFactory = _serviceProvider.ResolveSignatureCipherParameterFactory(signatureAlgorithm);
+            var digest = _serviceProvider.ResolveHashAlgorithm(hashAlgorithm);
 
             var endConfig = _serviceProvider.GetRequiredService<EndConfig>();
 
