@@ -84,7 +84,8 @@ namespace Crypto.TLS.KeyExchange
 
             var offset = 0;
 
-            if (_serviceProvider.IsBlockCipher(cipherSuite))
+            // TODO technically AEAD has no mac (i.e. length == 0)
+            if (!_serviceProvider.IsAEADCipher(cipherSuite))
             {
                 var clientMACKey = new byte[macKeyLength];
                 Array.Copy(keyBlock, offset, clientMACKey, 0, macKeyLength);

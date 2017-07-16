@@ -17,6 +17,7 @@
     <ProjectReference Include="..\Crypto.TLS.DH\Crypto.TLS.DH.csproj" />
     <ProjectReference Include="..\Crypto.TLS.EC\Crypto.TLS.EC.csproj" />
     <ProjectReference Include="..\Crypto.TLS.GCM\Crypto.TLS.GCM.csproj" />
+    <ProjectReference Include="..\Crypto.TLS.RC4\Crypto.TLS.RC4.csproj" />
     <ProjectReference Include="..\Crypto.TLS.RSA\Crypto.TLS.RSA.csproj" />
     <ProjectReference Include="..\Crypto.TLS.SHA\Crypto.TLS.SHA.csproj" />
     <ProjectReference Include="..\Crypto.TLS\Crypto.TLS.csproj" />

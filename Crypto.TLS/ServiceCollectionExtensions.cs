@@ -55,6 +55,7 @@ namespace Crypto.TLS
         private static void AddRecordStrategies(this IServiceCollection services)
         {
             services.AddTransient<PlaintextStrategy>();
+            services.AddTransient<CipherStrategy>();
             services.AddTransient<BlockCipherStrategy>();
             services.AddTransient<AEADCipherStrategy>();
         }

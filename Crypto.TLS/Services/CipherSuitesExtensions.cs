@@ -31,8 +31,8 @@ namespace Crypto.TLS.Services
             {
                 return serviceProvider.GetRequiredService<AEADCipherStrategy>();
             }
-
-            throw new NotImplementedException();
+            
+            return serviceProvider.GetRequiredService<CipherStrategy>();
         }
         public static IRecordWriterStrategy GetRecordWriterStrategy(
             this IServiceProvider serviceProvider,
@@ -47,7 +47,7 @@ namespace Crypto.TLS.Services
                 return serviceProvider.GetRequiredService<AEADCipherStrategy>();
             }
 
-            throw new NotImplementedException();
+            return serviceProvider.GetRequiredService<CipherStrategy>();
         }
     }
 }

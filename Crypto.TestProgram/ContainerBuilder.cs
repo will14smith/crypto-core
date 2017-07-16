@@ -8,6 +8,7 @@ using Crypto.TLS.DH;
 using Crypto.TLS.DH.Config;
 using Crypto.TLS.EC;
 using Crypto.TLS.GCM;
+using Crypto.TLS.RC4;
 using Crypto.TLS.RSA;
 using Crypto.TLS.SHA;
 using Microsoft.Extensions.DependencyInjection;
@@ -33,6 +34,7 @@ namespace Crypto.TestProgram
             services.AddDHKeyExchange(CreateDHParameters());
             services.AddEC();
             services.AddGCM();
+            services.AddRC4();
             services.AddRSAKeyReaders();
             services.AddRSAKeyExchange();
             services.AddSHA();
