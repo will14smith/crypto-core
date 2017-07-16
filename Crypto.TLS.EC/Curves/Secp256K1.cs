@@ -1,12 +1,16 @@
-﻿using Crypto.EC.Maths;
+﻿using Crypto.ASN1;
+using Crypto.EC.Maths;
 using Crypto.EC.Maths.Prime;
+using Crypto.TLS.EC.Services;
 using Crypto.Utils;
 
-namespace Crypto.EC.Curves
+namespace Crypto.TLS.EC.Curves
 {
     public class Secp256K1
     {
-        public static PrimeDomainParameters Parameters;
+        public static readonly NamedCurve Id = NamedCurve.secp256k1;
+        public static readonly ASN1ObjectIdentifier OID = new ASN1ObjectIdentifier("1.3.132.0.10");
+        public static readonly PrimeDomainParameters Parameters;
 
         static Secp256K1()
         {

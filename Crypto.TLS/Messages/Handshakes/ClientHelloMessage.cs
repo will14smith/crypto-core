@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Crypto.TLS.Extensions;
 using Crypto.Utils;
 using Crypto.Utils.IO;
 
@@ -53,7 +54,7 @@ namespace Crypto.TLS.Messages.Handshakes
                     {
                         extsLength -= 4;
 
-                        var extType = reader.ReadUInt16();
+                        var extType = (ExtensionType)reader.ReadUInt16();
                         var extLength = reader.ReadUInt16();
                         extsLength -= extLength;
 

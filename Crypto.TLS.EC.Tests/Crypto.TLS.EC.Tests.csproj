@@ -13,6 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Crypto.SHA\Crypto.SHA.csproj" />
     <ProjectReference Include="..\Crypto.TLS.EC\Crypto.TLS.EC.csproj" />
   </ItemGroup>
 

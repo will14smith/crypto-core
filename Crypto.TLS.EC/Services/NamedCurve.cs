@@ -1,9 +1,9 @@
 ﻿
 // ReSharper disable InconsistentNaming
 
-namespace Crypto.EC.Services
+namespace Crypto.TLS.EC.Services
 {
-    public enum NamedCurve
+    public enum NamedCurve : ushort
     {
         sect163k1 = 1,
         sect163r1 = 2,

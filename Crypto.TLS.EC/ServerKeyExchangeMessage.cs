@@ -1,32 +1,26 @@
 ﻿using System;
-using System.Numerics;
 using Crypto.TLS.Config;
+using Crypto.TLS.EC.KeyExchanges;
 using Crypto.TLS.Messages.Handshakes;
 using Crypto.TLS.Services;
-using Crypto.Utils;
 using Crypto.Utils.IO;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Crypto.TLS.DH
+namespace Crypto.TLS.EC
 {
     public class ServerKeyExchangeMessage : HandshakeMessage
     {
         private readonly IServiceProvider _serviceProvider;
 
-        public BigInteger P { get; }
-        public BigInteger G { get; }
-        public BigInteger Ys { get; }
+        public ServerECDHParams Parameters { get; }
 
         public ServerKeyExchangeMessage(
             IServiceProvider serviceProvider,
-            BigInteger p, BigInteger g, BigInteger ys)
+            ServerECDHParams parameters)
             : base(HandshakeType.ServerKeyExchange)
         {
             _serviceProvider = serviceProvider;
-            
-            P = p;
-            G = g;
-            Ys = ys;
+            Parameters = parameters;
         }
 
         protected override void Write(EndianBinaryWriter baseWriter)
@@ -37,7 +31,7 @@ namespace Crypto.TLS.DH
             // TODO check these are compatible with signature_algorithms extension & certificate
             var hashAlgorithm = cipherSuites.ResolveHashAlgorithm(cipherSuiteConfig.CipherSuite);
             var signatureAlgorithm = cipherSuites.ResolveSignatureAlgorithm(cipherSuiteConfig.CipherSuite);
-            
+
             var stream = _serviceProvider.CreateSignedStream(baseWriter, hashAlgorithm, signatureAlgorithm);
             var writer = new EndianBinaryWriter(baseWriter.BitConverter, stream);
 
@@ -46,23 +40,15 @@ namespace Crypto.TLS.DH
             // signature needs these but the output doesn't
             stream.HashAlgorithm.Update(randomConfig.Client, 0, 32);
             stream.HashAlgorithm.Update(randomConfig.Server, 0, 32);
-
-            var pBuffer = P.ToByteArray(Endianness.BigEndian);
-            var gBuffer = G.ToByteArray(Endianness.BigEndian);
-            var pubBuffer = Ys.ToByteArray(Endianness.BigEndian);
-
-            writer.Write((short)pBuffer.Length);
-            writer.Write(pBuffer);
-            writer.Write((short)gBuffer.Length);
-            writer.Write(gBuffer);
-            writer.Write((short)pubBuffer.Length);
-            writer.Write(pubBuffer);
-
-            stream.Flush();
             
+            Parameters.Write(writer);
+            
+            stream.Flush();
+
             stream.WriteTlsSignature(
                 cipherSuites.ResolveHashAlgorithm(cipherSuiteConfig.CipherSuite),
                 signatureAlgorithm);
+
         }
     }
 }

@@ -1,14 +1,14 @@
 ﻿using System.Text;
 using Crypto.Core.Randomness;
-using Crypto.EC.Curves;
 using Crypto.EC.Encryption;
 using Crypto.EC.Maths;
 using Crypto.EC.Parameters;
 using Crypto.SHA;
+using Crypto.TLS.EC.Curves;
 using Crypto.Utils;
 using Xunit;
 
-namespace Crypto.EC.Tests.Curves
+namespace Crypto.TLS.EC.Tests.Curves
 {
     public class Secp256K1Tests
     {

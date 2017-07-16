@@ -5,9 +5,9 @@ namespace Crypto.TLS.Messages.Handshakes
 {
     public class HelloExtension
     {
-        public HelloExtension(ushort type, byte[] data)
+        public HelloExtension(ExtensionType type, byte[] data)
         {
-            Type = (ExtensionType) type;
+            Type = type;
 
             SecurityAssert.NotNull(data);
             SecurityAssert.Assert(data.Length >= 0 && data.Length <= 0xFFFF);
