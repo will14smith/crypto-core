@@ -17,15 +17,15 @@ namespace Crypto.AES
         {
             SecurityAssert.Assert(keySize == 128 || keySize == 192 || keySize == 256);
 
-            KeyLength = keySize / 8;
+            KeySize = keySize / 8;
 
-            _key = new byte[KeyLength];
-            _roundKeys = new byte[KeyLength * 4 + 112];
+            _key = new byte[KeySize];
+            _roundKeys = new byte[KeySize * 4 + 112];
         }
 
 
         public int BlockLength => AESBlockLength;
-        public int KeyLength { get; }
+        public int KeySize { get; }
 
         public void Init(ICipherParameters parameters)
         {
@@ -39,8 +39,8 @@ namespace Crypto.AES
             var keyParam = keyParams.Key;
 
             SecurityAssert.NotNull(keyParam);
-            SecurityAssert.Assert(keyParam.Length == KeyLength);
-            Array.Copy(keyParam, _key, KeyLength);
+            SecurityAssert.Assert(keyParam.Length == KeySize);
+            Array.Copy(keyParam, _key, KeySize);
 
             var tmp = BuildRoundKeys(_key);
             Array.Copy(tmp, _roundKeys, _roundKeys.Length);
@@ -54,7 +54,7 @@ namespace Crypto.AES
             SecurityAssert.AssertBuffer(input, inputOffset, BlockLength);
             SecurityAssert.AssertBuffer(output, outputOffset, BlockLength);
 
-            var rounds = KeyLength / 4 + 6;
+            var rounds = KeySize / 4 + 6;
 
             var state = ToState(input, inputOffset);
 
@@ -81,7 +81,7 @@ namespace Crypto.AES
             SecurityAssert.AssertBuffer(input, inputOffset, BlockLength);
             SecurityAssert.AssertBuffer(output, outputOffset, BlockLength);
 
-            var rounds = KeyLength / 4 + 6;
+            var rounds = KeySize / 4 + 6;
 
             var state = ToState(input, inputOffset);
 

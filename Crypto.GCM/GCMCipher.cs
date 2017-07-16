@@ -20,7 +20,7 @@ namespace Crypto.GCM
         public GCMCipher(IBlockCipher cipher)
         {
             SecurityAssert.Assert(cipher.BlockLength == 16);
-            SecurityAssert.Assert(cipher.KeyLength >= 16);
+            SecurityAssert.Assert(cipher.KeySize >= 16);
 
             Cipher = cipher;
             _buffer = new byte[BlockLength];
@@ -29,7 +29,7 @@ namespace Crypto.GCM
         public IBlockCipher Cipher { get; }
 
         public int BlockLength => Cipher.BlockLength;
-        public int KeySize => Cipher.KeyLength;
+        public int KeySize => Cipher.KeySize;
         public int TagLength => 16;
 
         public void Init(ICipherParameters parameters)

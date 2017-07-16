@@ -12,7 +12,7 @@ namespace Crypto.Core.Encryption.Adapters
             BlockCipher = blockCipher;
         }
 
-        public int KeySize => BlockCipher.KeyLength;
+        public int KeySize => BlockCipher.KeySize;
         public int BlockLength => BlockCipher.BlockLength;
 
         public void Init(ICipherParameters parameters)

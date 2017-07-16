@@ -5,7 +5,7 @@ namespace Crypto.Core.Encryption
     public interface IBlockCipher
     {
         int BlockLength { get; }
-        int KeyLength { get; }
+        int KeySize { get; }
 
         void Init(ICipherParameters parameters);
 
