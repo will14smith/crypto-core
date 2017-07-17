@@ -23,6 +23,11 @@ namespace Crypto.Utils
 
         public static byte[] GetBytes(this BitArray arr, int bitOffset, int byteLength)
         {
+            if (byteLength == 0)
+            {
+                return new byte[0];
+            }
+            
             SecurityAssert.NotNull(arr);
             SecurityAssert.Assert(bitOffset < arr.Length);
             SecurityAssert.Assert(bitOffset + byteLength * 8 < arr.Length + 7);
