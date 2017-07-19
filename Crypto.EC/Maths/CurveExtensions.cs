@@ -5,8 +5,7 @@ namespace Crypto.EC.Maths
 {
     public static class CurveExtensions
     {
-        public static Point<T> PointFromBinary<T>(this Curve<T> curve, byte[] b)
-            where T : IFieldValue
+        public static Point PointFromBinary(this Curve curve, byte[] b)
         {
             SecurityAssert.NotNull(b);
             SecurityAssert.Assert(b.Length > 1 && b.Length % 2 == 1);
@@ -17,10 +16,10 @@ namespace Crypto.EC.Maths
 
             var len = (b.Length - 1) / 2;
 
-            var x = curve.Field.Int(b.Skip(1).Take(len).ToBigInteger());
-            var y = curve.Field.Int(b.Skip(1 + len).Take(len).ToBigInteger());
+            var x = curve.Field.Value(b.Skip(1).Take(len).ToBigInteger());
+            var y = curve.Field.Value(b.Skip(1 + len).Take(len).ToBigInteger());
 
-            var p = new Point<T>(x, y);
+            var p = new Point(x, y);
             SecurityAssert.Assert(curve.IsPointOnCurve(p));
 
             return p;

@@ -1,43 +1,37 @@
-﻿using System;
-using System.Numerics;
+﻿using System.Numerics;
 
 namespace Crypto.EC.Maths.Real
 {
-    public class RealField : IField<RealValue>
+    public class RealField : IField
     {
-        public RealValue Int(BigInteger i)
+        public FieldValue Value(BigInteger i)
         {
-            return new RealValue((decimal)i);
+            return new FieldValue(i);
         }
 
-        public RealValue Negate(RealValue a)
+        public FieldValue Negate(FieldValue a)
         {
-            return new RealValue(-a.Value);
+            return Value(-a.Value);
         }
 
-        public RealValue Add(RealValue a, RealValue b)
+        public FieldValue Add(FieldValue a, FieldValue b)
         {
-            return new RealValue(a.Value + b.Value);
+            return Value(a.Value + b.Value);
         }
 
-        public RealValue Sub(RealValue a, RealValue b)
+        public FieldValue Sub(FieldValue a, FieldValue b)
         {
-            return new RealValue(a.Value - b.Value);
+            return Value(a.Value - b.Value);
         }
 
-        public RealValue Multiply(RealValue a, RealValue b)
+        public FieldValue Multiply(FieldValue a, FieldValue b)
         {
-            return new RealValue(a.Value * b.Value);
+            return Value(a.Value * b.Value);
         }
 
-        public RealValue Divide(RealValue a, RealValue b)
+        public FieldValue Divide(FieldValue a, FieldValue b)
         {
-            return new RealValue(a.Value / b.Value);
-        }
-
-        public RealValue Sqrt(RealValue a)
-        {
-            return new RealValue((decimal)Math.Sqrt((double)a.Value));
+            return Value(a.Value / b.Value);
         }
     }
 }

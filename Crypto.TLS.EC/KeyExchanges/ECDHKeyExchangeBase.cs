@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using Crypto.Certificates;
 using Crypto.EC.Maths;
-using Crypto.EC.Maths.Prime;
 using Crypto.EC.Parameters;
 using Crypto.RSA.Keys;
 using Crypto.TLS.Config;
@@ -94,14 +93,13 @@ namespace Crypto.TLS.EC.KeyExchanges
 
             var sharedSecret = CalculatePoint(qc);
 
-            var preMasterSecret = sharedSecret.X.ToInt().ToByteArray(Endianness.BigEndian);
+            var preMasterSecret = sharedSecret.X.Value.ToByteArray(Endianness.BigEndian);
 
             var masterSecret = MasterSecretCalculator.Compute(preMasterSecret);
             MasterSecretCalculator.ComputeKeysAndUpdateConfig(masterSecret);
         }
 
-        // TODO make more generic
-        private Point<PrimeValue> ReadMessage(ClientKeyExchangeMessage message)
+        private Point ReadMessage(ClientKeyExchangeMessage message)
         {
             SecurityAssert.Assert(message.Body.Length > 0);
             var length = message.Body[0];
@@ -113,10 +111,9 @@ namespace Crypto.TLS.EC.KeyExchanges
             return ECDHExchangeConfig.Parameters.Curve.PointFromBinary(param);
         }
 
-        // TODO make more generic
-        protected Point<PrimeValue> CalculatePoint(Point<PrimeValue> b)
+        protected Point CalculatePoint(Point b)
         {
-            return Point<PrimeValue>.Multiply(
+            return Point.Multiply(
                 ECDHExchangeConfig.Parameters.Curve,
                 ECDHExchangeConfig.D,
                 b);

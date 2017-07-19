@@ -1,21 +1,19 @@
-using System;
 using System.Numerics;
 
 namespace Crypto.EC.Maths
 {
-    public abstract class DomainParameters<TFieldValue> 
-        where TFieldValue : IFieldValue
+    public class DomainParameters
     {
-        public IField<TFieldValue> Field { get; }
-        public Curve<TFieldValue> Curve { get; }
+        public IField Field { get; }
+        public Curve Curve { get; }
 
-        public Point<TFieldValue> Generator { get; }
+        public Point Generator { get; }
         public BigInteger Order { get; }
 
-        protected DomainParameters(IField<TFieldValue> field, BigInteger a, BigInteger b, Point<TFieldValue> g, BigInteger n)
+        protected DomainParameters(IField field, Curve curve, Point g, BigInteger n)
         {
             Field = field;
-            Curve = new Curve<TFieldValue>(Field, Field.Int(a), Field.Int(b));
+            Curve = curve;
 
             Generator = g;
             Order = n;
@@ -24,16 +22,16 @@ namespace Crypto.EC.Maths
         public override bool Equals(object obj)
         {
             if (ReferenceEquals(null, obj)) return false;
-            if (object.ReferenceEquals(this, obj)) return true;
-            var other = obj as DomainParameters<TFieldValue>;
+            if (ReferenceEquals(this, obj)) return true;
+            var other = obj as DomainParameters;
             return other != null && Equals(other);
         }
 
-        protected bool Equals(DomainParameters<TFieldValue> other)
+        protected bool Equals(DomainParameters other)
         {
-            return Object.Equals(Field, other.Field)
-                   && Object.Equals(Curve, other.Curve)
-                   && Object.Equals(Generator, other.Generator)
+            return Equals(Field, other.Field)
+                   && Equals(Curve, other.Curve)
+                   && Equals(Generator, other.Generator)
                    && Order.Equals(other.Order);
         }
 

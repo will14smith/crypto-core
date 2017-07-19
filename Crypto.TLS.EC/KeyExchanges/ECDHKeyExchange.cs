@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Crypto.Certificates;
-using Crypto.EC.Maths.Prime;
+using Crypto.EC.Maths;
 using Crypto.EC.Parameters;
 using Crypto.TLS.Config;
 using Crypto.TLS.EC.Config;
@@ -72,7 +72,7 @@ namespace Crypto.TLS.EC.KeyExchanges
             ECDHExchangeConfig.D = key.D;
         }
 
-        private Option<NamedCurve> GetCurveName(PrimeDomainParameters parameters)
+        private Option<NamedCurve> GetCurveName(DomainParameters parameters)
         {
             return _namedCurvesRegistry.FindNameByParameters(parameters, out var name)
                 ? Option.Some(name)

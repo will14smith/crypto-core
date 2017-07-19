@@ -70,7 +70,7 @@ namespace Crypto.TLS.EC.KeyExchanges
 
             // must be in range [1, n-1] hence the -2 and +1
             var d = _random.RandomBig(ECDHExchangeConfig.Parameters.Order - 2) + 1;
-            ECDHExchangeConfig.D = ECDHExchangeConfig.Parameters.Field.Int(d);
+            ECDHExchangeConfig.D = ECDHExchangeConfig.Parameters.Field.Value(d);
 
             return new ECParameters.Named(namedCurve.Value);
         }

@@ -1,14 +1,14 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Linq;
 using System.Numerics;
 using Crypto.Utils;
 
 namespace Crypto.EC.Maths.Char2
 {
-    public class Char2Field : IField<Char2Value>
+    public class Char2Field : IField
     {
         private readonly int _m;
-        //TODO f == 2^m + 2^k3 + 2^k2 + 2^k1 + 1
         private readonly int[] _ks;
 
         public Char2Field(int m, int k) : this(m, new[] { k }) { }
@@ -22,41 +22,42 @@ namespace Crypto.EC.Maths.Char2
             _ks = ks;
         }
 
-        public Char2Value Int(BigInteger i)
+        public FieldValue Value(BigInteger i)
         {
-            SecurityAssert.Assert(i.GetBitLength() <= _m);
+            SecurityAssert.Assert(i.GetBitLength() <= _m, $"{i.GetBitLength()} <= {_m}");
 
-            return new Char2Value(i);
+            return new FieldValue(i);
         }
 
-        public Char2Value Negate(Char2Value a)
+        public FieldValue Negate(FieldValue a)
         {
             return a;
         }
 
-        public Char2Value Add(Char2Value a, Char2Value b)
+        public FieldValue Add(FieldValue a, FieldValue b)
         {
-            return new Char2Value(a.Value ^ b.Value);
+            return Value(a.Value ^ b.Value);
         }
 
-        public Char2Value Sub(Char2Value a, Char2Value b)
+        public FieldValue Sub(FieldValue a, FieldValue b)
         {
             return Add(a, Negate(b));
         }
 
-        public Char2Value Multiply(Char2Value av, Char2Value bv)
+        public FieldValue Multiply(FieldValue av, FieldValue bv)
         {
             var a = new BitArray(av.Value.ToByteArray());
             var b = bv.Value;
 
             var c = a[0] ? b : 0;
 
-            var bitMask = (1 << _m) - 1;
-            var highBitMask = 1 << _m;
+            var bitMask = (BigInteger.One << _m) - 1;
+            var highBitMask = BigInteger.One << _m;
 
             var r = _ks.Aggregate(BigInteger.One, (current, k) => current | BigInteger.One << k);
 
-            for (var i = 1; i < _m; i++)
+            var max = Math.Min(_m, a.Count);
+            for (var i = 1; i < max; i++)
             {
                 b = b << 1;
                 if ((b & highBitMask) != 0)
@@ -71,15 +72,15 @@ namespace Crypto.EC.Maths.Char2
                 }
             }
 
-            return new Char2Value(c);
+            return Value(c);
         }
 
-        public Char2Value Divide(Char2Value a, Char2Value b)
+        public FieldValue Divide(FieldValue a, FieldValue b)
         {
             return Multiply(a, Invert(b));
         }
 
-        private Char2Value Invert(Char2Value a)
+        private FieldValue Invert(FieldValue a)
         {
             SecurityAssert.Assert(a.Value != 0);
 
@@ -103,7 +104,7 @@ namespace Crypto.EC.Maths.Char2
                 g1 ^= g2 << j;
             }
 
-            return new Char2Value(g1);
+            return Value(g1);
         }
     }
 }

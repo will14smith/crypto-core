@@ -1,16 +1,14 @@
-﻿using System;
-using Crypto.Certificates.Keys;
+﻿using Crypto.Certificates.Keys;
 using Crypto.EC.Maths;
-using Crypto.EC.Maths.Prime;
 
 namespace Crypto.EC.Parameters
 {
     public class ECPublicKey : PublicKey
     {
-        public PrimeDomainParameters Parameters { get; }
-        public Point<PrimeValue> Point { get; }
+        public DomainParameters Parameters { get; }
+        public Point Point { get; }
 
-        public ECPublicKey(PrimeDomainParameters parameters, Point<PrimeValue> point)
+        public ECPublicKey(DomainParameters parameters, Point point)
         {
             Parameters = parameters;
             Point = point;

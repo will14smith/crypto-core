@@ -8,8 +8,7 @@ namespace Crypto.TLS.EC.KeyExchanges
     {
         public class ExplicitChar2 : ECParameters
         {
-            // TODO all these IFieldValue should be Char2Value
-            public ExplicitChar2(ushort m, IFieldValue[] k, ECCurve curve, Point<IFieldValue> @base, IFieldValue order, IFieldValue cofactor)
+            public ExplicitChar2(ushort m, int[] k, ECCurve curve, Point @base, FieldValue order, FieldValue cofactor)
             {
                 SecurityAssert.Assert(k.Length == 1 || k.Length == 3);
 
@@ -25,11 +24,11 @@ namespace Crypto.TLS.EC.KeyExchanges
 
             public ushort M { get; }
             public ECBasisType Basis => K.Length == 1 ? ECBasisType.Trinomial : ECBasisType.Pentanomial;
-            public IFieldValue[] K { get; }
+            public int[] K { get; }
             public ECCurve Curve { get; }
-            public Point<IFieldValue> Base { get; }
-            public IFieldValue Order { get; }
-            public IFieldValue Cofactor { get; }
+            public Point Base { get; }
+            public FieldValue Order { get; }
+            public FieldValue Cofactor { get; }
 
             public override void Write(EndianBinaryWriter writer)
             {

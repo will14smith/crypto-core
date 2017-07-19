@@ -16,9 +16,9 @@ namespace Crypto.TLS.EC.Curves
         {
             var prime = "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F".HexToBigInteger();
             var field = new PrimeField(prime);
-            var curve = new Curve<PrimeValue>(field, field.Int(0), field.Int(7));
+            var curve = new PrimeCurve(field, field.Value(0), field.Value(7));
 
-            // cofactor = 1
+            // cofactor = 4
 
             Parameters = new PrimeDomainParameters(
                 p: prime,

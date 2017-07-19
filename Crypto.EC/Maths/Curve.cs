@@ -1,16 +1,15 @@
-﻿using System.Collections.Generic;
+﻿using System;
 
 namespace Crypto.EC.Maths
 {
-    public class Curve<TFieldValue>
-        where TFieldValue : IFieldValue
-    {
-        public IField<TFieldValue> Field { get; }
+    public abstract class Curve
+    { 
+        public IField Field { get; }
 
-        public TFieldValue A { get; }
-        public TFieldValue B { get; }
+        public FieldValue A { get; }
+        public FieldValue B { get; }
 
-        public Curve(IField<TFieldValue> field, TFieldValue a, TFieldValue b)
+        protected Curve(IField field, FieldValue a, FieldValue b)
         {
             Field = field;
 
@@ -23,39 +22,28 @@ namespace Crypto.EC.Maths
             return $"y^2 = x^3 + {A}x + {B}";
         }
 
-        public bool IsPointOnCurve(Point<TFieldValue> point)
-        {
-            var x = point.X;
-            var y = point.Y;
-
-            var lhs = Field.Multiply(y, y);
-            var rhs = Field.Add(Field.Add(Field.Multiply(Field.Multiply(x, x), x), Field.Multiply(A, x)), B);
-
-            return Equals(lhs, rhs);
-        }
+        public abstract bool IsPointOnCurve(Point point);
 
         public override bool Equals(object obj)
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
-            var other = obj as Curve<TFieldValue>;
-            return other != null && Equals(other);
+            if (obj.GetType() != GetType()) return false;
+            return Equals((Curve) obj);
         }
 
-        protected bool Equals(Curve<TFieldValue> other)
+        protected bool Equals(Curve other)
         {
-            return Equals(Field, other.Field) 
-                && EqualityComparer<TFieldValue>.Default.Equals(A, other.A) 
-                && EqualityComparer<TFieldValue>.Default.Equals(B, other.B);
+            return Equals(Field, other.Field) && Equals(A, other.A) && Equals(B, other.B);
         }
 
         public override int GetHashCode()
         {
             unchecked
             {
-                var hashCode = Field != null ? Field.GetHashCode() : 0;
-                hashCode = (hashCode * 397) ^ EqualityComparer<TFieldValue>.Default.GetHashCode(A);
-                hashCode = (hashCode * 397) ^ EqualityComparer<TFieldValue>.Default.GetHashCode(B);
+                var hashCode = (Field != null ? Field.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (A != null ? A.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (B != null ? B.GetHashCode() : 0);
                 return hashCode;
             }
         }

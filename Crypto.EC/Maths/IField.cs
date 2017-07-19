@@ -2,16 +2,15 @@
 
 namespace Crypto.EC.Maths
 {
-    public interface IField<TFieldValue>
-        where TFieldValue : IFieldValue
+    public interface IField
     {
-        TFieldValue Int(BigInteger i);
+        FieldValue Value(BigInteger i);
 
-        TFieldValue Negate(TFieldValue a);
+        FieldValue Negate(FieldValue a);
 
-        TFieldValue Add(TFieldValue a, TFieldValue b);
-        TFieldValue Sub(TFieldValue a, TFieldValue b);
-        TFieldValue Multiply(TFieldValue a, TFieldValue b);
-        TFieldValue Divide(TFieldValue a, TFieldValue b);
+        FieldValue Add(FieldValue a, FieldValue b);
+        FieldValue Sub(FieldValue a, FieldValue b);
+        FieldValue Multiply(FieldValue a, FieldValue b);
+        FieldValue Divide(FieldValue a, FieldValue b);
     }
 }

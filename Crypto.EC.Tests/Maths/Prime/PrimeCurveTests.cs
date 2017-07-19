@@ -1,38 +1,39 @@
 ﻿using Crypto.EC.Maths;
 using Crypto.EC.Maths.Prime;
+using Crypto.EC.Maths.Real;
 using Xunit;
 
 namespace Crypto.EC.Tests.Maths.Prime
 {
-    public class PrimeCurveTests
+    public class PrimeRealCurveTests
     {
         [Fact]
         public void TestAddition_Basic()
         {
             var field = new PrimeField(97);
-            var curve = new Curve<PrimeValue>(field, field.Int(2), field.Int(3));
+            var curve = new RealCurve(field, field.Value(2), field.Value(3));
 
-            var a = new Point<PrimeValue>(field.Int(3), field.Int(6));
-            var b = new Point<PrimeValue>(field.Int(11), field.Int(17));
+            var a = new Point(field.Value(3), field.Value(6));
+            var b = new Point(field.Value(11), field.Value(17));
 
-            var c = Point<PrimeValue>.Add(curve, a, b);
+            var c = Point.Add(curve, a, b);
 
-            Assert.Equal(field.Int(47), c.X);
-            Assert.Equal(field.Int(79), c.Y);
+            Assert.Equal(field.Value(47), c.X);
+            Assert.Equal(field.Value(79), c.Y);
         }
 
         [Fact]
         public void TestAddition_Same()
         {
             var field = new PrimeField(97);
-            var curve = new Curve<PrimeValue>(field, field.Int(2), field.Int(3));
+            var curve = new RealCurve(field, field.Value(2), field.Value(3));
 
-            var a = new Point<PrimeValue>(field.Int(59), field.Int(32));
+            var a = new Point(field.Value(59), field.Value(32));
 
-            var c = Point<PrimeValue>.Add(curve, a, a);
+            var c = Point.Add(curve, a, a);
 
-            Assert.Equal(field.Int(80), c.X);
-            Assert.Equal(field.Int(10), c.Y);
+            Assert.Equal(field.Value(80), c.X);
+            Assert.Equal(field.Value(10), c.Y);
         }
 
         [Fact(Skip = "Not Implemented")]
@@ -45,42 +46,42 @@ namespace Crypto.EC.Tests.Maths.Prime
         public void TestMultiplication_One()
         {
             var field = new PrimeField(97);
-            var curve = new Curve<PrimeValue>(field, field.Int(2), field.Int(3));
+            var curve = new RealCurve(field, field.Value(2), field.Value(3));
 
-            var a = new Point<PrimeValue>(field.Int(3), field.Int(6));
+            var a = new Point(field.Value(3), field.Value(6));
 
-            var c = Point<PrimeValue>.Multiply(curve, field.Int(1), a);
+            var c = Point.Multiply(curve, field.Value(1), a);
 
-            Assert.Equal(field.Int(3), c.X);
-            Assert.Equal(field.Int(6), c.Y);
+            Assert.Equal(field.Value(3), c.X);
+            Assert.Equal(field.Value(6), c.Y);
         }
 
         [Fact]
         public void TestMultiplication_Double()
         {
             var field = new PrimeField(97);
-            var curve = new Curve<PrimeValue>(field, field.Int(2), field.Int(3));
+            var curve = new RealCurve(field, field.Value(2), field.Value(3));
 
-            var a = new Point<PrimeValue>(field.Int(3), field.Int(6));
+            var a = new Point(field.Value(3), field.Value(6));
 
-            var c = Point<PrimeValue>.Multiply(curve, field.Int(2), a);
+            var c = Point.Multiply(curve, field.Value(2), a);
 
-            Assert.Equal(field.Int(80), c.X);
-            Assert.Equal(field.Int(10), c.Y);
+            Assert.Equal(field.Value(80), c.X);
+            Assert.Equal(field.Value(10), c.Y);
         }
 
         [Fact]
         public void TestMultiplication_Three()
         {
             var field = new PrimeField(97);
-            var curve = new Curve<PrimeValue>(field, field.Int(2), field.Int(3));
+            var curve = new RealCurve(field, field.Value(2), field.Value(3));
 
-            var a = new Point<PrimeValue>(field.Int(3), field.Int(6));
+            var a = new Point(field.Value(3), field.Value(6));
 
-            var c = Point<PrimeValue>.Multiply(curve, field.Int(3), a);
+            var c = Point.Multiply(curve, field.Value(3), a);
 
-            Assert.Equal(field.Int(80), c.X);
-            Assert.Equal(field.Int(87), c.Y);
+            Assert.Equal(field.Value(80), c.X);
+            Assert.Equal(field.Value(87), c.Y);
         }
     }
 }

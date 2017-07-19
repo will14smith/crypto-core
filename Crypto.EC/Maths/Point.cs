@@ -1,30 +1,31 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using Crypto.Utils.IO;
 using Crypto.Utils;
 
 namespace Crypto.EC.Maths
 {
-    public class Point<TFieldValue>
-        where TFieldValue : IFieldValue
+    public class Point : IEquatable<Point>
     {
-        public TFieldValue X { get; }
-        public TFieldValue Y { get; }
+        public FieldValue X { get; }
+        public FieldValue Y { get; }
 
-        public Point(TFieldValue x, TFieldValue y)
+        public Point(FieldValue x, FieldValue y)
         {
             X = x;
             Y = y;
         }
 
-        // TODO type
+        // TODO different types
         public byte[] ToBytes()
         {
-            var x = X.ToInt().ToByteArray(Endianness.BigEndian);
-            var y = Y.ToInt().ToByteArray(Endianness.BigEndian);
+            var x = X.Value.ToByteArray(Endianness.BigEndian);
+            var y = Y.Value.ToByteArray(Endianness.BigEndian);
 
-            SecurityAssert.Assert(x.Length == y.Length);
+            if (x.Length != y.Length)
+            {
+                throw new NotImplementedException("Padding");
+            }
 
             return new[]
             {
@@ -37,37 +38,37 @@ namespace Crypto.EC.Maths
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
-            var other = obj as Point<TFieldValue>;
+            var other = obj as Point;
             return other != null && Equals(other);
         }
 
-        protected bool Equals(Point<TFieldValue> other)
+        public bool Equals(Point other)
         {
-            return EqualityComparer<TFieldValue>.Default.Equals(X, other.X)
-                && EqualityComparer<TFieldValue>.Default.Equals(Y, other.Y);
+            return Equals(X, other.X)
+                && Equals(Y, other.Y);
         }
 
         public override int GetHashCode()
         {
             unchecked
             {
-                return (EqualityComparer<TFieldValue>.Default.GetHashCode(X) * 397) ^ EqualityComparer<TFieldValue>.Default.GetHashCode(Y);
+                return (X.GetHashCode() * 397) ^ Y.GetHashCode();
             }
         }
 
-        public static Point<TFieldValue> Add(Curve<TFieldValue> curve, Point<TFieldValue> a, Point<TFieldValue> b)
+        public static Point Add(Curve curve, Point a, Point b)
         {
             if (a == null) { return b; }
             if (b == null) { return a; }
 
             var field = curve.Field;
 
-            TFieldValue m;
+            FieldValue m;
 
             if (Equals(a, b))
             {
-                var mt = field.Add(field.Multiply(field.Int(3), field.Multiply(a.X, a.X)), curve.A);
-                var mb = field.Multiply(field.Int(2), a.Y);
+                var mt = field.Add(field.Multiply(field.Value(3), field.Multiply(a.X, a.X)), curve.A);
+                var mb = field.Multiply(field.Value(2), a.Y);
                 m = field.Divide(mt, mb);
             }
             else
@@ -80,19 +81,19 @@ namespace Crypto.EC.Maths
             var x = field.Sub(field.Sub(field.Multiply(m, m), a.X), b.X);
             var y = field.Add(b.Y, field.Multiply(m, field.Sub(x, b.X)));
 
-            return new Point<TFieldValue>(x, field.Negate(y));
+            return new Point(x, field.Negate(y));
         }
 
-        public static Point<TFieldValue> Multiply(Curve<TFieldValue> curve, TFieldValue a, Point<TFieldValue> b)
+        public static Point Multiply(Curve curve, FieldValue a, Point b)
         {
-            var i = a.ToInt();
+            var i = a.Value;
 
             if (i < 0)
             {
                 throw new NotImplementedException();
             }
 
-            Point<TFieldValue> result = null;
+            Point result = null;
 
             while (i > 0)
             {

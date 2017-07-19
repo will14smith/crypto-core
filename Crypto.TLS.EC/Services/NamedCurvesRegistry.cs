@@ -1,22 +1,22 @@
 ﻿using System.Collections.Generic;
 using Crypto.ASN1;
-using Crypto.EC.Maths.Prime;
+using Crypto.EC.Maths;
 
 namespace Crypto.TLS.EC.Services
 {
     public class NamedCurvesRegistry
     {
-        private readonly Dictionary<NamedCurve, PrimeDomainParameters> _curvesByEnum
-            = new Dictionary<NamedCurve, PrimeDomainParameters>();
-        private readonly Dictionary<ASN1ObjectIdentifier, PrimeDomainParameters> _curvesByOID
-            = new Dictionary<ASN1ObjectIdentifier, PrimeDomainParameters>();
+        private readonly Dictionary<NamedCurve, DomainParameters> _curvesByEnum
+            = new Dictionary<NamedCurve, DomainParameters>();
+        private readonly Dictionary<ASN1ObjectIdentifier, DomainParameters> _curvesByOID
+            = new Dictionary<ASN1ObjectIdentifier, DomainParameters>();
 
-        public void Register(NamedCurve key, PrimeDomainParameters parameters)
+        public void Register(NamedCurve key, DomainParameters parameters)
         {
             _curvesByEnum.Add(key, parameters);
         }
 
-        public PrimeDomainParameters Resolve(NamedCurve key)
+        public DomainParameters Resolve(NamedCurve key)
         {
             return _curvesByEnum[key];
         }
@@ -26,12 +26,12 @@ namespace Crypto.TLS.EC.Services
             return _curvesByEnum.TryGetValue(key, out var _);
         }
 
-        public void Register(ASN1ObjectIdentifier key, PrimeDomainParameters parameters)
+        public void Register(ASN1ObjectIdentifier key, DomainParameters parameters)
         {
             _curvesByOID.Add(key, parameters);
         }
 
-        public PrimeDomainParameters Resolve(ASN1ObjectIdentifier key)
+        public DomainParameters Resolve(ASN1ObjectIdentifier key)
         {
             return _curvesByOID[key];
         }
@@ -41,13 +41,13 @@ namespace Crypto.TLS.EC.Services
             return _curvesByOID.TryGetValue(key, out var _);
         }
 
-        public void Register(NamedCurve id, ASN1ObjectIdentifier oid, PrimeDomainParameters parameters)
+        public void Register(NamedCurve id, ASN1ObjectIdentifier oid, DomainParameters parameters)
         {
             Register(id, parameters);
             Register(oid, parameters);
         }
 
-        public bool FindNameByParameters(PrimeDomainParameters parameters, out NamedCurve name)
+        public bool FindNameByParameters(DomainParameters parameters, out NamedCurve name)
         {
             foreach (var entry in _curvesByEnum)
             {

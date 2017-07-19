@@ -17,7 +17,7 @@ namespace Crypto.TLS.EC.Tests.Curves
             Secp256K1.Parameters.Curve.PointFromBinary(HexConverter.FromHex("0487055e38dd31ef223763531f03fc0e82ab4643d845d8aade83f5ffbff71f7046d4735e68926df377f5f0e6ab68ced4a82f1884cd82ac91596eccc29d20561a8f")));
         private static readonly ECPrivateKey PrivateKey = new ECPrivateKey(
             PublicKey,
-            PublicKey.Parameters.Field.Int("1dcc2c87bbd1b13f680022420b8f1b9d79ba18f6d46e1c7f53260c222f708848".HexToBigInteger()));
+            PublicKey.Parameters.Field.Value("1dcc2c87bbd1b13f680022420b8f1b9d79ba18f6d46e1c7f53260c222f708848".HexToBigInteger()));
 
         [Fact]
         public void TestSignature()

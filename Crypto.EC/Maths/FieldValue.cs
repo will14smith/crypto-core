@@ -1,31 +1,26 @@
 ﻿using System;
 using System.Numerics;
 
-namespace Crypto.EC.Maths.Prime
+namespace Crypto.EC.Maths
 {
-    public class PrimeValue : IFieldValue, IEquatable<PrimeValue>
+    public class FieldValue : IEquatable<FieldValue>
     {
-        public PrimeValue(BigInteger value)
+        public FieldValue(BigInteger value)
         {
             Value = value;
         }
 
         public BigInteger Value { get; }
-
-        public BigInteger ToInt()
-        {
-            return Value;
-        }
-
+        
         public override bool Equals(object obj)
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
-            var other = obj as PrimeValue;
+            var other = obj as FieldValue;
             return other != null && Equals(other);
         }
 
-        public bool Equals(PrimeValue other)
+        public bool Equals(FieldValue other)
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
@@ -38,12 +33,12 @@ namespace Crypto.EC.Maths.Prime
             return Value.GetHashCode();
         }
 
-        public static bool operator ==(PrimeValue left, PrimeValue right)
+        public static bool operator ==(FieldValue left, FieldValue right)
         {
             return Equals(left, right);
         }
 
-        public static bool operator !=(PrimeValue left, PrimeValue right)
+        public static bool operator !=(FieldValue left, FieldValue right)
         {
             return !Equals(left, right);
         }

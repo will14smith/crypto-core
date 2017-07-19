@@ -1,11 +1,10 @@
-﻿using Crypto.EC.Maths.Prime;
+﻿using Crypto.EC.Maths;
 
 namespace Crypto.TLS.EC.Config
 {
     public class ECDHExchangeConfig
     {
-        // TODO make configurable
-        public PrimeDomainParameters Parameters { get; set; }
-        public PrimeValue D { get; set; }
+        public DomainParameters Parameters { get; set; }
+        public FieldValue D { get; set; }
     }
 }

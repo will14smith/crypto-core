@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.IO;
 using Crypto.ASN1;
 using Crypto.Certificates;
 using Crypto.Certificates.Keys;
 using Crypto.EC.Maths;
-using Crypto.EC.Maths.Prime;
 using Crypto.EC.Parameters;
 using Crypto.TLS.EC.Services;
 using Crypto.Utils;
@@ -26,7 +24,6 @@ namespace Crypto.TLS.EC.Keys
         {
             var parameters = CreateParameters(algorithm);
 
-            // TODO bits => point
             var data = bits.ToArray();
             var point = parameters.Curve.PointFromBinary(data);
 
@@ -52,9 +49,9 @@ namespace Crypto.TLS.EC.Keys
                 var dString = seq.Elements[1] as ASN1OctetString;
                 SecurityAssert.NotNull(dString);
                 
-                var d = parameters.Field.Int(dString.Value.ToBigInteger(Endianness.BigEndian));
+                var d = parameters.Field.Value(dString.Value.ToBigInteger(Endianness.BigEndian));
 
-                var q = Point<PrimeValue>.Multiply(
+                var q = Point.Multiply(
                     parameters.Curve,
                     d,
                     parameters.Generator
@@ -66,7 +63,7 @@ namespace Crypto.TLS.EC.Keys
             }
         }
 
-        private PrimeDomainParameters CreateParameters(X509AlgorithmIdentifier algorithm)
+        private DomainParameters CreateParameters(X509AlgorithmIdentifier algorithm)
         {
             // TODO support other formats
 

@@ -1,5 +1,4 @@
 using Crypto.EC.Maths;
-using Crypto.EC.Maths.Prime;
 using Crypto.Utils.IO;
 
 namespace Crypto.TLS.EC.KeyExchanges
@@ -8,7 +7,7 @@ namespace Crypto.TLS.EC.KeyExchanges
     {
         public class ExplicitPrime : ECParameters
         {
-            public ExplicitPrime(PrimeValue primeP, ECCurve curve, Point<PrimeValue> @base, PrimeValue order, PrimeValue cofactor)
+            public ExplicitPrime(FieldValue primeP, ECCurve curve, Point @base, FieldValue order, FieldValue cofactor)
             {
                 PrimeP = primeP;
                 Curve = curve;
@@ -19,11 +18,11 @@ namespace Crypto.TLS.EC.KeyExchanges
 
             public override ECCurveType CurveType { get; } = ECCurveType.ExplicitPrime;
             
-            public PrimeValue PrimeP { get; }
+            public FieldValue PrimeP { get; }
             public ECCurve Curve { get; }
-            public Point<PrimeValue> Base { get; }
-            public PrimeValue Order { get; }
-            public PrimeValue Cofactor { get; }
+            public Point Base { get; }
+            public FieldValue Order { get; }
+            public FieldValue Cofactor { get; }
 
             public override void Write(EndianBinaryWriter writer)
             {

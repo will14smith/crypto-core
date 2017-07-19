@@ -4,7 +4,7 @@ using Crypto.Utils;
 
 namespace Crypto.EC.Maths.Prime
 {
-    public class PrimeField : IField<PrimeValue>
+    public class PrimeField : IField
     {
         public BigInteger Prime { get; }
 
@@ -13,7 +13,7 @@ namespace Crypto.EC.Maths.Prime
             Prime = prime;
         }
 
-        public PrimeValue Int(BigInteger i)
+        public FieldValue Value(BigInteger i)
         {
             i = i % Prime;
             if (i < 0)
@@ -21,35 +21,35 @@ namespace Crypto.EC.Maths.Prime
                 i += Prime;
             }
 
-            return new PrimeValue(i);
+            return new FieldValue(i);
         }
 
-        public PrimeValue Negate(PrimeValue a)
+        public FieldValue Negate(FieldValue a)
         {
-            return Int(-a.Value);
+            return Value(-a.Value);
         }
 
-        public PrimeValue Add(PrimeValue a, PrimeValue b)
+        public FieldValue Add(FieldValue a, FieldValue b)
         {
-            return Int(a.Value + b.Value);
+            return Value(a.Value + b.Value);
         }
 
-        public PrimeValue Sub(PrimeValue a, PrimeValue b)
+        public FieldValue Sub(FieldValue a, FieldValue b)
         {
-            return Int(a.Value - b.Value);
+            return Value(a.Value - b.Value);
         }
 
-        public PrimeValue Multiply(PrimeValue a, PrimeValue b)
+        public FieldValue Multiply(FieldValue a, FieldValue b)
         {
-            return Int(a.Value * b.Value);
+            return Value(a.Value * b.Value);
         }
 
-        public PrimeValue Divide(PrimeValue a, PrimeValue b)
+        public FieldValue Divide(FieldValue a, FieldValue b)
         {
             return Multiply(a, Invert(b));
         }
 
-        private PrimeValue Invert(PrimeValue a)
+        private FieldValue Invert(FieldValue a)
         {
             var result = ExtendedEuclidean(a.Value, Prime);
             var gcd = result.Item1;
@@ -64,7 +64,7 @@ namespace Crypto.EC.Maths.Prime
                 throw new Exception($"{a.Value} has no multiplicative inverse modulo {Prime}");
             }
 
-            return Int(x);
+            return Value(x);
         }
 
         private void DualAssign<T>(out T a, out T b, T aValue, T bValue)

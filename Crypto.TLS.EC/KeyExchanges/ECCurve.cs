@@ -4,14 +4,13 @@ namespace Crypto.TLS.EC.KeyExchanges
 {
     public class ECCurve
     {
-        public ECCurve(IFieldValue a, IFieldValue b)
+        public ECCurve(FieldValue a, FieldValue b)
         {
             A = a;
             B = b;
         }
 
-        // TODO these should be more specific types
-        public IFieldValue A { get; }
-        public IFieldValue B { get; }
+        public FieldValue A { get; }
+        public FieldValue B { get; }
     }
 }
