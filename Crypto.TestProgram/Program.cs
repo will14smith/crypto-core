@@ -2,8 +2,8 @@
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
-using Crypto.TLS.State;
 using Crypto.Certificates;
+using Crypto.TLS.IO;
 using Crypto.Utils;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -20,31 +20,23 @@ namespace Crypto.TestProgram
 
             var server = new TcpListener(IPAddress.Any, 443);
             server.Start();
-            
+
             while (true)
             {
                 var client = server.AcceptTcpClient();
 
                 Console.WriteLine("Client connected: " + client.Client.RemoteEndPoint);
 
-                using (var scope = serviceProvider.CreateScope())
-                {
-                    var scopedServiceProvider = scope.ServiceProvider;
+                var stream = new TLSStream(client.GetStream(), serviceProvider);
 
-                    scopedServiceProvider.GetRequiredService<IStreamAccessor>().Stream = client.GetStream();
+                stream.AuthenticateAsServer();
+                
+                var reader = new StreamReader(stream);
+                var writer = new StreamWriter(stream) { AutoFlush = true };
 
-                    IState state = scopedServiceProvider.GetRequiredService<InitialState>();
-                    while (true)
-                    {
-                        Console.WriteLine("In state " + state.State);
-                        state = state.Run();
-                        if (state == null)
-                        {
-                            client.Close();
-                            break;
-                        }
-                    }
-                }
+                writer.WriteLine("Please enter a message to be echoed:");
+                var msg = reader.ReadLine();
+                writer.WriteLine("Thanks! Your message was: " + msg);
             }
         }
 

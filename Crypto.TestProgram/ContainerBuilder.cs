@@ -8,6 +8,7 @@ using Crypto.TLS.DH;
 using Crypto.TLS.DH.Config;
 using Crypto.TLS.EC;
 using Crypto.TLS.GCM;
+using Crypto.TLS.IO;
 using Crypto.TLS.RC4;
 using Crypto.TLS.RSA;
 using Crypto.TLS.SHA;
@@ -22,8 +23,7 @@ namespace Crypto.TestProgram
             var services = new ServiceCollection();
 
             // core
-            services.AddTLS(
-                connectionFactory: sp => new Connection(sp.GetRequiredService<IStreamAccessor>().Stream));
+            services.AddTLS();
             
             services.AddSingleton<IRandom, DefaultRandomGenerator>();
             services.AddTransient<IStreamAccessor, StreamAccessor>();

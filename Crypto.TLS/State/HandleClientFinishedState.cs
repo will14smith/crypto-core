@@ -81,8 +81,8 @@ namespace Crypto.TLS.State
             _connection.RecordWriterStrategy = _serviceProvider.GetRecordWriterStrategy(_cipherSuiteConfig.CipherSuite);
 
             _writer.Write(GenerateFinishedMessage());
-                
-            throw new NotImplementedException();
+
+            return _serviceProvider.GetRequiredService<ActiveState>();
         }
 
         private void VerifyHandshake()

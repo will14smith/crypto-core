@@ -1,7 +1,7 @@
 using System.IO;
 using System.Threading;
 
-namespace Crypto.TestProgram
+namespace Crypto.TLS.IO
 {
     public class StreamAccessor : IStreamAccessor
     {

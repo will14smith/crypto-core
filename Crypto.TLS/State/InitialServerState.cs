@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Crypto.TLS.State
 {
-    public class InitialState : IState
+    public class InitialServerState : IState
     {
         public ConnectionState State => ConnectionState.Initial;
 
@@ -12,7 +12,7 @@ namespace Crypto.TLS.State
         
         private readonly EndConfig _endConfig;
         
-        public InitialState(
+        public InitialServerState(
             IServiceProvider serviceProvider,
             
             EndConfig endConfig)

@@ -1,6 +1,6 @@
 ﻿using System.IO;
 
-namespace Crypto.TestProgram
+namespace Crypto.TLS.IO
 {
     public interface IStreamAccessor
     {

@@ -13,7 +13,7 @@ namespace Crypto.TLS
 {
     public static class ServiceCollectionExtensions
     {
-        public static void AddTLS(this IServiceCollection services, Func<IServiceProvider, Connection> connectionFactory)
+        public static void AddTLS(this IServiceCollection services)
         {            
             services.AddCipherSuiteServices();
             services.AddStates();
@@ -21,7 +21,7 @@ namespace Crypto.TLS
             services.AddCoreExtensions();
             
             services.AddScopedConfig();
-            services.AddScoped(connectionFactory);
+            services.AddScoped<Connection>();
 
             services.AddTransient<HandshakeReader>();
             services.AddTransient<HandshakeWriter>();

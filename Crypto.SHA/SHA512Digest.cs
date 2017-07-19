@@ -13,7 +13,7 @@ namespace Crypto.SHA
             SHA512
         }
 
-        public override ASN1ObjectIdentifier Id => throw new NotImplementedException();
+        public override ASN1ObjectIdentifier Id => new ASN1ObjectIdentifier("2.16.840.1.101.3.4.2.3");
 
         public override int BlockSize => 1024;
         public override int HashSize => _mode == Mode.SHA384 ? 384 : 512;

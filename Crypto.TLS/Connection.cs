@@ -1,4 +1,4 @@
-﻿using System.IO;
+﻿using Crypto.TLS.IO;
 using Crypto.TLS.Records;
 using Crypto.TLS.Records.Strategy;
 using Crypto.Utils;
@@ -8,11 +8,9 @@ namespace Crypto.TLS
 {
     public class Connection
     {
-        private readonly Stream _stream;
-
-        public Connection(Stream stream)
+        public Connection(IStreamAccessor streamAccessor)
         {
-            _stream = stream;
+            var stream = streamAccessor.Stream;
 
             Reader = new EndianBinaryReader(EndianBitConverter.Big, stream);
             Writer = new EndianBinaryWriter(EndianBitConverter.Big, stream);
