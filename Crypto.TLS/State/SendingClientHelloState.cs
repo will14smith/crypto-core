@@ -50,8 +50,6 @@ namespace Crypto.TLS.State
 
             var cipherSuites = _serviceProvider
                 .GetAllSupportedSuites()
-                // TODO allow user to specify ordering
-                .OrderByDescending(x => x)
                 .ToArray();
             var compressionMethods = new[] { CompressionMethod.Null };
 

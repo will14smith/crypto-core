@@ -6,7 +6,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Crypto.RSA\Crypto.RSA.csproj" />
-    <ProjectReference Include="..\Crypto.TLS.KeyExchange\Crypto.TLS.KeyExchange.csproj" />
     <ProjectReference Include="..\Crypto.TLS\Crypto.TLS.csproj" />
   </ItemGroup>
 

@@ -4,7 +4,7 @@ using Crypto.Core.Hashing;
 using Crypto.Core.Registry;
 using Crypto.Core.Signing;
 using Crypto.TLS.Identifiers;
-using Crypto.TLS.KeyExchange;
+using Crypto.TLS.KeyExchanges;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Crypto.TLS.Services

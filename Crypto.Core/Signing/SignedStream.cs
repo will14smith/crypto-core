@@ -26,6 +26,15 @@ namespace Crypto.Core.Signing
             HashAlgorithm = hashAlgo;
         }
 
+        public override int Read(byte[] buffer, int offset, int count)
+        {
+            var readCount = InnerStream.Read(buffer, offset, count);
+
+            HashAlgorithm.Update(buffer, offset, readCount);
+
+            return readCount;
+        }
+
         public override void Write(byte[] buffer, int offset, int count)
         {
             InnerStream.Write(buffer, offset, count);
@@ -34,8 +43,13 @@ namespace Crypto.Core.Signing
 
         public byte[] Sign()
         {
-            // no input because Write has alreday updated the hash
+            // no input because Write has already updated the hash
             return SignatureAlgorithm.Sign(new byte[0], HashAlgorithm);
+        }
+        public bool Verify(byte[] signature)
+        {
+            // no input because Write has already updated the hash
+            return SignatureAlgorithm.Verify(new byte[0], signature, HashAlgorithm);
         }
 
         public override void Flush()
@@ -43,7 +57,7 @@ namespace Crypto.Core.Signing
             InnerStream.Flush();
         }
 
-        public override bool CanRead => false;
+        public override bool CanRead => true;
         public override bool CanSeek => false;
         public override bool CanWrite => true;
         public override long Length => InnerStream.Length;
@@ -51,11 +65,6 @@ namespace Crypto.Core.Signing
         {
             get => InnerStream.Position;
             set => throw new NotSupportedException();
-        }
-
-        public override int Read(byte[] buffer, int offset, int count)
-        {
-            throw new NotSupportedException();
         }
 
         public override long Seek(long offset, SeekOrigin origin)

@@ -1,60 +1,27 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Numerics;
-using Crypto.Core.Randomness;
+﻿using Crypto.Certificates;
+using Crypto.RSA.Keys;
 using Crypto.TLS.Config;
-using Crypto.TLS.DH.Config;
-using Crypto.TLS.KeyExchange;
-using Crypto.TLS.Messages.Handshakes;
+using Crypto.TLS.KeyExchanges;
 
 namespace Crypto.TLS.DH.KeyExchanges
 {
-    public class DHEKeyExchange : DHKeyExchangeBase
+    public class DHEKeyExchange : KeyExchange
     {
-        private readonly IServiceProvider _serviceProvider;
-        
-        private readonly IRandom _random;
-
-        private readonly DHParameterConfig _dhParameterConfig;
-        private readonly DHExchangeConfig _dhExchangeConfig;
-
-        public DHEKeyExchange(
-            IServiceProvider serviceProvider,
-
-            IRandom random,
-            MasterSecretCalculator masterSecretCalculator,
-
-            DHParameterConfig dhParameterConfig,
-            DHExchangeConfig dhExchangeConfig,
-            CertificateConfig certificateConfig)
-                :base(masterSecretCalculator, certificateConfig)
+        public DHEKeyExchange(DHEServerKeyExchange server, DHEClientKeyExchange client) : base(server, client)
         {
-            _serviceProvider = serviceProvider;
-            
-            _random = random;
-
-            _dhParameterConfig = dhParameterConfig;
-            _dhExchangeConfig = dhExchangeConfig;
         }
-        
-        public override IEnumerable<HandshakeMessage> GenerateHandshakeMessages()
+
+        public override bool IsCompatible(CipherSuite cipherSuite, X509Certificate certificate)
         {
-            foreach (var message in base.GenerateHandshakeMessages())
+            // TODO check cipherSuite == RSA/DSS
+            // cert signed with RSA
+            if (!RSAKeyReader.IsRSAIdentifier(certificate.SignatureAlgorithm.Algorithm))
             {
-                yield return message;
+                return false;
             }
-            
-            // 512 is "approx" 256-bits of security
-            _dhExchangeConfig.X = _random.RandomBig(256);
 
-            var ys = BigInteger.ModPow(_dhParameterConfig.G, _dhExchangeConfig.X, _dhParameterConfig.P);
-
-            yield return new ServerKeyExchangeMessage(_serviceProvider, _dhParameterConfig.P, _dhParameterConfig.G, ys);
-        }
-
-        public override BigInteger CalculatedSharedSecret(BigInteger yc)
-        {
-            return BigInteger.ModPow(yc, _dhExchangeConfig.X, _dhParameterConfig.P);
+            // TODO ?
+            return true;
         }
     }
 }

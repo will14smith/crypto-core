@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Crypto.TLS.Config;
@@ -12,17 +13,23 @@ namespace Crypto.TLS.Extensions
 {
     public class SignatureAlgorithmsExtension : IExtension
     {
+        private readonly IServiceProvider _serviceProvider;
+        
         private readonly CipherSuiteRegistry _cipherSuiteRegistry;
 
         private readonly EndConfig _endConfig;
         private readonly Config _config;
 
         public SignatureAlgorithmsExtension(
+            IServiceProvider serviceProvider,
+            
             CipherSuiteRegistry cipherSuiteRegistry,
 
             EndConfig endConfig,
             Config config)
         {
+            _serviceProvider = serviceProvider;
+            
             _cipherSuiteRegistry = cipherSuiteRegistry;
 
             _endConfig = endConfig;
@@ -36,19 +43,20 @@ namespace Crypto.TLS.Extensions
                 yield break;
             }
 
-            var suites = _cipherSuiteRegistry.GetAll();
+            var suites = _serviceProvider
+                .GetAllSupportedSuites();
 
-            var combos = suites
+            _config.SupportedAlgorithms = suites
                 .Select(x => (_cipherSuiteRegistry.ResolveHashAlgorithm(x), _cipherSuiteRegistry.ResolveSignatureAlgorithm(x)))
                 .Distinct()
                 .ToArray();
-
+           
             using (var ms = new MemoryStream())
             {
                 var writer = new EndianBinaryWriter(EndianBitConverter.Big, ms);
 
-                writer.Write((ushort)(combos.Length * 2));
-                foreach (var (hash, sig) in combos)
+                writer.Write((ushort)(_config.SupportedAlgorithms.Count * 2));
+                foreach (var (hash, sig) in _config.SupportedAlgorithms)
                 {
                     writer.Write(hash.Id);
                     writer.Write(sig.Id);

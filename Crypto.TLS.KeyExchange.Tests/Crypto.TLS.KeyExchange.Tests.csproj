@@ -12,8 +12,4 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Crypto.TLS.KeyExchange\Crypto.TLS.KeyExchange.csproj" />
-  </ItemGroup>
-
 </Project>

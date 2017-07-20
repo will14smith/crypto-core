@@ -61,5 +61,10 @@ namespace Crypto.TLS.EC.Services
             name = default(NamedCurve);
             return false;
         }
+
+        public IReadOnlyCollection<NamedCurve> GetAllSupportedNamedCurves()
+        {
+            return _curvesByEnum.Keys;
+        }
     }
 }

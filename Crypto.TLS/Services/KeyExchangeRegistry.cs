@@ -1,6 +1,6 @@
 ﻿using Crypto.Core.Registry;
 using Crypto.TLS.Identifiers;
-using Crypto.TLS.KeyExchange;
+using Crypto.TLS.KeyExchanges;
 
 namespace Crypto.TLS.Services
 {

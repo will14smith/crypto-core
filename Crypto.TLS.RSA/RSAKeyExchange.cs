@@ -4,7 +4,7 @@ using Crypto.Core.Randomness;
 using Crypto.RSA.Encryption;
 using Crypto.RSA.Keys;
 using Crypto.TLS.Config;
-using Crypto.TLS.KeyExchange;
+using Crypto.TLS.KeyExchanges;
 using Crypto.TLS.Messages.Handshakes;
 using Crypto.Utils;
 
@@ -53,12 +53,31 @@ namespace Crypto.TLS.RSA
             return true;
         }
 
-        public IEnumerable<HandshakeMessage> GenerateHandshakeMessages()
+        public IEnumerable<HandshakeMessage> GenerateServerHandshakeMessages()
         {
             yield return new CertificateMessage(_certificateConfig.CertificateChain);
         }
+        
+        public void HandleClientKeyExchange(ClientKeyExchangeMessage message)
+        {
+            var preMasterSecret = ReadMessage(message.Body);
 
-        public byte[] ReadClientKeyExchange(byte[] body)
+            var masterSecret = _masterSecretCalculator.Compute(preMasterSecret);
+            // TODO return type?
+            _masterSecretCalculator.ComputeKeysAndUpdateConfig(masterSecret);
+        }
+
+        public IEnumerable<HandshakeMessage> GenerateClientHandshakeMessages()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public void HandleServerKeyExchange(ServerKeyExchangeMessage message)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        private byte[] ReadMessage(byte[] body)
         {
             var length = EndianBitConverter.Big.ToUInt16(body, 0);
             SecurityAssert.Assert(body.Length == length + 2);
@@ -74,15 +93,6 @@ namespace Crypto.TLS.RSA
             SecurityAssert.Assert(preMasterSecret[1] == _versionConfig.Version.Minor);
 
             return preMasterSecret;
-        }
-
-        public void HandleClientKeyExchange(ClientKeyExchangeMessage message)
-        {
-            var preMasterSecret = ReadClientKeyExchange(message.Body);
-
-            var masterSecret = _masterSecretCalculator.Compute(preMasterSecret);
-            // TODO return type?
-            _masterSecretCalculator.ComputeKeysAndUpdateConfig(masterSecret);
         }
     }
 }

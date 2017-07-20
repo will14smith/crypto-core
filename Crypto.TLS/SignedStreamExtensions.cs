@@ -1,6 +1,8 @@
-﻿using Crypto.Core.Signing;
+﻿using System;
+using Crypto.Core.Signing;
 using Crypto.TLS.Identifiers;
 using Crypto.Utils;
+using Crypto.Utils.IO;
 
 namespace Crypto.TLS
 {
@@ -18,6 +20,20 @@ namespace Crypto.TLS
 
             stream.InnerStream.Write(EndianBitConverter.Big.GetBytes((ushort)signature.Length), 0, 2);
             stream.InnerStream.Write(signature, 0, signature.Length);
+        }
+        
+        public static void VerifyTlsSignature(this SignedStream stream, TLSHashAlgorithm hashAlgorithm, TLSSignatureAlgorithm signatureAlgorithm)
+        {
+            var reader = new EndianBinaryReader(EndianBitConverter.Big, stream.InnerStream);
+
+            var actualHashAlgo = reader.ReadByte();
+            SecurityAssert.Assert(actualHashAlgo == hashAlgorithm.Id);
+            var actualSignAlgo = reader.ReadByte();
+            SecurityAssert.Assert(actualSignAlgo == signatureAlgorithm.Id);
+            
+            var signLength = reader.ReadUInt16();
+            var actualSign = reader.ReadBytes(signLength);
+            SecurityAssert.Assert(stream.Verify(actualSign));
         }
     }
 }

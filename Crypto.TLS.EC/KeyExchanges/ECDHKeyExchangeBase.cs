@@ -6,7 +6,7 @@ using Crypto.EC.Parameters;
 using Crypto.RSA.Keys;
 using Crypto.TLS.Config;
 using Crypto.TLS.EC.Config;
-using Crypto.TLS.KeyExchange;
+using Crypto.TLS.KeyExchanges;
 using Crypto.TLS.Messages.Handshakes;
 using Crypto.TLS.RSA;
 using Crypto.TLS.Services;
@@ -82,7 +82,7 @@ namespace Crypto.TLS.EC.KeyExchanges
 
         }
 
-        public virtual IEnumerable<HandshakeMessage> GenerateHandshakeMessages()
+        public virtual IEnumerable<HandshakeMessage> GenerateServerHandshakeMessages()
         {
             yield return new CertificateMessage(CertificateConfig.CertificateChain);
         }
@@ -97,6 +97,16 @@ namespace Crypto.TLS.EC.KeyExchanges
 
             var masterSecret = MasterSecretCalculator.Compute(preMasterSecret);
             MasterSecretCalculator.ComputeKeysAndUpdateConfig(masterSecret);
+        }
+
+        public virtual IEnumerable<HandshakeMessage> GenerateClientHandshakeMessages()
+        {
+            throw new NotImplementedException();
+        }
+
+        public virtual void HandleServerKeyExchange(ServerKeyExchangeMessage message)
+        {
+            throw new NotImplementedException();
         }
 
         private Point ReadMessage(ClientKeyExchangeMessage message)

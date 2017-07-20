@@ -3,6 +3,7 @@ using System.Linq;
 using Crypto.Certificates;
 using Crypto.TLS.Config;
 using Crypto.TLS.Extensions;
+using Crypto.TLS.KeyExchanges;
 using Crypto.TLS.Messages.Handshakes;
 using Crypto.TLS.Records.Strategy;
 using Crypto.TLS.Services;
@@ -25,6 +26,8 @@ namespace Crypto.TLS
 
             services.AddTransient<HandshakeReader>();
             services.AddTransient<HandshakeWriter>();
+            
+            services.AddTransient<MasterSecretCalculator>();
 
             // external services
             services.AddCertificateManager();

@@ -4,7 +4,7 @@ using Crypto.Core.Randomness;
 using Crypto.TLS.Config;
 using Crypto.TLS.EC.Config;
 using Crypto.TLS.EC.Services;
-using Crypto.TLS.KeyExchange;
+using Crypto.TLS.KeyExchanges;
 using Crypto.TLS.Messages.Handshakes;
 using Crypto.TLS.Services;
 using Crypto.Utils;
@@ -46,11 +46,11 @@ namespace Crypto.TLS.EC.KeyExchanges
             _supportedGroupsConfig = supportedGroupsConfig;
         }
         
-        public override IEnumerable<HandshakeMessage> GenerateHandshakeMessages()
+        public override IEnumerable<HandshakeMessage> GenerateServerHandshakeMessages()
         {
             var ecParameters = NegotiateParameters();
 
-            foreach (var message in base.GenerateHandshakeMessages())
+            foreach (var message in base.GenerateServerHandshakeMessages())
             {
                 yield return message;
             }
@@ -58,7 +58,7 @@ namespace Crypto.TLS.EC.KeyExchanges
             var qs = CalculatePoint(ECDHExchangeConfig.Parameters.Generator);
             var serverParams = new ServerECDHParams(ecParameters, qs);
             
-            yield return new ServerKeyExchangeMessage(_serviceProvider, serverParams);
+            yield return new ECServerKeyExchangeMessage(_serviceProvider, serverParams);
         }
 
         private ECParameters NegotiateParameters()

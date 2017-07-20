@@ -5,7 +5,7 @@ using Crypto.TLS.Hashing;
 using Crypto.TLS.Services;
 using Crypto.Utils;
 
-namespace Crypto.TLS.KeyExchange
+namespace Crypto.TLS.KeyExchanges
 {
     public class MasterSecretCalculator
     {

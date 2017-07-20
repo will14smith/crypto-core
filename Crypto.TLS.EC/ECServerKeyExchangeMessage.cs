@@ -8,13 +8,13 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Crypto.TLS.EC
 {
-    public class ServerKeyExchangeMessage : HandshakeMessage
+    public class ECServerKeyExchangeMessage : HandshakeMessage
     {
         private readonly IServiceProvider _serviceProvider;
 
         public ServerECDHParams Parameters { get; }
 
-        public ServerKeyExchangeMessage(
+        public ECServerKeyExchangeMessage(
             IServiceProvider serviceProvider,
             ServerECDHParams parameters)
             : base(HandshakeType.ServerKeyExchange)
@@ -25,14 +25,9 @@ namespace Crypto.TLS.EC
 
         protected override void Write(EndianBinaryWriter baseWriter)
         {
-            var cipherSuiteConfig = _serviceProvider.GetRequiredService<CipherSuiteConfig>();
-            var cipherSuites = _serviceProvider.GetRequiredService<CipherSuiteRegistry>();
+            var (hashAlgorithm, signatureAlgorithm) = _serviceProvider.GetSigningAlgorithms();
 
-            // TODO check these are compatible with signature_algorithms extension & certificate
-            var hashAlgorithm = cipherSuites.ResolveHashAlgorithm(cipherSuiteConfig.CipherSuite);
-            var signatureAlgorithm = cipherSuites.ResolveSignatureAlgorithm(cipherSuiteConfig.CipherSuite);
-
-            var stream = _serviceProvider.CreateSignedStream(baseWriter, hashAlgorithm, signatureAlgorithm);
+            var stream = _serviceProvider.CreateSignedStream(baseWriter.BaseStream, hashAlgorithm, signatureAlgorithm);
             var writer = new EndianBinaryWriter(baseWriter.BitConverter, stream);
 
             var randomConfig = _serviceProvider.GetRequiredService<RandomConfig>();
@@ -40,15 +35,12 @@ namespace Crypto.TLS.EC
             // signature needs these but the output doesn't
             stream.HashAlgorithm.Update(randomConfig.Client, 0, 32);
             stream.HashAlgorithm.Update(randomConfig.Server, 0, 32);
-            
+
             Parameters.Write(writer);
-            
+
             stream.Flush();
 
-            stream.WriteTlsSignature(
-                cipherSuites.ResolveHashAlgorithm(cipherSuiteConfig.CipherSuite),
-                signatureAlgorithm);
-
+            stream.WriteTlsSignature(hashAlgorithm, signatureAlgorithm);
         }
     }
 }

@@ -12,7 +12,6 @@
   <ItemGroup>
     <ProjectReference Include="..\Crypto.Certificates\Crypto.Certificates.csproj" />
     <ProjectReference Include="..\Crypto.RSA\Crypto.RSA.csproj" />
-    <ProjectReference Include="..\Crypto.TLS.KeyExchange\Crypto.TLS.KeyExchange.csproj" />
     <ProjectReference Include="..\Crypto.TLS\Crypto.TLS.csproj" />
   </ItemGroup>
 

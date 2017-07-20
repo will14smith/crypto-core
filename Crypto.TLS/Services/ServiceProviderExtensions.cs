@@ -5,7 +5,7 @@ using Crypto.Core.Encryption;
 using Crypto.Core.Hashing;
 using Crypto.Core.Signing;
 using Crypto.TLS.Identifiers;
-using Crypto.TLS.KeyExchange;
+using Crypto.TLS.KeyExchanges;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Crypto.TLS.Services
@@ -69,6 +69,8 @@ namespace Crypto.TLS.Services
             return serviceProvider.GetRequiredService<CipherSuiteRegistry>()
                 .GetAll()
                 .Where(x => IsCipherSuiteSupported(serviceProvider, x))
+                // TODO allow user to specify ordering
+                .OrderByDescending(x => x)
                 .ToList();
         }
 

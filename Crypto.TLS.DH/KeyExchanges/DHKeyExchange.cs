@@ -1,42 +1,34 @@
-﻿using System.Numerics;
-using Crypto.Certificates;
-using Crypto.TLS.Config;
+﻿using Crypto.Certificates;
+using Crypto.RSA.Keys;
 using Crypto.TLS.DH.Keys;
-using Crypto.TLS.KeyExchange;
-using Crypto.Utils;
+using Crypto.TLS.KeyExchanges;
 
 namespace Crypto.TLS.DH.KeyExchanges
 {
-    public class DHKeyExchange : DHKeyExchangeBase
+    public class DHKeyExchange : KeyExchange
     {
-        private readonly CertificateManager _certificateManager;
-
-        public DHKeyExchange(
-            CertificateManager certificateManager,
-            MasterSecretCalculator masterSecretCalculator,
-
-            CertificateConfig certificateConfig)
-                : base(masterSecretCalculator, certificateConfig)
+        public DHKeyExchange(DHServerKeyExchange server, DHClientKeyExchange client) 
+            : base(server, client)
         {
-            _certificateManager = certificateManager;
         }
 
-        public override BigInteger CalculatedSharedSecret(BigInteger yc)
+        public override bool IsCompatible(CipherSuite cipherSuite, X509Certificate certificate)
         {
-            var key = GetPrivateKey();
-            
-            return BigInteger.ModPow(yc, key.X, key.DHPublicKey.P);
-        }
-        
-        private DHPrivateKey GetPrivateKey()
-        {
-            var cert = CertificateConfig.Certificate;
-            var key = _certificateManager.GetPrivateKey(cert.SubjectPublicKey);
+            // TODO check cipherSuite == RSA/DSS
+            // cert signed with RSA
+            if (!RSAKeyReader.IsRSAIdentifier(certificate.SignatureAlgorithm.Algorithm))
+            {
+                return false;
+            }
 
-            var dhKey = key as DHPrivateKey;
-            SecurityAssert.NotNull(dhKey);
+            // cert has DH public key
+            if (!(certificate.SubjectPublicKey is DHPublicKey))
+            {
+                return false;
+            }
 
-            return dhKey;
+            // TODO ?
+            return true;
         }
     }
 }
