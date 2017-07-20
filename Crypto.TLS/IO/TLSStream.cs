@@ -13,18 +13,18 @@ namespace Crypto.TLS.IO
     {
         private readonly Stream _inner;
         private readonly IServiceScope _servicesScope;
-        
+
         private IServiceProvider Services => _servicesScope.ServiceProvider;
 
         private bool _active;
         private Thread _reader;
         private readonly ByteQueue _readQueue = new ByteQueue();
-        
+
         public TLSStream(Stream inner, IServiceProvider services)
         {
             SecurityAssert.NotNull(inner);
             SecurityAssert.NotNull(services);
-            
+
             _inner = inner;
 
             _servicesScope = services.CreateScope();
@@ -33,7 +33,18 @@ namespace Crypto.TLS.IO
 
         public void AuthenticateAsServer()
         {
-            IState state = Services.GetRequiredService<InitialServerState>();
+            Authenticate<InitialServerState>();
+        }
+
+        public void AuthenticateAsClient()
+        {
+            Authenticate<InitialClientState>();
+        }
+
+        private void Authenticate<TInitialState>()
+            where TInitialState : IState
+        {
+            IState state = Services.GetRequiredService<TInitialState>();
             while (true)
             {
                 Console.WriteLine("In state " + state.State);
@@ -42,11 +53,11 @@ namespace Crypto.TLS.IO
                 if (state is ActiveState)
                 {
                     _active = true;
-                    
-                    StartReadThread();                    
+
+                    StartReadThread();
                     break;
                 }
-                
+
                 if (state == null)
                 {
                     _inner.Close();
@@ -72,7 +83,7 @@ namespace Crypto.TLS.IO
                     case RecordType.Application:
                         _readQueue.Put(record.Data);
                         break;
-                        // TODO handle alerts
+                    // TODO handle alerts
                     default:
                         // TODO terminate connection
                         throw new InvalidOperationException();
@@ -94,10 +105,10 @@ namespace Crypto.TLS.IO
         {
             SecurityAssert.Assert(_active);
             SecurityAssert.AssertBuffer(buffer, offset, count);
-            
+
             var data = new byte[count];
             Array.Copy(buffer, offset, data, 0, count);
-            
+
             var versionConfig = Services.GetRequiredService<VersionConfig>();
             var record = new Record(RecordType.Application, versionConfig.Version, data);
 
@@ -109,7 +120,7 @@ namespace Crypto.TLS.IO
         {
             _inner.Flush();
         }
-        
+
         public override bool CanRead => true;
         public override bool CanWrite => true;
 

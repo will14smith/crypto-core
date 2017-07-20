@@ -1,10 +1,13 @@
 ﻿using System;
 using System.IO;
+using Crypto.Certificates;
+using Crypto.Certificates.Services;
 using Crypto.TLS.Config;
 using Crypto.TLS.Records;
 using Crypto.TLS.Services;
 using Crypto.Utils;
 using Crypto.Utils.IO;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Crypto.TLS.Messages.Handshakes
 {
@@ -55,6 +58,12 @@ namespace Crypto.TLS.Messages.Handshakes
             {
                 case HandshakeType.ClientHello:
                     return ClientHelloMessage.Read(body);
+                case HandshakeType.ServerHello:
+                    return ServerHelloMessage.Read(body);
+                case HandshakeType.Certificate:
+                    return CertificateMessage.Read(body, b => new X509Reader(_serviceProvider.GetRequiredService<PublicKeyReaderRegistry>(), _serviceProvider, b));
+                case HandshakeType.ServerKeyExchange:
+                    return new ServerKeyExchangeMessage(body);
                 case HandshakeType.ClientKeyExchange:
                     return new ClientKeyExchangeMessage(body);
                 case HandshakeType.Finished:

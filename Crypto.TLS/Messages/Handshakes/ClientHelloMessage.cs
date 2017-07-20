@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Crypto.TLS.Extensions;
@@ -27,10 +26,11 @@ namespace Crypto.TLS.Messages.Handshakes
 
         protected override void WriteHello(EndianBinaryWriter writer)
         {
-            throw new NotImplementedException();
+            writer.WriteUInt16Variable(2, CipherSuites);
+            writer.WriteByteVariable(1, CompressionMethods);
         }
 
-        internal static HandshakeMessage Read(byte[] body)
+        internal static ClientHelloMessage Read(byte[] body)
         {
             using (var stream = new MemoryStream(body))
             {

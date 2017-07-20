@@ -39,6 +39,8 @@ namespace Crypto.TLS.State
         
         public IState Run()
         {
+            // TODO is it valid to receive this message?
+
             var keyExchange = _serviceProvider.ResolveKeyExchange(_cipherSuiteConfig.CipherSuite);
 
             keyExchange.HandleClientKeyExchange(_handshake);

@@ -3,6 +3,7 @@ namespace Crypto.TLS
     public enum ConnectionState
     {
         Initial,
+        
         Active,
         UnexpectedError,
 
@@ -18,6 +19,15 @@ namespace Crypto.TLS
         
         // client
         SendingClientHello,
-        WaitingForServerHello
+        WaitingForServerHello,
+        RecievedServerHello,
+        WaitingForServerHelloFollowup,
+        RecievedServerCertificate,
+        WaitingForServerCertificateFollowup,
+        RecievedServerKeyExchange,
+        WaitingForServerKeyExchangeFollowup,
+        RecievedServerCertificateRequest,
+        WaitingForServerCertificateRequestFollowup,
+        RecievedServerHelloDone
     }
 }

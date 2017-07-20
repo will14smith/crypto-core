@@ -33,7 +33,7 @@ namespace Crypto.TLS.Messages.Handshakes
         {
             writer.Write(Version);
             writer.Write(RandomBytes);
-            writer.WriteVariable(1, SessionId);
+            writer.WriteByteVariable(1, SessionId);
             WriteHello(writer);
 
             if (Extensions.Length == 0)

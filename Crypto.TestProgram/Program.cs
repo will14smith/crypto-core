@@ -13,6 +13,24 @@ namespace Crypto.TestProgram
     {
         static void Main(string[] args)
         {
+            ClientMain(args);
+        }
+
+        static void ClientMain(string[] args)
+        {
+            var services = ContainerBuilder.Create();
+            var serviceProvider = services.BuildServiceProvider();
+
+            var client = new TcpClient();
+            client.Connect(new IPEndPoint(IPAddress.Loopback, 4433));
+            
+            var stream = new TLSStream(client.GetStream(), serviceProvider);
+
+            stream.AuthenticateAsClient();
+        }
+
+        static void ServerMain(string[] args)
+        {
             var services = ContainerBuilder.Create();
             var serviceProvider = services.BuildServiceProvider();
 

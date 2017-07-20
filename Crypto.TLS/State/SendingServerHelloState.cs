@@ -88,7 +88,7 @@ namespace Crypto.TLS.State
         {
             var keyExchange = _serviceProvider.ResolveKeyExchange(_cipherSuiteConfig.CipherSuite);
 
-            return keyExchange.GenerateHandshakeMessages();
+            return keyExchange.GenerateServerHandshakeMessages();
         }
 
         private HandshakeMessage CreateDone()

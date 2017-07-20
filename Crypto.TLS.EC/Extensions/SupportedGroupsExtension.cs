@@ -1,23 +1,31 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using Crypto.TLS.Config;
 using Crypto.TLS.EC.Config;
 using Crypto.TLS.EC.Services;
 using Crypto.TLS.Extensions;
 using Crypto.TLS.Messages.Handshakes;
 using Crypto.Utils;
+using Crypto.Utils.IO;
 
 namespace Crypto.TLS.EC.Extensions
 {
     public class SupportedGroupsExtension : IExtension
     {
+        private readonly NamedCurvesRegistry _namedCurvesRegistry;
+        
         private readonly SupportedGroupsConfig _supportedGroupsConfig;
         private readonly EndConfig _endConfig;
 
         public SupportedGroupsExtension(
+            NamedCurvesRegistry namedCurvesRegistry,
+            
             SupportedGroupsConfig supportedGroupsConfig,
             EndConfig endConfig)
         {
+            _namedCurvesRegistry = namedCurvesRegistry;
+            
             _supportedGroupsConfig = supportedGroupsConfig;
             _endConfig = endConfig;
         }
@@ -28,8 +36,21 @@ namespace Crypto.TLS.EC.Extensions
             {
                 yield break;
             }
+
+            var groups = _namedCurvesRegistry.GetAllSupportedNamedCurves();
             
-            throw new NotImplementedException();
+            using (var ms = new MemoryStream())
+            {
+                var writer = new EndianBinaryWriter(EndianBitConverter.Big, ms);
+
+                writer.Write((ushort)(groups.Count * 2));
+                foreach (var group in groups)
+                {
+                    writer.Write((ushort)group);
+                }
+
+                yield return new HelloExtension(ECIdentifiers.SupportedGroups, ms.ToArray());
+            }
         }
 
         public void HandleHello(HelloExtension hello)

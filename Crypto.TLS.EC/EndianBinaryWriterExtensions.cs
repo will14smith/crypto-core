@@ -10,7 +10,7 @@ namespace Crypto.TLS.EC
             // TODO respect ECPointFormatsConfig
 
             var b = point.ToBytes();
-            writer.WriteVariable(1, b);
+            writer.WriteByteVariable(1, b);
         }
     }
 }
