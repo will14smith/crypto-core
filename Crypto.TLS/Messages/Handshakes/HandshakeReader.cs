@@ -64,6 +64,8 @@ namespace Crypto.TLS.Messages.Handshakes
                     return CertificateMessage.Read(body, b => new X509Reader(_serviceProvider.GetRequiredService<PublicKeyReaderRegistry>(), _serviceProvider, b));
                 case HandshakeType.ServerKeyExchange:
                     return new ServerKeyExchangeMessage(body);
+                case HandshakeType.ServerHelloDone:
+                    return ServerHelloDoneMessage.Read(body);
                 case HandshakeType.ClientKeyExchange:
                     return new ClientKeyExchangeMessage(body);
                 case HandshakeType.Finished:

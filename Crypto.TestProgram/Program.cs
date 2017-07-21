@@ -27,6 +27,13 @@ namespace Crypto.TestProgram
             var stream = new TLSStream(client.GetStream(), serviceProvider);
 
             stream.AuthenticateAsClient();
+
+            var reader = new StreamReader(stream);
+            var writer = new StreamWriter(stream) { AutoFlush = true };
+
+            writer.WriteLine("Hi there, please reply!");
+            var msg = reader.ReadLine();
+            writer.WriteLine("Thanks! Your message was: " + msg);
         }
 
         static void ServerMain(string[] args)

@@ -28,6 +28,9 @@ namespace Crypto.TLS
         WaitingForServerKeyExchangeFollowup,
         RecievedServerCertificateRequest,
         WaitingForServerCertificateRequestFollowup,
-        RecievedServerHelloDone
+        RecievedServerHelloDone,
+        WaitingForServerChangeCipherSpec,
+        WaitingForServerFinished,
+        RecievedServerFinished,
     }
 }

@@ -1,7 +1,5 @@
-﻿using System;
-using System.Linq;
+using System;
 using Crypto.TLS.Config;
-using Crypto.TLS.Hashing;
 using Crypto.TLS.Messages.Handshakes;
 using Crypto.TLS.Records;
 using Crypto.TLS.Services;
@@ -10,9 +8,9 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Crypto.TLS.State
 {
-    public class HandleClientFinishedState : IState
+    public class HandleServerFinishedState : IState
     {
-        public ConnectionState State => ConnectionState.RecievedClientFinished;
+        public ConnectionState State => ConnectionState.RecievedServerFinished;
 
         private readonly IServiceProvider _serviceProvider;
 
@@ -25,7 +23,7 @@ namespace Crypto.TLS.State
 
         private readonly FinishedMessage _handshake;
 
-        public HandleClientFinishedState(
+        public HandleServerFinishedState(
             IServiceProvider serviceProvider,
 
             Connection connection,
@@ -50,9 +48,9 @@ namespace Crypto.TLS.State
             _handshake = handshake;
         }
 
-        public static HandleClientFinishedState New(IServiceProvider serviceProvider, FinishedMessage handshake)
+        public static HandleServerFinishedState New(IServiceProvider serviceProvider, FinishedMessage handshake)
         {
-            return new HandleClientFinishedState(
+            return new HandleServerFinishedState(
                 serviceProvider,
 
                 serviceProvider.GetService<Connection>(),
@@ -69,11 +67,6 @@ namespace Crypto.TLS.State
         public IState Run()
         {
             SecurityAssert.Assert(_handshakeFinishedService.Verify(_handshake));
-
-            _connection.WriteRecord(new Record(RecordType.ChangeCipherSpec, _versionConfig.Version, new byte[] { 1 }));
-            _connection.RecordWriterStrategy = _serviceProvider.GetRecordWriterStrategy(_cipherSuiteConfig.CipherSuite);
-
-            _writer.Write(_handshakeFinishedService.Generate());
 
             return _serviceProvider.GetRequiredService<ActiveState>();
         }

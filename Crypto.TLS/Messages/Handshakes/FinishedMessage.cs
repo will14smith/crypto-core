@@ -1,5 +1,4 @@
 ﻿using System;
-using Crypto.TLS.Config;
 using Crypto.Utils;
 using Crypto.Utils.IO;
 
@@ -37,6 +36,5 @@ namespace Crypto.TLS.Messages.Handshakes
 
             return new FinishedMessage(verifyData, currentHash);
         }
-
     }
 }

@@ -47,7 +47,7 @@ namespace Crypto.TLS.DH.KeyExchanges
             // 512 is "approx" 256-bits of security
             _dhExchangeConfig.X = _random.RandomBig(512);
 
-            var sharedSecret = DHCalculator.Calculate(dhMessage.Ys, _dhExchangeConfig.X, _dhParameterConfig.G);
+            var sharedSecret = DHCalculator.Calculate(dhMessage.Ys, _dhExchangeConfig.X, _dhParameterConfig.P);
             var preMasterSecret = sharedSecret.ToByteArray(Endianness.BigEndian);
 
             var masterSecret = _masterSecretCalculator.Compute(preMasterSecret);

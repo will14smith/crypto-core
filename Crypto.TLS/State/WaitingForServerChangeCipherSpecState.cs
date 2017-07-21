@@ -7,13 +7,13 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Crypto.TLS.State
 {
-    public class WaitingForClientChangeCipherSpecState : ReadingState
+    public class WaitingForServerChangeCipherSpecState : ReadingState
     {
-        public override ConnectionState State => ConnectionState.WaitingForClientChangeCipherSpec;
+        public override ConnectionState State => ConnectionState.WaitingForServerChangeCipherSpec;
 
         private readonly CipherSuiteConfig _cipherSuiteConfig;
 
-        public WaitingForClientChangeCipherSpecState(
+        public WaitingForServerChangeCipherSpecState(
             IServiceProvider serviceProvider,
 
             CipherSuiteConfig cipherSuiteConfig,
@@ -43,7 +43,7 @@ namespace Crypto.TLS.State
 
             Connection.RecordReaderStrategy = ServiceProvider.GetRecordReaderStrategy(_cipherSuiteConfig.CipherSuite);
 
-            return ServiceProvider.GetRequiredService<WaitingForClientFinishedState>();
+            return ServiceProvider.GetRequiredService<WaitingForServerFinishedState>();
         }
 
         private Option<IState> HandleAlert(Record record)

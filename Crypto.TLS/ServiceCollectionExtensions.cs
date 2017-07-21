@@ -28,6 +28,7 @@ namespace Crypto.TLS
             services.AddTransient<HandshakeWriter>();
             
             services.AddTransient<MasterSecretCalculator>();
+            services.AddTransient<HandshakeFinishedService>();
 
             // external services
             services.AddCertificateManager();

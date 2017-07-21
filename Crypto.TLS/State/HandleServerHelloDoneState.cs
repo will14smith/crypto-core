@@ -1,5 +1,9 @@
 ﻿using System;
+using Crypto.TLS.Config;
 using Crypto.TLS.Messages.Handshakes;
+using Crypto.TLS.Records;
+using Crypto.TLS.Services;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Crypto.TLS.State
 {
@@ -7,22 +11,82 @@ namespace Crypto.TLS.State
     {
         public ConnectionState State => ConnectionState.RecievedServerHelloDone;
 
-        private ServerHelloDoneMessage _handshake;
+        private readonly IServiceProvider _serviceProvider;
 
-        public HandleServerHelloDoneState(ServerHelloDoneMessage handshake)
+        private readonly Connection _connection;
+        private readonly HandshakeWriter _writer;
+        private readonly HandshakeFinishedService _handshakeFinishedService;
+
+        private readonly CipherSuiteConfig _cipherSuiteConfig;
+        private readonly VersionConfig _versionConfig;
+
+        public HandleServerHelloDoneState(
+            IServiceProvider serviceProvider,
+
+            Connection connection,
+            HandshakeWriter writer,
+            HandshakeFinishedService handshakeFinishedService,
+
+            CipherSuiteConfig cipherSuiteConfig,
+            VersionConfig versionConfig)
         {
-            _handshake = handshake;
+            _serviceProvider = serviceProvider;
+
+            _connection = connection;
+            _writer = writer;
+            _handshakeFinishedService = handshakeFinishedService;
+
+            _cipherSuiteConfig = cipherSuiteConfig;
+            _versionConfig = versionConfig;
         }
 
         public static HandleServerHelloDoneState New(IServiceProvider serviceProvider, ServerHelloDoneMessage handshake)
         {
             return new HandleServerHelloDoneState(
-                handshake);
+                serviceProvider,
+
+                serviceProvider.GetRequiredService<Connection>(),
+                serviceProvider.GetRequiredService<HandshakeWriter>(),
+                serviceProvider.GetRequiredService<HandshakeFinishedService>(),
+
+                serviceProvider.GetRequiredService<CipherSuiteConfig>(),
+                serviceProvider.GetRequiredService<VersionConfig>());
         }
 
         public IState Run()
         {
-            throw new NotImplementedException();
+            // TODO send cert (if requested)
+
+            SendKeyExchange();
+
+            // TODO send cert verified (if request & required)
+
+            SendChangeCipherSpec();
+            SendFinished();
+
+            return _serviceProvider.GetRequiredService<WaitingForServerChangeCipherSpecState>();
+        }
+
+        private void SendKeyExchange()
+        {
+            var keyExchange = _serviceProvider.ResolveKeyExchange(_cipherSuiteConfig.CipherSuite);
+
+            var messages = keyExchange.GenerateClientHandshakeMessages();
+            foreach (var message in messages)
+            {
+                _writer.Write(message);
+            }
+        }
+
+        private void SendChangeCipherSpec()
+        {
+            _connection.WriteRecord(new Record(RecordType.ChangeCipherSpec, _versionConfig.Version, new byte[] { 1 }));
+            _connection.RecordWriterStrategy = _serviceProvider.GetRecordWriterStrategy(_cipherSuiteConfig.CipherSuite);
+        }
+
+        private void SendFinished()
+        {
+            _writer.Write(_handshakeFinishedService.Generate());
         }
     }
 }

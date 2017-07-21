@@ -5,13 +5,13 @@ using Crypto.Utils;
 
 namespace Crypto.TLS.State
 {
-    public class WaitingForClientFinishedState : ReadingState
+    public class WaitingForServerFinishedState : ReadingState
     {
-        public override ConnectionState State => ConnectionState.WaitingForClientFinished;
+        public override ConnectionState State => ConnectionState.WaitingForServerFinished;
 
         private readonly HandshakeReader _reader;
 
-        public WaitingForClientFinishedState(
+        public WaitingForServerFinishedState(
             IServiceProvider serviceProvider,
             Connection connection,
             HandshakeReader reader)
@@ -42,7 +42,7 @@ namespace Crypto.TLS.State
                 return UnexpectedMessage();
             }
 
-            return Option.Some<IState>(HandleClientFinishedState.New(ServiceProvider, (FinishedMessage)handshake));
+            return Option.Some<IState>(HandleServerFinishedState.New(ServiceProvider, (FinishedMessage)handshake));
         }
 
         private Option<IState> HandleAlert(Record record)
