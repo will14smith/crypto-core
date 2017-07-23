@@ -10,9 +10,10 @@ namespace Crypto.TLS.State
     {
         public ConnectionState State => ConnectionState.UnexpectedError;
 
+        public AlertMessage AlertMessage { get; }
+
         private readonly VersionConfig _versionConfig;
         private readonly Connection _connection;
-        private readonly AlertMessage _alertMessage;
 
         public CloseConnectionWithAlertState(
             VersionConfig versionConfig,
@@ -21,7 +22,7 @@ namespace Crypto.TLS.State
         {
             _versionConfig = versionConfig;
             _connection = connection;
-            _alertMessage = alertMessage;
+            AlertMessage = alertMessage;
         }
 
         public static CloseConnectionWithAlertState New(IServiceProvider serviceProvider, AlertMessage alertMessage)
@@ -35,7 +36,7 @@ namespace Crypto.TLS.State
 
         public IState Run()
         {
-            _connection.WriteRecord(new Record(RecordType.Alert, _versionConfig.Version, _alertMessage.GetBytes()));
+            _connection.WriteRecord(new Record(RecordType.Alert, _versionConfig.Version, AlertMessage.GetBytes()));
             return null;
         }
     }

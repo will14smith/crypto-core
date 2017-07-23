@@ -58,10 +58,10 @@ namespace Crypto.TLS.IO
                     break;
                 }
 
-                if (state == null)
+                if (state is CloseConnectionWithAlertState alertState)
                 {
                     _inner.Close();
-                    break;
+                    throw new UnableToEstablishSecureConnectionException(alertState.AlertMessage);
                 }
             }
         }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Crypto.Core.Randomness;
 using Crypto.TLS.Config;
 using Crypto.TLS.Extensions;
+using Crypto.TLS.Messages.Alerts;
 using Crypto.TLS.Messages.Handshakes;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -70,11 +71,26 @@ namespace Crypto.TLS.State
 
         public IState Run()
         {
-            _versionConfig.Version = _negotiatior.DecideVersion(_handshake.Version);
-            _cipherSuiteConfig.CipherSuite = _negotiatior.DecideCipherSuite(_handshake.CipherSuites);
-            _cipherSuiteConfig.CompressionMethod = _negotiatior.DecideCompression(_handshake.CompressionMethods);
-            // TODO this might need the extensions to be processed before
-            _certificateConfig.CertificateChain = _negotiatior.DecideCertificateChain();
+            var version = _negotiatior.DecideVersion(_handshake.Version);
+            if (!version.HasValue)
+            {
+                return CloseConnectionWithAlertState.New(_serviceProvider, new AlertMessage(AlertLevel.Fatal, AlertDescription.HandshakeFailure));
+            }
+            _versionConfig.Version = version.Value;
+
+            var cipherSuite = _negotiatior.DecideCipherSuite(_handshake.CipherSuites);
+            if (!cipherSuite.HasValue)
+            {
+                return CloseConnectionWithAlertState.New(_serviceProvider, new AlertMessage(AlertLevel.Fatal, AlertDescription.HandshakeFailure));
+            }
+            _cipherSuiteConfig.CipherSuite = cipherSuite.Value;
+
+            var compression = _negotiatior.DecideCompression(_handshake.CompressionMethods);
+            if (!compression.HasValue)
+            {
+                return CloseConnectionWithAlertState.New(_serviceProvider, new AlertMessage(AlertLevel.Fatal, AlertDescription.HandshakeFailure));
+            }
+            _cipherSuiteConfig.CompressionMethod = compression.Value;
 
             _randomConfig.Client = _handshake.RandomBytes;
             // TODO move this to an earlier state?
@@ -84,6 +100,13 @@ namespace Crypto.TLS.State
             _sessionConfig.Id = new byte[0];
 
             HandleClientExtensions(_handshake.Extensions);
+
+            var certificateChain = _negotiatior.DecideCertificateChain();
+            if (!certificateChain.HasValue)
+            {
+                return CloseConnectionWithAlertState.New(_serviceProvider, new AlertMessage(AlertLevel.Fatal, AlertDescription.HandshakeFailure));
+            }
+            _certificateConfig.CertificateChain = certificateChain.Value;
 
             return _serviceProvider.GetRequiredService<SendingServerHelloState>();
         }

@@ -1,13 +1,14 @@
 ﻿using Crypto.Certificates;
+using Crypto.Utils;
 
 namespace Crypto.TLS
 {
     public interface INegotiatior
     {
-        TLSVersion DecideVersion(TLSVersion maxSupportedVersion);
-        CipherSuite DecideCipherSuite(CipherSuite[] supportedCipherSuites);
-        CompressionMethod DecideCompression(CompressionMethod[] supportedCompressionMethods);
+        Option<TLSVersion> DecideVersion(TLSVersion maxSupportedVersion);
+        Option<CipherSuite> DecideCipherSuite(CipherSuite[] supportedCipherSuites);
+        Option<CompressionMethod> DecideCompression(CompressionMethod[] supportedCompressionMethods);
 
-        X509Certificate[] DecideCertificateChain();
+        Option<X509Certificate[]> DecideCertificateChain();
     }
 }

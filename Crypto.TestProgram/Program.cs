@@ -13,7 +13,7 @@ namespace Crypto.TestProgram
     {
         static void Main(string[] args)
         {
-            ClientMain(args);
+            ServerMain(args);
         }
 
         static void ClientMain(string[] args)
@@ -54,8 +54,16 @@ namespace Crypto.TestProgram
 
                 var stream = new TLSStream(client.GetStream(), serviceProvider);
 
-                stream.AuthenticateAsServer();
-                
+                try
+                {
+                    stream.AuthenticateAsServer();
+                }
+                catch (UnableToEstablishSecureConnectionException ex)
+                {
+                    Console.WriteLine(ex);
+                    continue;
+                }
+                 
                 var reader = new StreamReader(stream);
                 var writer = new StreamWriter(stream) { AutoFlush = true };
 

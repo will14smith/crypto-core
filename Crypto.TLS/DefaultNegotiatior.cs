@@ -3,6 +3,7 @@ using System.Linq;
 using Crypto.Certificates;
 using Crypto.TLS.Config;
 using Crypto.TLS.Services;
+using Crypto.Utils;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Crypto.TLS
@@ -16,25 +17,39 @@ namespace Crypto.TLS
             _serviceProvider = serviceProvider;
         }
 
-        public TLSVersion DecideVersion(TLSVersion maxSupportedVersion)
+        public Option<TLSVersion> DecideVersion(TLSVersion maxSupportedVersion)
         {
-            // TODO handle if client doesn't support it
-            return TLSVersion.TLS1_2;
+            if (maxSupportedVersion != TLSVersion.TLS1_2)
+            {
+                return Option.None<TLSVersion>();
+            }
+
+            return Option.Some(TLSVersion.TLS1_2);
         }
 
-        public CipherSuite DecideCipherSuite(CipherSuite[] supportedCipherSuites)
+        public Option<CipherSuite> DecideCipherSuite(CipherSuite[] supportedCipherSuites)
         {
-            // TODO handle if client doesn't support any
-            return supportedCipherSuites.First(x => _serviceProvider.IsCipherSuiteSupported(x));
+            foreach (var x in supportedCipherSuites)
+            {
+                if (_serviceProvider.IsCipherSuiteSupported(x))
+                    return Option.Some(x);
+            }
+
+            return Option.None<CipherSuite>();
         }
 
-        public CompressionMethod DecideCompression(CompressionMethod[] supportedCompressionMethods)
+        public Option<CompressionMethod> DecideCompression(CompressionMethod[] supportedCompressionMethods)
         {
-            // TODO handle if client doesn't support it
-            return CompressionMethod.Null;
+            if (!supportedCompressionMethods.Contains(CompressionMethod.Null))
+            {
+                return Option.None<CompressionMethod>();
+            }
+
+            return Option.Some(CompressionMethod.Null);
+
         }
 
-        public X509Certificate[] DecideCertificateChain()
+        public Option<X509Certificate[]> DecideCertificateChain()
         {
             var certificateManager = _serviceProvider.GetRequiredService<CertificateManager>();
 
@@ -43,14 +58,14 @@ namespace Crypto.TLS
                 if (IsSuitable(certificate))
                 {
                     // TODO build actual chain
-                    return new[]
+                    return Option.Some(new[]
                     {
                         certificate
-                    };
+                    });
                 }
             }
-            
-            throw new InvalidOperationException("No suitable certificates found");
+
+            return Option.None<X509Certificate[]>();
         }
 
         private bool IsSuitable(X509Certificate certificate)
