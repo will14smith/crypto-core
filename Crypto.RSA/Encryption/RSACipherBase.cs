@@ -44,7 +44,7 @@ namespace Crypto.RSA.Encryption
         {
             SecurityAssert.Assert(c >= 0 && c < key.Modulus);
 
-            return BigInteger.ModPow(c, key.PrivateExponent, key.Modulus);
+            return BigInteger.ModPow(c, key.Exponent, key.Modulus);
         }
 
         internal static byte[] I2OSP(BigInteger x, int length)

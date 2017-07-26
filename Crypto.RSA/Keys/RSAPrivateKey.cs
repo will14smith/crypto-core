@@ -16,32 +16,28 @@ namespace Crypto.RSA.Keys
             SecurityAssert.Assert(keySeq.Count == 9);
 
             Modulus = GetInteger(keySeq, 1);
-            PublicExponent = GetInteger(keySeq, 2);
-            PrivateExponent = GetInteger(keySeq, 3);
-            Prime1 = GetInteger(keySeq, 4);
-            Prime2 = GetInteger(keySeq, 5);
-            Exponent1 = GetInteger(keySeq, 6);
-            Exponent2 = GetInteger(keySeq, 7);
-            Coefficent = GetInteger(keySeq, 8);
+            var publicExponent = GetInteger(keySeq, 2);
+            Exponent = GetInteger(keySeq, 3);
+            var prime1 = GetInteger(keySeq, 4);
+            var prime2 = GetInteger(keySeq, 5);
+            var exponent1 = GetInteger(keySeq, 6);
+            var exponent2 = GetInteger(keySeq, 7);
+            // TODO var coefficent = GetInteger(keySeq, 8);
 
-            SecurityAssert.Assert(Modulus == Prime1 * Prime2);
-            SecurityAssert.Assert(Exponent1 == PrivateExponent % (Prime1 - 1));
-            SecurityAssert.Assert(Exponent2 == PrivateExponent % (Prime2 - 1));
+            SecurityAssert.Assert(Modulus == prime1 * prime2);
+            SecurityAssert.Assert(exponent1 == Exponent % (prime1 - 1));
+            SecurityAssert.Assert(exponent2 == Exponent % (prime2 - 1));
             // TODO assert Coefficent == ((inverse of q) mod p)
+
+            PublicKey = new RSAPublicKey(Modulus, publicExponent);
         }
 
-        public override PublicKey PublicKey => new RSAPublicKey(Modulus, PublicExponent);
+        public override PublicKey PublicKey { get; }
 
         public BigInteger Modulus { get; }
-        public BigInteger PublicExponent { get; }
-        public BigInteger PrivateExponent { get; }
-        public BigInteger Prime1 { get; }
-        public BigInteger Prime2 { get; }
-        public BigInteger Exponent1 { get; }
-        public BigInteger Exponent2 { get; }
-        public BigInteger Coefficent { get; }
+        public BigInteger Exponent { get; }
 
-        protected override int HashCode => HashCodeHelper.ToInt(Modulus ^ PublicExponent ^ PrivateExponent ^ Prime1 ^ Prime2 ^ Exponent1 ^ Exponent2 ^ Coefficent);
+        protected override int HashCode => HashCodeHelper.ToInt(Modulus ^ Exponent);
 
         private BigInteger GetInteger(ASN1Sequence obj, int index)
         {
@@ -60,13 +56,8 @@ namespace Crypto.RSA.Keys
             if (other == null) return false;
 
             return Modulus == other.Modulus
-                   && PublicExponent == other.PublicExponent
-                   && PrivateExponent == other.PrivateExponent
-                   && Prime1 == other.Prime1
-                   && Prime2 == other.Prime2
-                   && Exponent1 == other.Exponent1
-                   && Exponent2 == other.Exponent2
-                   && Coefficent == other.Coefficent;
+                   && Exponent == other.Exponent
+                && Equals(PublicKey, other.PublicKey);
         }
     }
 }
