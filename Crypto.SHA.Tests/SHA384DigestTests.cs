@@ -15,7 +15,7 @@ namespace Crypto.SHA.Tests
 
             var result = digest.Digest();
 
-            AssertSHA512("38b060a751ac96384cd9327eb1b1e36a21fdb71114be07434c0cc7bf63f6e1da274edebfe76f65fbd51ad2f14898b95b", result);
+            AssertSHA384("38b060a751ac96384cd9327eb1b1e36a21fdb71114be07434c0cc7bf63f6e1da274edebfe76f65fbd51ad2f14898b95b", result);
         }
 
         [Fact]
@@ -28,7 +28,7 @@ namespace Crypto.SHA.Tests
 
             var result = digest.Digest();
 
-            AssertSHA512("b1583f4b2e1bf53fc31e9dfb8e8d945a62955da709f280a9066aa8f31ef688d65e0e9816a5f1f11363b3898820bd1576", result);
+            AssertSHA384("b1583f4b2e1bf53fc31e9dfb8e8d945a62955da709f280a9066aa8f31ef688d65e0e9816a5f1f11363b3898820bd1576", result);
         }
 
         [Fact]
@@ -41,7 +41,25 @@ namespace Crypto.SHA.Tests
 
             var result = digest.Digest();
 
-            AssertSHA512("ca737f1014a48f4c0b6dd43cb177b0afd9e5169367544c494011e3317dbf9a509cb1e5dc1e85a941bbee3d7f2afbc9b1", result);
+            AssertSHA384("ca737f1014a48f4c0b6dd43cb177b0afd9e5169367544c494011e3317dbf9a509cb1e5dc1e85a941bbee3d7f2afbc9b1", result);
+        }
+
+        [Fact]
+        public void Clone_SeperateStateFromOriginal()
+        {
+            var digest = new SHA512Digest(SHA512Digest.Mode.SHA384);
+            var buffer = Encoding.UTF8.GetBytes("The quick brown fox jumps");
+            digest.Update(buffer, 0, buffer.Length);
+
+            var digest2 = digest.Clone();
+            buffer = Encoding.UTF8.GetBytes(" over the lazy dog");
+            digest2.Update(buffer, 0, buffer.Length);
+
+            var result1 = digest.Digest();
+            var result2 = digest2.Digest();
+
+            AssertSHA384("17ab2a4374f66611b44d072223392aac47619917f67c563be63506a2445438dac1f08aff2289b6306c63015e17f6d756", result1);
+            AssertSHA384("ca737f1014a48f4c0b6dd43cb177b0afd9e5169367544c494011e3317dbf9a509cb1e5dc1e85a941bbee3d7f2afbc9b1", result2);
         }
 
         [Fact]
@@ -71,11 +89,11 @@ namespace Crypto.SHA.Tests
                 digest.Update(msg, 0, len);
                 var hash = digest.Digest();
 
-                AssertSHA512(expectedHash, hash);
+                AssertSHA384(expectedHash, hash);
             }
         }
 
-        private void AssertSHA512(string expected, byte[] actual)
+        private void AssertSHA384(string expected, byte[] actual)
         {
             Assert.NotNull(actual);
             Assert.Equal(48, actual.Length);

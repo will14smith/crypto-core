@@ -58,6 +58,8 @@ namespace Crypto.SHA
         private SHA512Digest(SHA512Digest source)
             : base(source)
         {
+            _mode = source._mode;
+
             _h0 = source._h0;
             _h1 = source._h1;
             _h2 = source._h2;

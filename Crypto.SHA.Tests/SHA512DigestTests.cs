@@ -43,6 +43,24 @@ namespace Crypto.SHA.Tests
 
             AssertSHA512("07e547d9586f6a73f73fbac0435ed76951218fb7d0c8d788a309d785436bbb642e93a252a954f23912547d1e8a3b5ed6e1bfd7097821233fa0538f3db854fee6", result);
         }
+        
+        [Fact]
+        public void Clone_SeperateStateFromOriginal()
+        {
+            var digest = new SHA512Digest(SHA512Digest.Mode.SHA512);
+            var buffer = Encoding.UTF8.GetBytes("The quick brown fox jumps");
+            digest.Update(buffer, 0, buffer.Length);
+
+            var digest2 = digest.Clone();
+            buffer = Encoding.UTF8.GetBytes(" over the lazy dog");
+            digest2.Update(buffer, 0, buffer.Length);
+
+            var result1 = digest.Digest();
+            var result2 = digest2.Digest();
+
+            AssertSHA512("4b4c254dd0bc5c4a1a70900bc9eea84c852e11ac3d16f87f1d3aaff0478e46ee58c264d4aea58d2ce1b08e84bd7bbbf032e99521f60fcec637abdb243977dd7c", result1);
+            AssertSHA512("07e547d9586f6a73f73fbac0435ed76951218fb7d0c8d788a309d785436bbb642e93a252a954f23912547d1e8a3b5ed6e1bfd7097821233fa0538f3db854fee6", result2);
+        }
 
         [Fact]
         public void NISTShortVectors_CorrectOutput()

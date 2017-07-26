@@ -45,6 +45,24 @@ namespace Crypto.SHA.Tests
         }
 
         [Fact]
+        public void Clone_SeperateStateFromOriginal()
+        {
+            var digest = new SHA256Digest(SHA256Digest.Mode.SHA256);
+            var buffer = Encoding.UTF8.GetBytes("The quick brown fox jumps");
+            digest.Update(buffer, 0, buffer.Length);
+
+            var digest2 = digest.Clone();
+            buffer = Encoding.UTF8.GetBytes(" over the lazy dog");
+            digest2.Update(buffer, 0, buffer.Length);
+
+            var result1 = digest.Digest();
+            var result2 = digest2.Digest();
+
+            AssertSHA256("8df831769cd51e4f57808343603e97c1ea44fcab46bb595a5000b9ad1d03bd70", result1);
+            AssertSHA256("d7a8fbb307d7809469ca9abcb0082e4f8d5651e46d3cdb762d02d0bf37c9e592", result2);
+        }
+
+        [Fact]
         public void NISTShortVectors_CorrectOutput()
         {
             RunNIST("SHA256ShortMsg.dat");
