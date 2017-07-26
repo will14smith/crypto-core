@@ -31,6 +31,9 @@ namespace Crypto.Core.Encryption.BlockModes
 
         private void ProcessBlock(byte[] input, int inputOffset, byte[] output, int outputOffset)
         {
+            SecurityAssert.AssertBuffer(input, inputOffset, BlockLength);
+            SecurityAssert.AssertBuffer(output, outputOffset, BlockLength);
+
             var counterOutput = new byte[BlockLength];
             Cipher.EncryptBlock(_counter, 0, counterOutput, 0);
 

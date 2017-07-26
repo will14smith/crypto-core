@@ -132,18 +132,17 @@ namespace Crypto.GCM
             Array.Clear(_buffer, 0, BlockLength);
         }
 
-        public int EncryptFinal(byte[] output, int offset)
+        public int EncryptFinal(byte[] output, int offset, byte[] tag)
         {
+            SecurityAssert.AssertBuffer(tag, 0, TagLength);
+
             var total = 0;
 
             if (_bufferOffset != 0)
             {
-                var len = _bufferOffset;
+                total += _bufferOffset;
 
                 EncryptBlock(output, offset);
-
-                total += len;
-                offset += len;
             }
 
             var tagCiphertextPaddingLength = (16 - (int)(_cSize / 8) % 16) % 16;
@@ -154,8 +153,7 @@ namespace Crypto.GCM
             var ctr = new CTRBlockCipher(Cipher);
             ctr.Init(new IVParameter(null, _j0));
 
-            ctr.EncryptBlock(_tagHash.Digest(), 0, output, offset);
-            total += BlockLength;
+            ctr.EncryptBlock(_tagHash.Digest(), 0, tag, 0);
 
             return total;
         }
@@ -203,7 +201,7 @@ namespace Crypto.GCM
 
         public int DecryptFinal(byte[] input, int inputOffset, byte[] output, int outputOffset)
         {
-            SecurityAssert.AssertBuffer(input, inputOffset, TagLength);
+            SecurityAssert.AssertBuffer(input, inputOffset, _bufferOffset + TagLength);
             SecurityAssert.AssertBuffer(output, outputOffset, _bufferOffset);
 
             var total = 0;
@@ -223,8 +221,9 @@ namespace Crypto.GCM
             var tagCtr = new CTRBlockCipher(Cipher);
             tagCtr.Init(new IVParameter(null, _j0));
 
+            var digest = _tagHash.Digest();
             var calculatedTag = new byte[16];
-            tagCtr.EncryptBlock(_tagHash.Digest(), 0, calculatedTag, 0);
+            tagCtr.EncryptBlock(digest, 0, calculatedTag, 0);
 
             var tag = new byte[16];
             Array.Copy(input, inputOffset, tag, 0, TagLength);

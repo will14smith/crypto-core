@@ -13,7 +13,7 @@ namespace Crypto.Core.Encryption
         //TODO other functions...
 
         int Encrypt(byte[] input, int inputOffset, byte[] output, int outputOffset, int length);
-        int EncryptFinal(byte[] output, int offset);
+        int EncryptFinal(byte[] output, int offset, byte[] tag);
 
         int Decrypt(byte[] input, int inputOffset, byte[] output, int outputOffset, int length);
         int DecryptFinal(byte[] input, int inputOffset, byte[] output, int outputOffset);

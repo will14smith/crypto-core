@@ -18,7 +18,8 @@ namespace Crypto.Utils
             InnerAssert(condition, callerName, callerLine, callerFile);
         }
 
-        private static void InnerAssert(bool condition, string callerName, int callerLine, string callerFile)
+        [AssertionMethod]
+        private static void InnerAssert([AssertionCondition(AssertionConditionType.IS_TRUE)]bool condition, string callerName, int callerLine, string callerFile)
         {
             if (condition) return;
 
@@ -26,12 +27,12 @@ namespace Crypto.Utils
         }
 
         [AssertionMethod]
-        public static void AssertHash(byte[] a, byte[] b)
+        public static void AssertHash(byte[] a, byte[] b, [CallerMemberName] string callerName = null, [CallerLineNumber] int callerLine = 0, [CallerFilePath] string callerFile = null)
         {
-            NotNull(a);
-            NotNull(b);
+            InnerAssert(a != null, callerName, callerLine, callerFile);
+            InnerAssert(b != null, callerName, callerLine, callerFile);
 
-            Assert(a.Length == b.Length);
+            InnerAssert(a.Length == b.Length, callerName, callerLine, callerFile);
 
             var result = 0;
             for (var i = 0; i < a.Length; i++)
@@ -39,17 +40,17 @@ namespace Crypto.Utils
                 result |= a[i] ^ b[i];
             }
 
-            Assert(result == 0);
+            InnerAssert(result == 0, callerName, callerLine, callerFile);
         }
 
         [AssertionMethod]
-        public static void AssertBuffer(byte[] buffer, int offset, int length)
+        public static void AssertBuffer(byte[] buffer, int offset, int length, [CallerMemberName] string callerName = null, [CallerLineNumber] int callerLine = 0, [CallerFilePath] string callerFile = null)
         {
-            NotNull(buffer);
-            
-            Assert(offset >= 0);
-            Assert(length >= 0);
-            Assert(offset + length <= buffer.Length);
+            InnerAssert(buffer != null, callerName, callerLine, callerFile);
+
+            InnerAssert(offset >= 0, callerName, callerLine, callerFile);
+            InnerAssert(length >= 0, callerName, callerLine, callerFile);
+            InnerAssert(offset + length <= buffer.Length, callerName, callerLine, callerFile);
         }
     }
 }

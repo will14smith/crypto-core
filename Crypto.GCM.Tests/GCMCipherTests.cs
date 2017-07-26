@@ -8,7 +8,7 @@ namespace Crypto.GCM.Tests
     public class GCMCipherTests
     {
         [Fact]
-        public void TestAES128()
+        public void TestAES128_Aligned()
         {
             var key = "ad7a2bd03eac835a6f620fdcb506b345";
             var iv = "12153524c0895e81b2c28465";
@@ -32,8 +32,8 @@ namespace Crypto.GCM.Tests
             var encryptOutput = new byte[encryptInput.Length];
             var encryptTag = new byte[16];
 
-            gcm.Encrypt(encryptInput, 0, encryptOutput, 0, encryptInput.Length);
-            gcm.EncryptFinal(encryptTag, 0);
+            var offset = gcm.Encrypt(encryptInput, 0, encryptOutput, 0, encryptInput.Length);
+            gcm.EncryptFinal(encryptOutput, offset, encryptTag);
 
             Assert.Equal(ciphertext, HexConverter.ToHex(encryptOutput));
             Assert.Equal(tag, HexConverter.ToHex(encryptTag));
@@ -44,8 +44,51 @@ namespace Crypto.GCM.Tests
             var decryptInput = HexConverter.FromHex(ciphertext + tag);
             var decryptOutput = new byte[decryptInput.Length - encryptTag.Length];
 
-            var offset = gcm.Decrypt(decryptInput, 0, decryptOutput, 0, decryptInput.Length - encryptTag.Length);
-            gcm.DecryptFinal(decryptInput, offset, decryptOutput, decryptInput.Length - encryptTag.Length);
+            offset = gcm.Decrypt(decryptInput, 0, decryptOutput, 0, decryptInput.Length - encryptTag.Length);
+            gcm.DecryptFinal(decryptInput, offset, decryptOutput, offset);
+
+            Assert.Equal(plaintext, HexConverter.ToHex(decryptOutput));
+        }
+        
+        [Fact]
+        public void TestAES128_Unaligned()
+        {
+            var key = "e88aeefe8ea9b95a1faeee762eeca23b";
+            var iv = "12153524c0895e81b2c28465";
+            var aad = "d609b1f056637a0d46df998d88e52e00b2c2846512153524c0895e81";
+
+            var plaintext = "08000f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a";
+            var ciphertext = "11a985767b4173be2760737176244b74e7eb06593380b1260931ae226918d18d9cbfb469e7589829d2246fba4425";
+            var tag = "4b320d8d2809e7573221ceea07b29a12";
+
+            var aes = new AESCipher(128);
+            var gcm = new GCMCipher(aes);
+
+            var keyParam = new AESKeyParameter(HexConverter.FromHex(key));
+            var ivParam = new IVParameter(keyParam, HexConverter.FromHex(iv));
+            var aadParam = new AADParameter(ivParam, HexConverter.FromHex(aad));
+
+            // encryption
+            gcm.Init(aadParam);
+
+            var encryptInput = HexConverter.FromHex(plaintext);
+            var encryptOutput = new byte[encryptInput.Length];
+            var encryptTag = new byte[16];
+
+            var offset = gcm.Encrypt(encryptInput, 0, encryptOutput, 0, encryptInput.Length);
+            gcm.EncryptFinal(encryptOutput, offset, encryptTag);
+
+            Assert.Equal(ciphertext, HexConverter.ToHex(encryptOutput));
+            Assert.Equal(tag, HexConverter.ToHex(encryptTag));
+
+            // decryption
+            gcm.Init(aadParam);
+
+            var decryptInput = HexConverter.FromHex(ciphertext + tag);
+            var decryptOutput = new byte[decryptInput.Length - encryptTag.Length];
+
+            offset = gcm.Decrypt(decryptInput, 0, decryptOutput, 0, decryptInput.Length - encryptTag.Length);
+            gcm.DecryptFinal(decryptInput, offset, decryptOutput, offset);
 
             Assert.Equal(plaintext, HexConverter.ToHex(decryptOutput));
         }

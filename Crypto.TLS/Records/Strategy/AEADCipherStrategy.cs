@@ -87,10 +87,15 @@ namespace Crypto.TLS.Records.Strategy
 
             cipher.Init(GetParameters(ConnectionDirection.Write, aad, nonce));
 
+            var tag = new byte[cipher.TagLength];
+            
             var payloadLength = explicitNonceLength;
             payloadLength += cipher.Encrypt(data, 0, payload, payloadLength, data.Length);
-            payloadLength += cipher.EncryptFinal(payload, payloadLength);
-
+            payloadLength += cipher.EncryptFinal(payload, payloadLength, tag);
+            
+            Array.Copy(tag, 0, payload, payloadLength, tag.Length);
+            payloadLength += tag.Length;
+            
             _connection.Writer.Write(type);
             _connection.Writer.Write(version);
             _connection.Writer.Write((ushort)payloadLength);
