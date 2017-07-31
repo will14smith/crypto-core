@@ -5,6 +5,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Services\CipherParameterFactoryProvider.cs" />
+    <Compile Remove="Services\CipherSuiteProvider.cs" />
+    <Compile Remove="Services\CipherSuitesRegistry.cs" />
+    <Compile Remove="Services\ICipherParameterFactoryProvider.cs" />
+    <Compile Remove="Services\ICipherSuitesProvider.cs" />
+    <Compile Remove="Services\ISignatureCipherParameterFactoryProvider.cs" />
+    <Compile Remove="Services\ServiceProviderExtensions.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Crypto.Certificates\Crypto.Certificates.csproj" />
     <ProjectReference Include="..\Crypto.Core\Crypto.Core.csproj" />
     <ProjectReference Include="..\Crypto.Utils\Crypto.Utils.csproj" />

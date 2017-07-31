@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Crypto.Certificates.Keys;
 using Crypto.Certificates.Services;
 
@@ -14,16 +12,13 @@ namespace Crypto.Certificates
         private readonly Dictionary<PublicKey, PrivateKey> _keys;
         private X509Certificate _defaultCertificate;
 
-        private readonly IServiceProvider _serviceProvider;
         private readonly PublicKeyReaderRegistry _publicKeyReaderRegistry;
         private readonly PrivateKeyReaderRegistry _privateKeyReaderRegistry;
 
         public CertificateManager(
-            IServiceProvider serviceProvider,
             PublicKeyReaderRegistry publicKeyReaderRegistry,
             PrivateKeyReaderRegistry privateKeyReaderRegistry)
         {
-            _serviceProvider = serviceProvider;
             _publicKeyReaderRegistry = publicKeyReaderRegistry;
             _privateKeyReaderRegistry = privateKeyReaderRegistry;
 
@@ -33,7 +28,7 @@ namespace Crypto.Certificates
 
         public void AddCertificate(byte[] input)
         {
-            var reader = new X509Reader(_publicKeyReaderRegistry, _serviceProvider, input);
+            var reader = new X509Reader(_publicKeyReaderRegistry, input);
             var cert = reader.ReadCertificate();
 
             if (_certificates.Count == 0)
@@ -46,7 +41,7 @@ namespace Crypto.Certificates
         public void AddPrivateKey(byte[] input)
         {
             var reader = new PrivateKeyReader(_privateKeyReaderRegistry);
-            var key = reader.ReadKey(_serviceProvider, input);
+            var key = reader.ReadKey(input);
 
             _keys.Add(key.PublicKey, key);
         }

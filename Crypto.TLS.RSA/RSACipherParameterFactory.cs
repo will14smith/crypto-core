@@ -4,6 +4,7 @@ using Crypto.Core.Encryption.Parameters;
 using Crypto.RSA.Keys;
 using Crypto.TLS.Config;
 using Crypto.TLS.Services;
+using Crypto.TLS.Suites.Parameters;
 
 namespace Crypto.TLS.RSA
 {

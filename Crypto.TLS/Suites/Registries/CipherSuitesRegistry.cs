@@ -2,9 +2,9 @@
 using System.Linq;
 using Crypto.TLS.Identifiers;
 
-namespace Crypto.TLS.Services
+namespace Crypto.TLS.Suites.Registries
 {
-    public class CipherSuiteRegistry
+    public class CipherSuitesRegistry
     {
         private readonly ISet<CipherSuite> _suites
             = new HashSet<CipherSuite>();
@@ -18,7 +18,7 @@ namespace Crypto.TLS.Services
         private readonly Dictionary<CipherSuite, TLSKeyExchange> _keyExchangeMapping
             = new Dictionary<CipherSuite, TLSKeyExchange>();
 
-        public CipherSuiteRegistry()
+        public CipherSuitesRegistry()
         {
             Register(
                 suite: CipherSuite.TLS_NULL_WITH_NULL_NULL,
@@ -43,23 +43,6 @@ namespace Crypto.TLS.Services
             _keyExchangeMapping.Add(suite, exchange);
         }
 
-        public TLSCipherAlgorithm ResolveCipherAlgorithm(CipherSuite suite)
-        {
-            return _cipherMapping[suite];
-        }
-        public TLSHashAlgorithm ResolveHashAlgorithm(CipherSuite suite)
-        {
-            return _hashMapping[suite];
-        }
-        public TLSSignatureAlgorithm ResolveSignatureAlgorithm(CipherSuite suite)
-        {
-            return _signatureMapping[suite];
-        }
-        public TLSKeyExchange ResolveKeyExchange(CipherSuite suite)
-        {
-            return _keyExchangeMapping[suite];
-        }
-
         public bool IsSupported(CipherSuite suite)
         {
             return _suites.Contains(suite);
@@ -68,6 +51,23 @@ namespace Crypto.TLS.Services
         public IReadOnlyCollection<CipherSuite> GetAll()
         {
             return _suites.ToList();
+        }
+
+        public TLSCipherAlgorithm MapCipherAlgorithm(CipherSuite suite)
+        {
+            return _cipherMapping[suite];
+        }
+        public TLSHashAlgorithm MapHashAlgorithm(CipherSuite suite)
+        {
+            return _hashMapping[suite];
+        }
+        public TLSSignatureAlgorithm MapSignatureAlgorithm(CipherSuite suite)
+        {
+            return _signatureMapping[suite];
+        }
+        public TLSKeyExchange MapKeyExchange(CipherSuite suite)
+        {
+            return _keyExchangeMapping[suite];
         }
     }
 }

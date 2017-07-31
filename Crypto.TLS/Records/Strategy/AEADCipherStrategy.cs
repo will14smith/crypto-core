@@ -4,15 +4,16 @@ using Crypto.Core.Encryption.Adapters;
 using Crypto.Core.Encryption.Parameters;
 using Crypto.Core.Randomness;
 using Crypto.TLS.Config;
-using Crypto.TLS.Services;
+using Crypto.TLS.Suites.Providers;
 using Crypto.Utils;
+using Crypto.Utils.IO;
 
 namespace Crypto.TLS.Records.Strategy
 {
     public class AEADCipherStrategy : IRecordReaderStrategy, IRecordWriterStrategy
     {
-        private readonly IServiceProvider _serviceProvider;
         private readonly IRandom _random;
+        private readonly ICipherSuitesProvider _cipherSuitesProvider;
 
         private readonly Connection _connection;
 
@@ -22,8 +23,8 @@ namespace Crypto.TLS.Records.Strategy
         private readonly AEADCipherConfig _aeadConfig;
 
         public AEADCipherStrategy(
-            IServiceProvider serviceProvider,
             IRandom random,
+            ICipherSuitesProvider cipherSuitesProvider,
 
             Connection connection,
 
@@ -32,8 +33,8 @@ namespace Crypto.TLS.Records.Strategy
             EndConfig endConfig,
             AEADCipherConfig aeadConfig)
         {
-            _serviceProvider = serviceProvider;
             _random = random;
+            _cipherSuitesProvider = cipherSuitesProvider;
 
             _connection = connection;
 
@@ -104,7 +105,7 @@ namespace Crypto.TLS.Records.Strategy
 
         private IAEADBlockCipher GetCipher()
         {
-            var cipher = _serviceProvider.ResolveCipherAlgorithm(_cipherSuiteConfig.CipherSuite);
+            var cipher = _cipherSuitesProvider.ResolveCipherAlgorithm(_cipherSuiteConfig.CipherSuite);
 
             if (cipher is AEADCipherAdapter adapter)
             {
@@ -124,7 +125,7 @@ namespace Crypto.TLS.Records.Strategy
         private ICipherParameters GetParameters(ConnectionDirection direction, byte[] aad, byte[] nonceExplicit)
         {
             var end = _endConfig.End;
-            var cipherParameterFactory = _serviceProvider.ResolveCipherParameterFactory(_cipherSuiteConfig.CipherSuite);
+            var cipherParameterFactory = _cipherSuitesProvider.ResolveCipherParameterFactory(_cipherSuiteConfig.CipherSuite);
             
             var innerParameters = cipherParameterFactory.Create(end, direction);
 

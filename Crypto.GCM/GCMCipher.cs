@@ -4,6 +4,7 @@ using Crypto.Core.Encryption.BlockModes;
 using Crypto.Core.Encryption.Parameters;
 using Crypto.Core.Hashing;
 using Crypto.Utils;
+using Crypto.Utils.IO;
 
 namespace Crypto.GCM
 {

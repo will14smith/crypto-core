@@ -5,9 +5,11 @@ using Crypto.Core.Registry;
 using Crypto.Core.Signing;
 using Crypto.TLS.Identifiers;
 using Crypto.TLS.KeyExchanges;
+using Crypto.TLS.Suites.Parameters;
+using Crypto.TLS.Suites.Registries;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Crypto.TLS.Services
+namespace Crypto.TLS.Suites
 {
     public static class RegistryExtensions
     {
@@ -19,9 +21,9 @@ namespace Crypto.TLS.Services
             TLSSignatureAlgorithm signature,
             TLSKeyExchange exchange)
         {
-            return serviceCollection.Update<CipherSuiteRegistry>(prev =>
+            return serviceCollection.Update<CipherSuitesRegistry>(prev =>
             {
-                prev = prev ?? new CipherSuiteRegistry();
+                prev = prev ?? new CipherSuitesRegistry();
 
                 prev.Register(
                     suite: suite,
@@ -43,27 +45,25 @@ namespace Crypto.TLS.Services
             {
                 prev = prev ?? new PRFHashRegistry();
 
-                prev.Register(digest, _ => prfDigest);
+                prev.Register(digest, () => prfDigest);
 
                 return prev;
             });
         }
 
         public static IServiceCollection RegisterCipherAlgorithm<T>(this IServiceCollection serviceCollection, TLSCipherAlgorithm cipherAlgorithm)
-            where T : class, ICipher
+            where T : class, ICipher, new()
         {
-            serviceCollection.AddTransient<T>();
-
             return serviceCollection.Update<CipherAlgorithmRegistry>(prev =>
             {
                 prev = prev ?? new CipherAlgorithmRegistry();
 
-                prev.Register(cipherAlgorithm, sp => sp.GetRequiredService<T>());
+                prev.Register(cipherAlgorithm, () => new T());
 
                 return prev;
             });
         }
-        public static IServiceCollection RegisterCipherAlgorithm(this IServiceCollection serviceCollection, TLSCipherAlgorithm cipherAlgorithm, Func<IServiceProvider, ICipher> factory)
+        public static IServiceCollection RegisterCipherAlgorithm(this IServiceCollection serviceCollection, TLSCipherAlgorithm cipherAlgorithm, Func<ICipher> factory)
         {
             return serviceCollection.Update<CipherAlgorithmRegistry>(prev =>
             {
@@ -91,20 +91,18 @@ namespace Crypto.TLS.Services
         }
 
         public static IServiceCollection RegisterHashAlgorithm<T>(this IServiceCollection serviceCollection, TLSHashAlgorithm hashAlgorithm)
-            where T : class, IDigest
+            where T : class, IDigest, new()
         {
-            serviceCollection.AddTransient<T>();
-
             return serviceCollection.Update<HashAlgorithmRegistry>(prev =>
             {
                 prev = prev ?? new HashAlgorithmRegistry();
 
-                prev.Register(hashAlgorithm, sp => sp.GetRequiredService<T>());
+                prev.Register(hashAlgorithm, () => new T());
 
                 return prev;
             });
         }
-        public static IServiceCollection RegisterHashAlgorithm(this IServiceCollection serviceCollection, TLSHashAlgorithm hashAlgorithm, Func<IServiceProvider, IDigest> factory)
+        public static IServiceCollection RegisterHashAlgorithm(this IServiceCollection serviceCollection, TLSHashAlgorithm hashAlgorithm, Func<IDigest> factory)
         {
             return serviceCollection.Update<HashAlgorithmRegistry>(prev =>
             {
@@ -117,15 +115,24 @@ namespace Crypto.TLS.Services
         }
 
         public static IServiceCollection RegisterSignatureAlgorithms<T>(this IServiceCollection serviceCollection, TLSSignatureAlgorithm signatureAlgorithm)
-            where T : class, ISignatureCipher
+            where T : class, ISignatureCipher, new()
         {
-            serviceCollection.AddTransient<T>();
-
             return serviceCollection.Update<SignatureAlgorithmsRegistry>(prev =>
             {
                 prev = prev ?? new SignatureAlgorithmsRegistry();
 
-                prev.Register(signatureAlgorithm, sp => sp.GetRequiredService<T>());
+                prev.Register(signatureAlgorithm, () => new T());
+
+                return prev;
+            });
+        }
+        public static IServiceCollection RegisterSignatureAlgorithms(this IServiceCollection serviceCollection, TLSSignatureAlgorithm signatureAlgorithm, Func<ISignatureCipher> factory)
+        {
+            return serviceCollection.Update<SignatureAlgorithmsRegistry>(prev =>
+            {
+                prev = prev ?? new SignatureAlgorithmsRegistry();
+
+                prev.Register(signatureAlgorithm, factory);
 
                 return prev;
             });
@@ -145,8 +152,7 @@ namespace Crypto.TLS.Services
                 return prev;
             });
         }
-
-
+        
         public static IServiceCollection RegisterKeyExchange<T>(this IServiceCollection serviceCollection, TLSKeyExchange keyExchange)
             where T : class, IKeyExchange
         {

@@ -1,9 +1,0 @@
-using Crypto.Core.Registry;
-using Crypto.TLS.Identifiers;
-
-namespace Crypto.TLS.Services
-{
-    public class SignatureCipherParameterFactoryRegistry : BaseRegistry<TLSSignatureAlgorithm, ICipherParameterFactory>
-    {
-    }
-}

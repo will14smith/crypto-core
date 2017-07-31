@@ -3,6 +3,7 @@ using Crypto.AES;
 using Crypto.Core.Encryption.Parameters;
 using Crypto.TLS.Config;
 using Crypto.TLS.Services;
+using Crypto.TLS.Suites.Parameters;
 using Crypto.Utils;
 
 namespace Crypto.TLS.GCM

@@ -2,6 +2,7 @@
 using Crypto.ASN1;
 using Crypto.Core.Hashing;
 using Crypto.Utils;
+using Crypto.Utils.IO;
 
 namespace Crypto.SHA
 {

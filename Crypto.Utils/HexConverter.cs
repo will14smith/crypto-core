@@ -7,6 +7,8 @@ namespace Crypto.Utils
     {
         public static byte[] FromHex(string s)
         {
+            SecurityAssert.Assert(s.Length % 2 == 0);
+            
             var buffer = new byte[s.Length / 2];
 
             for (var i = 0; i < buffer.Length; i++)

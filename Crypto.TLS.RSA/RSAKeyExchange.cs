@@ -7,6 +7,7 @@ using Crypto.TLS.Config;
 using Crypto.TLS.KeyExchanges;
 using Crypto.TLS.Messages.Handshakes;
 using Crypto.Utils;
+using Crypto.Utils.IO;
 
 namespace Crypto.TLS.RSA
 {

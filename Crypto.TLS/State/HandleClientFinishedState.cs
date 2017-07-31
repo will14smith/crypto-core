@@ -1,10 +1,10 @@
 ﻿using System;
-using System.Linq;
 using Crypto.TLS.Config;
-using Crypto.TLS.Hashing;
 using Crypto.TLS.Messages.Handshakes;
 using Crypto.TLS.Records;
 using Crypto.TLS.Services;
+using Crypto.TLS.Suites;
+using Crypto.TLS.Suites.Providers;
 using Crypto.Utils;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -15,6 +15,7 @@ namespace Crypto.TLS.State
         public ConnectionState State => ConnectionState.RecievedClientFinished;
 
         private readonly IServiceProvider _serviceProvider;
+        private readonly ICipherSuitesProvider _cipherSuitesProvider;
 
         private readonly Connection _connection;
         private readonly HandshakeWriter _writer;
@@ -27,7 +28,8 @@ namespace Crypto.TLS.State
 
         public HandleClientFinishedState(
             IServiceProvider serviceProvider,
-
+            ICipherSuitesProvider cipherSuitesProvider,
+            
             Connection connection,
             HandshakeWriter writer,
             HandshakeFinishedService handshakeFinishedService,
@@ -38,6 +40,7 @@ namespace Crypto.TLS.State
             FinishedMessage handshake)
         {
             _serviceProvider = serviceProvider;
+            _cipherSuitesProvider = cipherSuitesProvider;
 
             _connection = connection;
             _writer = writer;
@@ -54,13 +57,14 @@ namespace Crypto.TLS.State
         {
             return new HandleClientFinishedState(
                 serviceProvider,
+                serviceProvider.GetRequiredService<ICipherSuitesProvider>(),
 
-                serviceProvider.GetService<Connection>(),
-                serviceProvider.GetService<HandshakeWriter>(),
-                serviceProvider.GetService<HandshakeFinishedService>(),
+                serviceProvider.GetRequiredService<Connection>(),
+                serviceProvider.GetRequiredService<HandshakeWriter>(),
+                serviceProvider.GetRequiredService<HandshakeFinishedService>(),
 
-                serviceProvider.GetService<VersionConfig>(),
-                serviceProvider.GetService<CipherSuiteConfig>(),
+                serviceProvider.GetRequiredService<VersionConfig>(),
+                serviceProvider.GetRequiredService<CipherSuiteConfig>(),
 
                 handshake
             );
@@ -71,7 +75,7 @@ namespace Crypto.TLS.State
             SecurityAssert.Assert(_handshakeFinishedService.Verify(_handshake));
 
             _connection.WriteRecord(new Record(RecordType.ChangeCipherSpec, _versionConfig.Version, new byte[] { 1 }));
-            _connection.RecordWriterStrategy = _serviceProvider.GetRecordWriterStrategy(_cipherSuiteConfig.CipherSuite);
+            _connection.RecordWriterStrategy = _cipherSuitesProvider.GetRecordWriterStrategy(_serviceProvider, _cipherSuiteConfig.CipherSuite);
 
             _writer.Write(_handshakeFinishedService.Generate());
 

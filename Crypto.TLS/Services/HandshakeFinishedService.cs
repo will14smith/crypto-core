@@ -1,17 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Linq;
 using Crypto.TLS.Config;
 using Crypto.TLS.Hashing;
 using Crypto.TLS.Messages.Handshakes;
-using Crypto.Utils;
+using Crypto.TLS.Suites.Providers;
 
 namespace Crypto.TLS.Services
 {
     public class HandshakeFinishedService
     {
-        private readonly IServiceProvider _serviceProvider;
+        private readonly ICipherSuitesProvider _cipherSuitesProvider;
         
         private readonly CipherSuiteConfig _cipherSuiteConfig;
         private readonly EndConfig _endConfig;
@@ -19,15 +16,14 @@ namespace Crypto.TLS.Services
         private readonly KeyConfig _keyConfig;
 
         public HandshakeFinishedService(
-            IServiceProvider serviceProvider,
+            ICipherSuitesProvider cipherSuitesProvider,
             
             CipherSuiteConfig cipherSuiteConfig,
             EndConfig endConfig,
             HandshakeConfig handshakeConfig,
             KeyConfig keyConfig)
         {
-            _serviceProvider = serviceProvider;
-            
+            _cipherSuitesProvider = cipherSuitesProvider;
             _cipherSuiteConfig = cipherSuiteConfig;
             _endConfig = endConfig;
             _handshakeConfig = handshakeConfig;
@@ -36,7 +32,7 @@ namespace Crypto.TLS.Services
         
         public bool Verify(FinishedMessage message)
         {
-            var prfDigest = _serviceProvider.ResolvePRFHash(_cipherSuiteConfig.CipherSuite);
+            var prfDigest = _cipherSuitesProvider.ResolvePRFHash(_cipherSuiteConfig.CipherSuite);
             var prf = new PRF(prfDigest);
 
             var label = _endConfig.End == ConnectionEnd.Server ? "client finished" : "server finished";
@@ -50,7 +46,7 @@ namespace Crypto.TLS.Services
 
         public FinishedMessage Generate()
         {
-            var prfDigest = _serviceProvider.ResolvePRFHash(_cipherSuiteConfig.CipherSuite);
+            var prfDigest = _cipherSuitesProvider.ResolvePRFHash(_cipherSuiteConfig.CipherSuite);
             var prf = new PRF(prfDigest);
 
             var label = _endConfig.End == ConnectionEnd.Server ? "server finished" : "client finished";

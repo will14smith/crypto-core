@@ -8,6 +8,9 @@ using Crypto.TLS.Messages.Handshakes;
 using Crypto.TLS.Records.Strategy;
 using Crypto.TLS.Services;
 using Crypto.TLS.State;
+using Crypto.TLS.Suites.Parameters;
+using Crypto.TLS.Suites.Providers;
+using Crypto.TLS.Suites.Registries;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Crypto.TLS
@@ -36,11 +39,17 @@ namespace Crypto.TLS
 
         private static void AddCipherSuiteServices(this IServiceCollection services)
         {
-            services.AddSingleton<CipherSuiteRegistry>();
+            services.AddSingleton<CipherSuitesRegistry>();
             services.AddSingleton<CipherAlgorithmRegistry>();
             services.AddSingleton<HashAlgorithmRegistry>();
             services.AddSingleton<SignatureAlgorithmsRegistry>();
             services.AddSingleton<KeyExchangeRegistry>();
+
+            services.AddTransient<ICipherSuitesProvider, CipherSuitesProvider>();
+            services.AddTransient<IKeyExchangeProvider, KeyExchangeProvider>();
+            
+            services.AddTransient<ICipherParameterFactoryProvider, CipherParameterFactoryProvider>();
+            services.AddTransient<ISignatureCipherParameterFactoryProvider, SignatureCipherParameterFactoryProvider>();
         }
 
         private static void AddStates(this IServiceCollection services)

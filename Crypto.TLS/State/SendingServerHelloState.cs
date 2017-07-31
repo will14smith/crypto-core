@@ -4,7 +4,7 @@ using System.Linq;
 using Crypto.TLS.Config;
 using Crypto.TLS.Extensions;
 using Crypto.TLS.Messages.Handshakes;
-using Crypto.TLS.Services;
+using Crypto.TLS.Suites.Providers;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Crypto.TLS.State
@@ -14,6 +14,7 @@ namespace Crypto.TLS.State
         public ConnectionState State => ConnectionState.SendingServerHello;
 
         private readonly IServiceProvider _serviceProvider;
+        private readonly ICipherSuitesProvider _cipherSuitesProvider;
 
         private readonly HandshakeWriter _writer;
 
@@ -24,7 +25,8 @@ namespace Crypto.TLS.State
 
         public SendingServerHelloState(
             IServiceProvider serviceProvider,
-
+            ICipherSuitesProvider cipherSuitesProvider,
+            
             HandshakeWriter writer,
 
             VersionConfig versionConfig,
@@ -33,6 +35,7 @@ namespace Crypto.TLS.State
             CipherSuiteConfig cipherSuiteConfig)
         {
             _serviceProvider = serviceProvider;
+            _cipherSuitesProvider = cipherSuitesProvider;
 
             _writer = writer;
 
@@ -86,7 +89,7 @@ namespace Crypto.TLS.State
 
         private IEnumerable<HandshakeMessage> CreateKeyExchangeMessages()
         {
-            var keyExchange = _serviceProvider.ResolveKeyExchange(_cipherSuiteConfig.CipherSuite);
+            var keyExchange = _cipherSuitesProvider.ResolveKeyExchange(_cipherSuiteConfig.CipherSuite);
 
             return keyExchange.GenerateServerHandshakeMessages();
         }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Crypto.Core.Hashing;
 using Crypto.TLS.Messages.Handshakes;
 using Crypto.Utils;
+using Crypto.Utils.IO;
 
 namespace Crypto.TLS.Config
 {
