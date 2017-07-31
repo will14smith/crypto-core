@@ -1,7 +1,7 @@
 using System;
 using Crypto.TLS.Config;
 using Crypto.TLS.Messages.Handshakes;
-using Crypto.TLS.Services;
+using Crypto.TLS.Suites.Providers;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Crypto.TLS.State
@@ -11,18 +11,21 @@ namespace Crypto.TLS.State
         public ConnectionState State => ConnectionState.RecievedClientKeyExchange;
 
         private readonly IServiceProvider _serviceProvider;
+        private readonly ICipherSuitesProvider _cipherSuitesProvider;
 
         private readonly CipherSuiteConfig _cipherSuiteConfig;
         private readonly ClientKeyExchangeMessage _handshake;
         
         public HandleClientKeyExchangeState(
             IServiceProvider serviceProvider,
+            ICipherSuitesProvider cipherSuitesProvider,
             
             CipherSuiteConfig cipherSuiteConfig, 
             ClientKeyExchangeMessage handshake)
         {
             _serviceProvider = serviceProvider;
-            
+            _cipherSuitesProvider = cipherSuitesProvider;
+
             _cipherSuiteConfig = cipherSuiteConfig;
             _handshake = handshake;
         }
@@ -31,6 +34,7 @@ namespace Crypto.TLS.State
         {
             return new HandleClientKeyExchangeState(
                 serviceProvider: serviceProvider,
+                cipherSuitesProvider: serviceProvider.GetRequiredService<ICipherSuitesProvider>(),
 
                 cipherSuiteConfig: serviceProvider.GetRequiredService<CipherSuiteConfig>(),
                 handshake: handshake
@@ -41,7 +45,7 @@ namespace Crypto.TLS.State
         {
             // TODO is it valid to receive this message?
 
-            var keyExchange = _serviceProvider.ResolveKeyExchange(_cipherSuiteConfig.CipherSuite);
+            var keyExchange = _cipherSuitesProvider.ResolveKeyExchange(_cipherSuiteConfig.CipherSuite);
 
             keyExchange.HandleClientKeyExchange(_handshake);
 

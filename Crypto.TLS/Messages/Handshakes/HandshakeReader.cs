@@ -5,26 +5,29 @@ using Crypto.Certificates.Services;
 using Crypto.TLS.Config;
 using Crypto.TLS.Records;
 using Crypto.TLS.Services;
+using Crypto.TLS.Suites.Providers;
 using Crypto.Utils;
 using Crypto.Utils.IO;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Crypto.TLS.Messages.Handshakes
 {
     public class HandshakeReader
     {
-        private readonly IServiceProvider _serviceProvider;
+        private readonly ICipherSuitesProvider _cipherSuitesProvider;
+        private readonly PublicKeyReaderRegistry _publicKeyReaderRegistry;
 
         private readonly HandshakeConfig _handshakeConfig;
         private readonly CipherSuiteConfig _cipherSuiteConfig;
 
         public HandshakeReader(
-            IServiceProvider serviceProvider,
+            ICipherSuitesProvider cipherSuitesProvider,
+            PublicKeyReaderRegistry publicKeyReaderRegistry,
 
             HandshakeConfig handshakeConfig,
             CipherSuiteConfig cipherSuiteConfig)
         {
-            _serviceProvider = serviceProvider;
+            _cipherSuitesProvider = cipherSuitesProvider;
+            _publicKeyReaderRegistry = publicKeyReaderRegistry;
 
             _handshakeConfig = handshakeConfig;
             _cipherSuiteConfig = cipherSuiteConfig;
@@ -61,7 +64,7 @@ namespace Crypto.TLS.Messages.Handshakes
                 case HandshakeType.ServerHello:
                     return ServerHelloMessage.Read(body);
                 case HandshakeType.Certificate:
-                    return CertificateMessage.Read(body, b => new X509Reader(_serviceProvider.GetRequiredService<PublicKeyReaderRegistry>(), _serviceProvider, b));
+                    return CertificateMessage.Read(body, b => new X509Reader(_publicKeyReaderRegistry, b));
                 case HandshakeType.ServerKeyExchange:
                     return new ServerKeyExchangeMessage(body);
                 case HandshakeType.ServerHelloDone:
@@ -77,7 +80,7 @@ namespace Crypto.TLS.Messages.Handshakes
 
         private HandshakeMessage ReadFinished(byte[] body)
         {
-            var prfDigest = _serviceProvider.ResolvePRFHash(_cipherSuiteConfig.CipherSuite);
+            var prfDigest = _cipherSuitesProvider.ResolvePRFHash(_cipherSuiteConfig.CipherSuite);
             var hash = _handshakeConfig.ComputeVerification(prfDigest);
 
             return FinishedMessage.Read(body, hash);

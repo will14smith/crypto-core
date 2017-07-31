@@ -9,7 +9,7 @@ using Crypto.TLS.EC.Config;
 using Crypto.TLS.KeyExchanges;
 using Crypto.TLS.Messages.Handshakes;
 using Crypto.TLS.RSA;
-using Crypto.TLS.Services;
+using Crypto.TLS.Suites.Registries;
 using Crypto.Utils;
 using Crypto.Utils.IO;
 
@@ -18,20 +18,21 @@ namespace Crypto.TLS.EC.KeyExchanges
     public abstract class ECDHKeyExchangeBase : IKeyExchange
     {
         protected MasterSecretCalculator MasterSecretCalculator { get; }
-        protected CipherSuiteRegistry CipherSuiteRegistry { get; }
+        protected CipherSuitesRegistry CipherSuitesRegistry { get; }
 
         protected ECDHExchangeConfig ECDHExchangeConfig { get; }
         protected CertificateConfig CertificateConfig { get; }
 
         protected ECDHKeyExchangeBase(
             MasterSecretCalculator masterSecretCalculator,
-            CipherSuiteRegistry cipherSuiteRegistry,
+            CipherSuitesRegistry cipherSuitesRegistry,
+
 
             ECDHExchangeConfig ecdhExchangeConfig,
             CertificateConfig certificateConfig)
         {
             MasterSecretCalculator = masterSecretCalculator;
-            CipherSuiteRegistry = cipherSuiteRegistry;
+            CipherSuitesRegistry = cipherSuitesRegistry;
 
             ECDHExchangeConfig = ecdhExchangeConfig;
             CertificateConfig = certificateConfig;
@@ -39,8 +40,8 @@ namespace Crypto.TLS.EC.KeyExchanges
 
         public virtual bool IsCompatible(CipherSuite cipherSuite, X509Certificate certificate)
         {
-            var signatureAlgorithm = CipherSuiteRegistry.ResolveSignatureAlgorithm(cipherSuite);
-            var requiresECKey = Equals(CipherSuiteRegistry.ResolveKeyExchange(cipherSuite), ECIdentifiers.ECDH);
+            var signatureAlgorithm = CipherSuitesRegistry.MapSignatureAlgorithm(cipherSuite);
+            var requiresECKey = Equals(CipherSuitesRegistry.MapKeyExchange(cipherSuite), ECIdentifiers.ECDH);
 
             if (signatureAlgorithm.Equals(ECIdentifiers.ECDSA))
             {

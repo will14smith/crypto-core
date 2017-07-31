@@ -5,15 +5,16 @@ using Crypto.Core.Encryption.Parameters;
 using Crypto.Core.Hashing;
 using Crypto.Core.Randomness;
 using Crypto.TLS.Config;
-using Crypto.TLS.Services;
+using Crypto.TLS.Suites.Providers;
 using Crypto.Utils;
+using Crypto.Utils.IO;
 
 namespace Crypto.TLS.Records.Strategy
 {
     public class BlockCipherStrategy : IRecordReaderStrategy, IRecordWriterStrategy
     {
-        private readonly IServiceProvider _serviceProvider;
         private readonly IRandom _random;
+        private readonly ICipherSuitesProvider _cipherSuitesProvider;
 
         private readonly Connection _connection;
 
@@ -23,8 +24,8 @@ namespace Crypto.TLS.Records.Strategy
         private readonly BlockCipherConfig _blockCipherConfig;
 
         public BlockCipherStrategy(
-            IServiceProvider serviceProvider,
             IRandom random,
+            ICipherSuitesProvider cipherSuitesProvider,
 
             Connection connection,
 
@@ -33,8 +34,8 @@ namespace Crypto.TLS.Records.Strategy
             BlockCipherConfig blockCipherConfig,
             CipherSuiteConfig cipherSuiteConfig)
         {
-            _serviceProvider = serviceProvider;
             _random = random;
+            _cipherSuitesProvider = cipherSuitesProvider;
 
             _connection = connection;
 
@@ -129,7 +130,7 @@ namespace Crypto.TLS.Records.Strategy
 
         private BlockCipherAdapter GetCipher()
         {
-            var cipher = _serviceProvider.ResolveCipherAlgorithm(_cipherSuiteConfig.CipherSuite);
+            var cipher = _cipherSuitesProvider.ResolveCipherAlgorithm(_cipherSuiteConfig.CipherSuite);
 
             if (cipher is BlockCipherAdapter adapter)
             {
@@ -147,13 +148,13 @@ namespace Crypto.TLS.Records.Strategy
         private ICipherParameters GetParameters(ConnectionDirection direction)
         {
             var end = _endConfig.End;
-            var cipherParameterFactory = _serviceProvider.ResolveCipherParameterFactory(_cipherSuiteConfig.CipherSuite);
+            var cipherParameterFactory = _cipherSuitesProvider.ResolveCipherParameterFactory(_cipherSuiteConfig.CipherSuite);
             return cipherParameterFactory.Create(end, direction);
         }
 
         private IDigest GetMAC(ConnectionDirection direction)
         {
-            var digest = _serviceProvider.ResolveHashAlgorithm(_cipherSuiteConfig.CipherSuite);
+            var digest = _cipherSuitesProvider.ResolveHashAlgorithm(_cipherSuiteConfig.CipherSuite);
 
             var key = GetMACKey(direction);
 

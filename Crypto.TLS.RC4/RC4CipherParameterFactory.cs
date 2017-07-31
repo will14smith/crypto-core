@@ -3,6 +3,7 @@ using Crypto.Core.Encryption.Parameters;
 using Crypto.RC4;
 using Crypto.TLS.Config;
 using Crypto.TLS.Services;
+using Crypto.TLS.Suites.Parameters;
 using Crypto.Utils;
 
 namespace Crypto.TLS.RC4

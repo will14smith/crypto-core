@@ -1,5 +1,6 @@
 ﻿using Crypto.RSA.Encryption;
 using Crypto.TLS.Services;
+using Crypto.TLS.Suites;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Crypto.TLS.RSA

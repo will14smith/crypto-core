@@ -6,7 +6,7 @@ using Crypto.TLS.EC.Config;
 using Crypto.TLS.EC.Services;
 using Crypto.TLS.KeyExchanges;
 using Crypto.TLS.Messages.Handshakes;
-using Crypto.TLS.Services;
+using Crypto.TLS.Suites.Registries;
 using Crypto.Utils;
 
 namespace Crypto.TLS.EC.KeyExchanges
@@ -25,7 +25,7 @@ namespace Crypto.TLS.EC.KeyExchanges
             IRandom random,
 
             MasterSecretCalculator masterSecretCalculator,
-            CipherSuiteRegistry cipherSuiteRegistry,
+            CipherSuitesRegistry cipherSuitesRegistry,
             NamedCurvesRegistry namedCurvesRegistry,
 
             ECDHExchangeConfig ecdhExchangeConfig,
@@ -33,7 +33,7 @@ namespace Crypto.TLS.EC.KeyExchanges
             CertificateConfig certificateConfig)
                 : base(
                     masterSecretCalculator,
-                    cipherSuiteRegistry,
+                    cipherSuitesRegistry,
                     
                     ecdhExchangeConfig,
                     certificateConfig)

@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using Crypto.ASN1;
 using Crypto.Certificates.Services;
 using Crypto.Utils;
@@ -11,15 +9,13 @@ namespace Crypto.Certificates
     public class X509Reader
     {
         private readonly PublicKeyReaderRegistry _keyReaderRegistry;
-        private readonly IServiceProvider _serviceProvider;
         private readonly byte[] _input;
 
-        public X509Reader(PublicKeyReaderRegistry keyReaderRegistry, IServiceProvider serviceProvider, byte[] input)
+        public X509Reader(PublicKeyReaderRegistry keyReaderRegistry, byte[] input)
         {
             SecurityAssert.NotNull(input);
 
             _keyReaderRegistry = keyReaderRegistry;
-            _serviceProvider = serviceProvider;
             _input = input;
         }
 
@@ -82,7 +78,7 @@ namespace Crypto.Certificates
             var subjectPublicKeyInfo = ToSeq(GetElement(tbsCertSeq, tbsOffset++), 2, 2);
             var subjectPublicKeyAlgorithm = X509AlgorithmIdentifier.FromObject(GetElement(subjectPublicKeyInfo, 0));
             var subjectPublicKeyBits = GetElement<ASN1BitString>(subjectPublicKeyInfo, 1).Value;
-            var subjectPublicKey = _keyReaderRegistry.Resolve(_serviceProvider, subjectPublicKeyAlgorithm.Algorithm).ReadPublicKey(subjectPublicKeyAlgorithm, subjectPublicKeyBits);
+            var subjectPublicKey = _keyReaderRegistry.Resolve(subjectPublicKeyAlgorithm.Algorithm).ReadPublicKey(subjectPublicKeyAlgorithm, subjectPublicKeyBits);
 
             var extensions = new List<X509Extension>();
 

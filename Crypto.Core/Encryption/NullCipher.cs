@@ -1,5 +1,6 @@
 ﻿using System;
 using Crypto.Core.Encryption.Parameters;
+using Crypto.Utils;
 
 namespace Crypto.Core.Encryption
 {
@@ -9,17 +10,22 @@ namespace Crypto.Core.Encryption
 
         public void Init(ICipherParameters parameters)
         {
-            throw new NotImplementedException();
         }
 
         public void Encrypt(byte[] input, int inputOffset, byte[] output, int outputOffset, int length)
         {
-            throw new NotImplementedException();
+            SecurityAssert.AssertBuffer(input, inputOffset, length);
+            SecurityAssert.AssertBuffer(output, outputOffset, length);
+
+            Array.Copy(input, inputOffset, output, outputOffset, length);
         }
 
         public void Decrypt(byte[] input, int inputOffset, byte[] output, int outputOffset, int length)
         {
-            throw new NotImplementedException();
+            SecurityAssert.AssertBuffer(input, inputOffset, length);
+            SecurityAssert.AssertBuffer(output, outputOffset, length);
+
+            Array.Copy(input, inputOffset, output, outputOffset, length);
         }
     }
 }

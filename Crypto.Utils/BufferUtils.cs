@@ -1,4 +1,6 @@
-﻿namespace Crypto.Utils
+﻿using System.Collections.Generic;
+
+namespace Crypto.Utils
 {
     public static class BufferUtils
     {
@@ -11,6 +13,30 @@
             {
                 target[targetOffset + i] ^= input[inputOffset + i];
             }
+        }
+
+        public static bool EqualConstantTime(IReadOnlyList<byte> a, IReadOnlyList<byte> b)
+        {
+            if (ReferenceEquals(a, b))
+            {
+                return true;
+            }
+            if (ReferenceEquals(a, null) || ReferenceEquals(b, null))
+            {
+                return false;
+            }
+
+            if (a.Count != b.Count)
+            {
+                return false;
+            }
+
+            var result = 0;
+            for (var i = 0; i < a.Count; i++)
+            {
+                result |= a[i] ^ b[i];
+            }
+            return result == 0;
         }
     }
 }

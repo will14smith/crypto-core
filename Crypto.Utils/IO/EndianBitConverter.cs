@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using Crypto.Utils.IO;
 using JetBrains.Annotations;
 
-namespace Crypto.Utils
+namespace Crypto.Utils.IO
 {
     /// <summary>
     ///     Equivalent of System.BitConverter, but with either endianness.

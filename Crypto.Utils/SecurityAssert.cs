@@ -32,15 +32,7 @@ namespace Crypto.Utils
             InnerAssert(a != null, callerName, callerLine, callerFile);
             InnerAssert(b != null, callerName, callerLine, callerFile);
 
-            InnerAssert(a.Length == b.Length, callerName, callerLine, callerFile);
-
-            var result = 0;
-            for (var i = 0; i < a.Length; i++)
-            {
-                result |= a[i] ^ b[i];
-            }
-
-            InnerAssert(result == 0, callerName, callerLine, callerFile);
+            InnerAssert(BufferUtils.EqualConstantTime(a, b), callerName, callerLine, callerFile);
         }
 
         [AssertionMethod]

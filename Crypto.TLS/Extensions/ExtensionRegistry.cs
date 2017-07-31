@@ -6,7 +6,7 @@ using Crypto.Utils;
 
 namespace Crypto.TLS.Extensions
 {
-    public class ExtensionRegistry : BaseRegistry<ExtensionType, IExtension>
+    public class ExtensionRegistry : BaseServiceRegistry<ExtensionType, IExtension>
     {
         public Option<IExtension> TryResolve(IServiceProvider serviceProvider, ExtensionType key)
         {

@@ -3,14 +3,16 @@ using System.Linq;
 using Crypto.TLS.Config;
 using Crypto.TLS.Hashing;
 using Crypto.TLS.Services;
+using Crypto.TLS.Suites;
+using Crypto.TLS.Suites.Providers;
 using Crypto.Utils;
 
 namespace Crypto.TLS.KeyExchanges
 {
     public class MasterSecretCalculator
     {
-        private readonly IServiceProvider _serviceProvider;
-        
+        private readonly ICipherSuitesProvider _cipherSuitesProvider;
+
         private readonly RandomConfig _randomConfig;
         private readonly CipherSuiteConfig _cipherSuiteConfig;
         
@@ -19,7 +21,7 @@ namespace Crypto.TLS.KeyExchanges
         private readonly BlockCipherConfig _blockConfig;
 
         public MasterSecretCalculator(
-            IServiceProvider serviceProvider,
+            ICipherSuitesProvider cipherSuitesProvider,
             
             RandomConfig randomConfig,
             CipherSuiteConfig cipherSuiteConfig,
@@ -28,9 +30,11 @@ namespace Crypto.TLS.KeyExchanges
             AEADCipherConfig aeadConfig,
             BlockCipherConfig blockConfig)
         {
-            _serviceProvider = serviceProvider;
+            _cipherSuitesProvider = cipherSuitesProvider;
+            
             _randomConfig = randomConfig;
             _cipherSuiteConfig = cipherSuiteConfig;
+            
             _keyConfig = keyConfig;
             _aeadConfig = aeadConfig;
             _blockConfig = blockConfig;
@@ -46,7 +50,7 @@ namespace Crypto.TLS.KeyExchanges
             Array.Copy(clientRandom, 0, random, 0, clientRandom.Length);
             Array.Copy(serverRandom, 0, random, clientRandom.Length, serverRandom.Length);
 
-            var prfDigest = _serviceProvider.ResolvePRFHash(_cipherSuiteConfig.CipherSuite);
+            var prfDigest = _cipherSuitesProvider.ResolvePRFHash(_cipherSuiteConfig.CipherSuite);
             var prf = new PRF(prfDigest);
 
             return prf.Digest(preMasterSecret, "master secret", random).Take(48).ToArray();
@@ -62,10 +66,10 @@ namespace Crypto.TLS.KeyExchanges
             var clientRandom = _randomConfig.Client;
             var serverRandom = _randomConfig.Server;
 
-            var cipher = _serviceProvider.ResolveCipherAlgorithm(cipherSuite);
-            var mac = _serviceProvider.ResolveHashAlgorithm(cipherSuite);
+            var cipher = _cipherSuitesProvider.ResolveCipherAlgorithm(cipherSuite);
+            var mac = _cipherSuitesProvider.ResolveHashAlgorithm(cipherSuite);
 
-            var prfDigest = _serviceProvider.ResolvePRFHash(_cipherSuiteConfig.CipherSuite);
+            var prfDigest = _cipherSuitesProvider.ResolvePRFHash(_cipherSuiteConfig.CipherSuite);
             var prf = new PRF(prfDigest);
 
             var random = new byte[serverRandom.Length + clientRandom.Length];
@@ -85,7 +89,7 @@ namespace Crypto.TLS.KeyExchanges
             var offset = 0;
 
             // TODO technically AEAD has no mac (i.e. length == 0)
-            if (!_serviceProvider.IsAEADCipher(cipherSuite))
+            if (!_cipherSuitesProvider.IsAEADCipher(cipherSuite))
             {
                 var clientMACKey = new byte[macKeyLength];
                 Array.Copy(keyBlock, offset, clientMACKey, 0, macKeyLength);
@@ -107,9 +111,8 @@ namespace Crypto.TLS.KeyExchanges
             Array.Copy(keyBlock, offset, serverKey, 0, encKeyLength);
             offset += encKeyLength;
             _keyConfig.Server = serverKey;
-
-
-            if (_serviceProvider.IsAEADCipher(cipherSuite))
+            
+            if (_cipherSuitesProvider.IsAEADCipher(cipherSuite))
             {
                 var clientIV = new byte[implicitIVLength];
                 Array.Copy(keyBlock, offset, clientIV, 0, implicitIVLength);

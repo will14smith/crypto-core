@@ -1,36 +1,34 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using Crypto.TLS.Config;
 using Crypto.TLS.Identifiers;
 using Crypto.TLS.Messages.Handshakes;
-using Crypto.TLS.Services;
 using Crypto.Utils;
 using Crypto.Utils.IO;
+using System.Linq;
+using Crypto.TLS.Suites;
+using Crypto.TLS.Suites.Providers;
+using Crypto.TLS.Suites.Registries;
 
 namespace Crypto.TLS.Extensions
 {
     public class SignatureAlgorithmsExtension : IExtension
-    {
-        private readonly IServiceProvider _serviceProvider;
-        
-        private readonly CipherSuiteRegistry _cipherSuiteRegistry;
+    {       
+        private readonly ICipherSuitesProvider _cipherSuiteProvider;
+        private readonly CipherSuitesRegistry _cipherSuitesRegistry;
 
         private readonly EndConfig _endConfig;
         private readonly Config _config;
 
         public SignatureAlgorithmsExtension(
-            IServiceProvider serviceProvider,
-            
-            CipherSuiteRegistry cipherSuiteRegistry,
+            ICipherSuitesProvider cipherSuiteProvider,
+            CipherSuitesRegistry cipherSuitesRegistry,
 
             EndConfig endConfig,
             Config config)
         {
-            _serviceProvider = serviceProvider;
-            
-            _cipherSuiteRegistry = cipherSuiteRegistry;
+            _cipherSuiteProvider = cipherSuiteProvider;
+            _cipherSuitesRegistry = cipherSuitesRegistry;
 
             _endConfig = endConfig;
             _config = config;
@@ -43,11 +41,11 @@ namespace Crypto.TLS.Extensions
                 yield break;
             }
 
-            var suites = _serviceProvider
-                .GetAllSupportedSuites();
+            var suites = _cipherSuiteProvider
+                .GetAllSupportedSuites(_cipherSuitesRegistry);
 
             _config.SupportedAlgorithms = suites
-                .Select(x => (_cipherSuiteRegistry.ResolveHashAlgorithm(x), _cipherSuiteRegistry.ResolveSignatureAlgorithm(x)))
+                .Select(x => (_cipherSuitesRegistry.MapHashAlgorithm(x), _cipherSuitesRegistry.MapSignatureAlgorithm(x)))
                 .Distinct()
                 .ToArray();
            

@@ -4,8 +4,10 @@ using Crypto.Core.Randomness;
 using Crypto.TLS.Config;
 using Crypto.TLS.Extensions;
 using Crypto.TLS.Messages.Handshakes;
-using Crypto.TLS.Services;
-using Crypto.Utils;
+using Crypto.TLS.Suites;
+using Crypto.TLS.Suites.Providers;
+using Crypto.TLS.Suites.Registries;
+using Crypto.Utils.IO;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Crypto.TLS.State
@@ -15,6 +17,8 @@ namespace Crypto.TLS.State
         public ConnectionState State => ConnectionState.SendingClientHello;
 
         private readonly IServiceProvider _serviceProvider;
+        private readonly ICipherSuitesProvider _cipherSuitesProvider;
+        private readonly CipherSuitesRegistry _cipherSuitesRegistry;
 
         private readonly IRandom _random;
         private readonly HandshakeWriter _writer;
@@ -25,6 +29,8 @@ namespace Crypto.TLS.State
 
         public SendingClientHelloState(
             IServiceProvider serviceProvider,
+            ICipherSuitesProvider cipherSuitesProvider,
+            CipherSuitesRegistry cipherSuitesRegistry,
 
             IRandom random,
             HandshakeWriter writer,
@@ -34,6 +40,8 @@ namespace Crypto.TLS.State
             SessionConfig sessionConfig)
         {
             _serviceProvider = serviceProvider;
+            _cipherSuitesProvider = cipherSuitesProvider;
+            _cipherSuitesRegistry = cipherSuitesRegistry;
 
             _random = random;
             _writer = writer;
@@ -48,8 +56,8 @@ namespace Crypto.TLS.State
             _versionConfig.Version = TLSVersion.TLS1_2;
             _randomConfig.Client = GenerateClientRandom();
 
-            var cipherSuites = _serviceProvider
-                .GetAllSupportedSuites()
+            var cipherSuites = _cipherSuitesProvider
+                .GetAllSupportedSuites(_cipherSuitesRegistry)
                 .ToArray();
             var compressionMethods = new[] { CompressionMethod.Null };
 

@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using Crypto.ASN1;
 using Crypto.Certificates.Services;
 using Crypto.Utils;
@@ -15,7 +14,7 @@ namespace Crypto.Certificates.Keys
             _keyReaderRegistry = keyReaderRegistry;
         }
 
-        public PrivateKey ReadKey(IServiceProvider serviceProvider, byte[] input)
+        public PrivateKey ReadKey(byte[] input)
         {
             // PKCS#8 only
             
@@ -35,7 +34,7 @@ namespace Crypto.Certificates.Keys
             var keyOctetString = seq.Elements[2] as ASN1OctetString;
             SecurityAssert.NotNull(keyOctetString);
             
-            var reader = _keyReaderRegistry.Resolve(serviceProvider, algorithm.Algorithm);
+            var reader = _keyReaderRegistry.Resolve(algorithm.Algorithm);
 
             return reader.ReadPrivateKey(algorithm, keyOctetString.Value);
         }

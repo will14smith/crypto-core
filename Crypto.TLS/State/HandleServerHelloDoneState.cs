@@ -3,6 +3,8 @@ using Crypto.TLS.Config;
 using Crypto.TLS.Messages.Handshakes;
 using Crypto.TLS.Records;
 using Crypto.TLS.Services;
+using Crypto.TLS.Suites;
+using Crypto.TLS.Suites.Providers;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Crypto.TLS.State
@@ -12,6 +14,7 @@ namespace Crypto.TLS.State
         public ConnectionState State => ConnectionState.RecievedServerHelloDone;
 
         private readonly IServiceProvider _serviceProvider;
+        private readonly ICipherSuitesProvider _cipherSuitesProvider;
 
         private readonly Connection _connection;
         private readonly HandshakeWriter _writer;
@@ -22,6 +25,7 @@ namespace Crypto.TLS.State
 
         public HandleServerHelloDoneState(
             IServiceProvider serviceProvider,
+            ICipherSuitesProvider cipherSuitesProvider,
 
             Connection connection,
             HandshakeWriter writer,
@@ -31,6 +35,7 @@ namespace Crypto.TLS.State
             VersionConfig versionConfig)
         {
             _serviceProvider = serviceProvider;
+            _cipherSuitesProvider = cipherSuitesProvider;
 
             _connection = connection;
             _writer = writer;
@@ -44,6 +49,7 @@ namespace Crypto.TLS.State
         {
             return new HandleServerHelloDoneState(
                 serviceProvider,
+                serviceProvider.GetRequiredService<ICipherSuitesProvider>(),
 
                 serviceProvider.GetRequiredService<Connection>(),
                 serviceProvider.GetRequiredService<HandshakeWriter>(),
@@ -69,7 +75,7 @@ namespace Crypto.TLS.State
 
         private void SendKeyExchange()
         {
-            var keyExchange = _serviceProvider.ResolveKeyExchange(_cipherSuiteConfig.CipherSuite);
+            var keyExchange = _cipherSuitesProvider.ResolveKeyExchange(_cipherSuiteConfig.CipherSuite);
 
             var messages = keyExchange.GenerateClientHandshakeMessages();
             foreach (var message in messages)
@@ -81,7 +87,7 @@ namespace Crypto.TLS.State
         private void SendChangeCipherSpec()
         {
             _connection.WriteRecord(new Record(RecordType.ChangeCipherSpec, _versionConfig.Version, new byte[] { 1 }));
-            _connection.RecordWriterStrategy = _serviceProvider.GetRecordWriterStrategy(_cipherSuiteConfig.CipherSuite);
+            _connection.RecordWriterStrategy = _cipherSuitesProvider.GetRecordWriterStrategy(_serviceProvider, _cipherSuiteConfig.CipherSuite);
         }
 
         private void SendFinished()

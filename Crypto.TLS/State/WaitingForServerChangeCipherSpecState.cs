@@ -2,6 +2,8 @@ using System;
 using Crypto.TLS.Config;
 using Crypto.TLS.Records;
 using Crypto.TLS.Services;
+using Crypto.TLS.Suites;
+using Crypto.TLS.Suites.Providers;
 using Crypto.Utils;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -11,15 +13,18 @@ namespace Crypto.TLS.State
     {
         public override ConnectionState State => ConnectionState.WaitingForServerChangeCipherSpec;
 
+        private readonly ICipherSuitesProvider _cipherSuitesProvider;
         private readonly CipherSuiteConfig _cipherSuiteConfig;
 
         public WaitingForServerChangeCipherSpecState(
             IServiceProvider serviceProvider,
+            ICipherSuitesProvider cipherSuitesProvider,
 
             CipherSuiteConfig cipherSuiteConfig,
             Connection connection)
             : base(serviceProvider, connection)
         {
+            _cipherSuitesProvider = cipherSuitesProvider;
             _cipherSuiteConfig = cipherSuiteConfig;
         }
 
@@ -41,7 +46,7 @@ namespace Crypto.TLS.State
             SecurityAssert.Assert(record.Length == 1);
             SecurityAssert.Assert(record.Data[0] == 1);
 
-            Connection.RecordReaderStrategy = ServiceProvider.GetRecordReaderStrategy(_cipherSuiteConfig.CipherSuite);
+            Connection.RecordReaderStrategy = _cipherSuitesProvider.GetRecordReaderStrategy(ServiceProvider, _cipherSuiteConfig.CipherSuite);
 
             return ServiceProvider.GetRequiredService<WaitingForServerFinishedState>();
         }

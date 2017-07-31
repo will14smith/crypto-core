@@ -1,20 +1,25 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using Crypto.Certificates;
 using Crypto.TLS.Config;
-using Crypto.TLS.Services;
+using Crypto.TLS.Suites.Providers;
 using Crypto.Utils;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Crypto.TLS
 {
     public class DefaultNegotiatior : INegotiatior
     {
-        private readonly IServiceProvider _serviceProvider;
+        private readonly ICipherSuitesProvider _cipherSuitesProvider;
+        private readonly CertificateManager _certificateManager;
+        private readonly CipherSuiteConfig _cipherSuiteConfig;
 
-        public DefaultNegotiatior(IServiceProvider serviceProvider)
+        public DefaultNegotiatior(
+            ICipherSuitesProvider cipherSuitesProvider,
+            CertificateManager certificateManager,
+            CipherSuiteConfig cipherSuiteConfig)
         {
-            _serviceProvider = serviceProvider;
+            _cipherSuitesProvider = cipherSuitesProvider;
+            _certificateManager = certificateManager;
+            _cipherSuiteConfig = cipherSuiteConfig;
         }
 
         public Option<TLSVersion> DecideVersion(TLSVersion maxSupportedVersion)
@@ -31,7 +36,7 @@ namespace Crypto.TLS
         {
             foreach (var x in supportedCipherSuites)
             {
-                if (_serviceProvider.IsCipherSuiteSupported(x))
+                if (_cipherSuitesProvider.IsSupported(x))
                     return Option.Some(x);
             }
 
@@ -51,9 +56,7 @@ namespace Crypto.TLS
 
         public Option<X509Certificate[]> DecideCertificateChain()
         {
-            var certificateManager = _serviceProvider.GetRequiredService<CertificateManager>();
-
-            foreach (var certificate in certificateManager.GetAllCertificates())
+            foreach (var certificate in _certificateManager.GetAllCertificates())
             {
                 if (IsSuitable(certificate))
                 {
@@ -74,15 +77,10 @@ namespace Crypto.TLS
             // TODO is compatible with signature_algorithms extn
             // TODO is compatible with signature
 
-            var cipherSuite = _serviceProvider.GetRequiredService<CipherSuiteConfig>().CipherSuite;
+            var cipherSuite = _cipherSuiteConfig.CipherSuite;
 
-            var keyExchange = _serviceProvider.ResolveKeyExchange(cipherSuite);
-            if (!keyExchange.IsCompatible(cipherSuite, certificate))
-            {
-                return false;
-            }
-
-            return true;
+            var keyExchange = _cipherSuitesProvider.ResolveKeyExchange(cipherSuite);
+            return keyExchange.IsCompatible(cipherSuite, certificate);
         }
     }
 }

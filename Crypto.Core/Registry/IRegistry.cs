@@ -5,14 +5,14 @@ namespace Crypto.Core.Registry
 {
     public interface IRegistry<TService>
     {
-        void Register(Func<IServiceProvider, TService> factory);
-        IReadOnlyCollection<Func<TService>> ResolveAll(IServiceProvider serviceProvider);
+        void Register(Func<TService> factory);
+        IReadOnlyCollection<Func<TService>> ResolveAll();
     }
 
     public interface IRegistry<in TKey, TService>
     {
-        void Register(TKey key, Func<IServiceProvider, TService> factory);
-        TService Resolve(IServiceProvider serviceProvider, TKey key);
+        void Register(TKey key, Func<TService> factory);
+        TService Resolve(TKey key);
         bool IsSupported(TKey key);
     }
 }

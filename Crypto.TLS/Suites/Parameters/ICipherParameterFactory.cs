@@ -1,6 +1,6 @@
 ﻿using Crypto.Core.Encryption.Parameters;
 
-namespace Crypto.TLS.Services
+namespace Crypto.TLS.Suites.Parameters
 {
     public interface ICipherParameterFactory
     {

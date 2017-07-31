@@ -9,6 +9,7 @@ using Crypto.TLS.Identifiers;
 using Crypto.TLS.SHA;
 using Crypto.TLS.GCM;
 using Crypto.TLS.RC4;
+using Crypto.TLS.Suites;
 
 namespace Crypto.TestProgram
 {
