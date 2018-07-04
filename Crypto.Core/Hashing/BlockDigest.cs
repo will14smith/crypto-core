@@ -16,7 +16,7 @@ namespace Crypto.Core.Hashing
         protected long MessageSize { get; private set; }
 
         private int _workBufferLength;
-        private readonly byte[] _workBuffer;
+        private byte[] _workBuffer;
 
         protected bool WorkBufferEmpty => _workBufferLength == 0;
 
@@ -30,22 +30,24 @@ namespace Crypto.Core.Hashing
             MessageSize = source.MessageSize;
 
             _workBufferLength = source._workBufferLength;
-            Array.Copy(source._workBuffer, _workBuffer, _workBufferLength);
+            source._workBuffer.ToSpan().CopyTo(_workBuffer.ToSpan());
         }
 
-        public virtual void Update(byte[] buffer, int offset, int length)
+        public virtual void Update(ReadOnlySpan<byte> input)
         {
-            SecurityAssert.NotNull(buffer);
-            SecurityAssert.Assert(offset >= 0 && length >= 0);
-            SecurityAssert.Assert(offset + length <= buffer.Length);
+            var length = input.Length;
+            var offset = 0;
 
+            var workBuffer = _workBuffer.ToSpan();
+            
             while (length > 0)
             {
                 SecurityAssert.Assert(_workBufferLength < BlockSize / 8);
 
                 var lengthToTake = Math.Min(length, _workBuffer.Length - _workBufferLength);
 
-                Array.Copy(buffer, offset, _workBuffer, _workBufferLength, lengthToTake);
+                // TODO make this use Span better
+                input.Slice(offset, lengthToTake).CopyTo(workBuffer.Slice(_workBufferLength));
 
                 length -= lengthToTake;
                 offset += lengthToTake;
@@ -63,21 +65,21 @@ namespace Crypto.Core.Hashing
                 UpdateBlock(_workBuffer);
 
                 _workBufferLength = 0;
-                Array.Clear(_workBuffer, 0, _workBuffer.Length);
+                workBuffer.Fill(0);
             }
         }
 
-        public abstract byte[] Digest();
+        public abstract ReadOnlySpan<byte> Digest();
         public virtual void Reset()
         {
             MessageSize = 0;
 
             _workBufferLength = 0;
-            Array.Clear(_workBuffer, 0, _workBuffer.Length);
+            _workBuffer.ToSpan().Fill(0);
         }
 
         public abstract IDigest Clone();
 
-        protected abstract void UpdateBlock(byte[] buffer);
+        protected abstract void UpdateBlock(Span<byte> buffer);
     }
 }

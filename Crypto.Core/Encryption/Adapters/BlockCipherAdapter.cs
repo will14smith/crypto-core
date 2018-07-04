@@ -1,4 +1,5 @@
-﻿using Crypto.Core.Encryption.Parameters;
+﻿using System;
+using Crypto.Core.Encryption.Parameters;
 using Crypto.Utils;
 
 namespace Crypto.Core.Encryption.Adapters
@@ -20,25 +21,23 @@ namespace Crypto.Core.Encryption.Adapters
             BlockCipher.Init(parameters);
         }
 
-        public void Encrypt(byte[] input, int inputOffset, byte[] output, int outputOffset, int length)
+        public void Encrypt(ReadOnlySpan<byte> input, Span<byte> output)
         {
-            SecurityAssert.AssertBuffer(input, inputOffset, length);
-            SecurityAssert.AssertBuffer(output, outputOffset, length);
+            SecurityAssert.AssertInputOutputBuffers(input, output);
 
-            for (var i = 0; i < length; i += BlockCipher.BlockLength)
+            for (var i = 0; i < input.Length; i += BlockCipher.BlockLength)
             {
-                BlockCipher.EncryptBlock(input, inputOffset + i, output, outputOffset + i);
+                BlockCipher.EncryptBlock(input.Slice(i, BlockLength), output.Slice(i, BlockLength));
             }
         }
 
-        public void Decrypt(byte[] input, int inputOffset, byte[] output, int outputOffset, int length)
+        public void Decrypt(ReadOnlySpan<byte> input, Span<byte> output)
         {
-            SecurityAssert.AssertBuffer(input, inputOffset, length);
-            SecurityAssert.AssertBuffer(output, outputOffset, length);
+            SecurityAssert.AssertInputOutputBuffers(input, output);
 
-            for (var i = 0; i < length; i += BlockCipher.BlockLength)
+            for (var i = 0; i < input.Length; i += BlockCipher.BlockLength)
             {
-                BlockCipher.DecryptBlock(input, inputOffset + i, output, outputOffset + i);
+                BlockCipher.DecryptBlock(input.Slice(i, BlockLength), output.Slice(i, BlockLength));
             }
         }
     }

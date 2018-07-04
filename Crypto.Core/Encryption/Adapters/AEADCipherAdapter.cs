@@ -22,25 +22,23 @@ namespace Crypto.Core.Encryption.Adapters
             Cipher.Init(parameters);
         }
 
-        public void Encrypt(byte[] input, int inputOffset, byte[] output, int outputOffset, int length)
+        public void Encrypt(ReadOnlySpan<byte> input, Span<byte> output)
         {
-            SecurityAssert.AssertBuffer(input, inputOffset, length);
-            SecurityAssert.AssertBuffer(output, outputOffset, length + TagLength);
+            SecurityAssert.AssertInputOutputBuffers(input, output, input.Length + TagLength);
 
             var tag = new byte[TagLength];
             
-            var offset = Cipher.Encrypt(input, inputOffset, output, outputOffset, length);
-            offset += Cipher.EncryptFinal(output, outputOffset + offset, tag);
-            Array.Copy(tag, 0, output, outputOffset + offset, tag.Length);
+            var offset = Cipher.Encrypt(input, output);
+            offset += Cipher.EncryptFinal(output.Slice(offset), tag);
+            tag.CopyTo(output.Slice(offset));
         }
 
-        public void Decrypt(byte[] input, int inputOffset, byte[] output, int outputOffset, int length)
+        public void Decrypt(ReadOnlySpan<byte> input, Span<byte> output)
         {
-            SecurityAssert.AssertBuffer(input, inputOffset, length);
-            SecurityAssert.AssertBuffer(output, outputOffset, length - TagLength);
+            SecurityAssert.AssertInputOutputBuffers(input, output, input.Length + TagLength);
 
-            var offset = Cipher.Decrypt(input, inputOffset, output, outputOffset, length);
-            Cipher.DecryptFinal(input, inputOffset + offset, output, outputOffset + offset);
+            var offset = Cipher.Decrypt(input, output);
+            Cipher.DecryptFinal(input.Slice(offset), output.Slice(offset));
         }
     }
 }

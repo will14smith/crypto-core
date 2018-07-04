@@ -1,4 +1,5 @@
-﻿using Crypto.Core.Encryption.Parameters;
+﻿using System;
+using Crypto.Core.Encryption.Parameters;
 
 namespace Crypto.Core.Encryption
 {
@@ -9,7 +10,7 @@ namespace Crypto.Core.Encryption
 
         void Init(ICipherParameters parameters);
 
-        void EncryptBlock(byte[] input, int inputOffset, byte[] output, int outputOffset);
-        void DecryptBlock(byte[] input, int inputOffset, byte[] output, int outputOffset);
+        void EncryptBlock(ReadOnlySpan<byte> input, Span<byte> output);
+        void DecryptBlock(ReadOnlySpan<byte> input, Span<byte> output);
     }
 }

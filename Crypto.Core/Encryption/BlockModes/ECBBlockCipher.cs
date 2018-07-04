@@ -1,4 +1,5 @@
-﻿using Crypto.Core.Encryption.Parameters;
+﻿using System;
+using Crypto.Core.Encryption.Parameters;
 
 namespace Crypto.Core.Encryption.BlockModes
 {
@@ -20,14 +21,14 @@ namespace Crypto.Core.Encryption.BlockModes
             Cipher.Init(parameters);
         }
 
-        public void EncryptBlock(byte[] input, int inputOffset, byte[] output, int outputOffset)
+        public void EncryptBlock(ReadOnlySpan<byte> input, Span<byte> output)
         {
-            Cipher.EncryptBlock(input, inputOffset, output, outputOffset);
+            Cipher.EncryptBlock(input, output);
         }
 
-        public void DecryptBlock(byte[] input, int inputOffset, byte[] output, int outputOffset)
+        public void DecryptBlock(ReadOnlySpan<byte> input, Span<byte> output)
         {
-            Cipher.DecryptBlock(input, inputOffset, output, outputOffset);
+            Cipher.DecryptBlock(input, output);
         }
     }
 }

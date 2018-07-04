@@ -12,20 +12,18 @@ namespace Crypto.Core.Encryption
         {
         }
 
-        public void Encrypt(byte[] input, int inputOffset, byte[] output, int outputOffset, int length)
+        public void Encrypt(ReadOnlySpan<byte> input, Span<byte> output)
         {
-            SecurityAssert.AssertBuffer(input, inputOffset, length);
-            SecurityAssert.AssertBuffer(output, outputOffset, length);
+            SecurityAssert.AssertInputOutputBuffers(input, output);
 
-            Array.Copy(input, inputOffset, output, outputOffset, length);
+            input.CopyTo(output);
         }
 
-        public void Decrypt(byte[] input, int inputOffset, byte[] output, int outputOffset, int length)
+        public void Decrypt(ReadOnlySpan<byte> input, Span<byte> output)
         {
-            SecurityAssert.AssertBuffer(input, inputOffset, length);
-            SecurityAssert.AssertBuffer(output, outputOffset, length);
+            SecurityAssert.AssertInputOutputBuffers(input, output);
 
-            Array.Copy(input, inputOffset, output, outputOffset, length);
+            input.CopyTo(output);
         }
     }
 }

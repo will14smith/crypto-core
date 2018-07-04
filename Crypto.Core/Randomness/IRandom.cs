@@ -1,4 +1,6 @@
-﻿namespace Crypto.Core.Randomness
+﻿using System;
+
+namespace Crypto.Core.Randomness
 {
     public interface IRandom
     {

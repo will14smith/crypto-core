@@ -30,7 +30,7 @@ namespace Crypto.Core.Signing
         {
             var readCount = InnerStream.Read(buffer, offset, count);
 
-            HashAlgorithm.Update(buffer, offset, readCount);
+            HashAlgorithm.Update(buffer.ToSpan().Slice(offset, readCount));
 
             return readCount;
         }
@@ -38,15 +38,15 @@ namespace Crypto.Core.Signing
         public override void Write(byte[] buffer, int offset, int count)
         {
             InnerStream.Write(buffer, offset, count);
-            HashAlgorithm.Update(buffer, offset, count);
+            HashAlgorithm.Update(buffer.ToSpan().Slice(offset, count));
         }
 
-        public byte[] Sign()
+        public ReadOnlySpan<byte> Sign()
         {
             // no input because Write has already updated the hash
             return SignatureAlgorithm.Sign(new byte[0], HashAlgorithm);
         }
-        public bool Verify(byte[] signature)
+        public bool Verify(ReadOnlySpan<byte> signature)
         {
             // no input because Write has already updated the hash
             return SignatureAlgorithm.Verify(new byte[0], signature, HashAlgorithm);

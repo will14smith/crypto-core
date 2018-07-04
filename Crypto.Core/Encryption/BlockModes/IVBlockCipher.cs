@@ -47,7 +47,7 @@ namespace Crypto.Core.Encryption.BlockModes
 
         protected abstract void Reset();
 
-        public abstract void EncryptBlock(byte[] input, int inputOffset, byte[] output, int outputOffset);
-        public abstract void DecryptBlock(byte[] input, int inputOffset, byte[] output, int outputOffset);
+        public abstract void EncryptBlock(ReadOnlySpan<byte> input, Span<byte> output);
+        public abstract void DecryptBlock(ReadOnlySpan<byte> input, Span<byte> output);
     }
 }

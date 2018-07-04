@@ -1,4 +1,5 @@
-﻿using Crypto.Core.Encryption.Parameters;
+﻿using System;
+using Crypto.Core.Encryption.Parameters;
 
 namespace Crypto.Core.Encryption
 {
@@ -12,10 +13,10 @@ namespace Crypto.Core.Encryption
 
         //TODO other functions...
 
-        int Encrypt(byte[] input, int inputOffset, byte[] output, int outputOffset, int length);
-        int EncryptFinal(byte[] output, int offset, byte[] tag);
+        int Encrypt(ReadOnlySpan<byte> input, Span<byte> output);
+        int EncryptFinal(Span<byte> output, ReadOnlySpan<byte> tag);
 
-        int Decrypt(byte[] input, int inputOffset, byte[] output, int outputOffset, int length);
-        int DecryptFinal(byte[] input, int inputOffset, byte[] output, int outputOffset);
+        int Decrypt(ReadOnlySpan<byte> input, Span<byte> output);
+        int DecryptFinal(ReadOnlySpan<byte> input, Span<byte> output);
     }
 }

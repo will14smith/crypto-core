@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Crypto.Utils
 {
@@ -12,6 +13,15 @@ namespace Crypto.Utils
             for (var i = 0; i < length; i++)
             {
                 target[targetOffset + i] ^= input[inputOffset + i];
+            }
+        }
+        public static void Xor(ReadOnlySpan<byte> input, Span<byte> output)
+        {
+            SecurityAssert.Assert(input.Length == output.Length);
+
+            for (var i = 0; i < input.Length; i++)
+            {
+                output[i] ^= input[i];
             }
         }
 

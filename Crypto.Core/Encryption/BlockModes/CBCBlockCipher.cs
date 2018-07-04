@@ -19,32 +19,31 @@ namespace Crypto.Core.Encryption.BlockModes
             Array.Copy(IV, _workingIV, BlockLength);
         }
 
-        public override void EncryptBlock(byte[] input, int inputOffset, byte[] output, int outputOffset)
+        public override void EncryptBlock(ReadOnlySpan<byte> input, Span<byte> output)
         {
             SecurityAssert.Assert(IVInitialised);
-            SecurityAssert.AssertBuffer(input, inputOffset, BlockLength);
-            SecurityAssert.AssertBuffer(output, outputOffset, BlockLength);
+            SecurityAssert.AssertInputOutputBuffers(input, output, BlockLength);
 
             var tmp = new byte[BlockLength];
-            Array.Copy(input, inputOffset, tmp, 0, BlockLength);
+            input.Slice(0, BlockLength).CopyTo(tmp);
 
-            BufferUtils.Xor(_workingIV, 0, tmp, 0, BlockLength);
+            BufferUtils.Xor(_workingIV, tmp);
 
-            Cipher.EncryptBlock(tmp, 0, output, outputOffset);
+            Cipher.EncryptBlock(tmp, output.Slice(0, BlockLength));
 
-            Array.Copy(output, outputOffset, _workingIV, 0, BlockLength);
+            output.Slice(BlockLength).CopyTo(_workingIV);
         }
 
-        public override void DecryptBlock(byte[] input, int inputOffset, byte[] output, int outputOffset)
+        public override void DecryptBlock(ReadOnlySpan<byte> input, Span<byte> output)
         {
             SecurityAssert.Assert(IVInitialised);
-            SecurityAssert.AssertBuffer(input, inputOffset, BlockLength);
-            SecurityAssert.AssertBuffer(output, outputOffset, BlockLength);
+            SecurityAssert.AssertInputOutputBuffers(input, output, BlockLength);
 
-            Cipher.DecryptBlock(input, inputOffset, output, outputOffset);
+            Cipher.DecryptBlock(input.Slice(0, BlockLength), output.Slice(0, BlockLength));
 
-            BufferUtils.Xor(_workingIV, 0, output, outputOffset, BlockLength);
-            Array.Copy(input, inputOffset, _workingIV, 0, BlockLength);
+            BufferUtils.Xor(_workingIV, output.Slice(0, BlockLength));
+
+            input.Slice(0, BlockLength).CopyTo(_workingIV);
         }
     }
 }

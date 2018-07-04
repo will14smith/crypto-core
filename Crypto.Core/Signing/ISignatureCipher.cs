@@ -1,4 +1,5 @@
-﻿using Crypto.Core.Encryption.Parameters;
+﻿using System;
+using Crypto.Core.Encryption.Parameters;
 using Crypto.Core.Hashing;
 
 namespace Crypto.Core.Signing
@@ -7,7 +8,7 @@ namespace Crypto.Core.Signing
     {
         void Init(ICipherParameters parameters);
 
-        byte[] Sign(byte[] input, IDigest hash);
-        bool Verify(byte[] input, byte[] signature, IDigest hash);
+        ReadOnlySpan<byte> Sign(ReadOnlySpan<byte> input, IDigest hash);
+        bool Verify(ReadOnlySpan<byte> input, ReadOnlySpan<byte> signature, IDigest hash);
     }
 }

@@ -19,28 +19,27 @@ namespace Crypto.Core.Encryption.BlockModes
             Array.Copy(IV, 0, _counter, 0, BlockLength);
         }
 
-        public override void EncryptBlock(byte[] input, int inputOffset, byte[] output, int outputOffset)
+        public override void EncryptBlock(ReadOnlySpan<byte> input, Span<byte> output)
         {
-            ProcessBlock(input, inputOffset, output, outputOffset);
+            ProcessBlock(input, output);
         }
 
-        public override void DecryptBlock(byte[] input, int inputOffset, byte[] output, int outputOffset)
+        public override void DecryptBlock(ReadOnlySpan<byte> input, Span<byte> output)
         {
-            ProcessBlock(input, inputOffset, output, outputOffset);
+            ProcessBlock(input, output);
         }
 
-        private void ProcessBlock(byte[] input, int inputOffset, byte[] output, int outputOffset)
+        private void ProcessBlock(ReadOnlySpan<byte> input, Span<byte> output)
         {
-            SecurityAssert.AssertBuffer(input, inputOffset, BlockLength);
-            SecurityAssert.AssertBuffer(output, outputOffset, BlockLength);
+            SecurityAssert.AssertInputOutputBuffers(input, output, BlockLength);
 
             var counterOutput = new byte[BlockLength];
-            Cipher.EncryptBlock(_counter, 0, counterOutput, 0);
+            Cipher.EncryptBlock(_counter, counterOutput);
 
             // XOR input
             for (var i = 0; i < BlockLength; i++)
             {
-                output[outputOffset + i] = (byte)(counterOutput[i] ^ input[inputOffset + i]);
+                output[i] = (byte)(counterOutput[i] ^ input[i]);
             }
 
             // increment counter

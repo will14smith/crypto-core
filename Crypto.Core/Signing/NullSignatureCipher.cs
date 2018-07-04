@@ -13,12 +13,12 @@ namespace Crypto.Core.Signing
             throw new NotImplementedException();
         }
 
-        public byte[] Sign(byte[] input, IDigest hash)
+        public ReadOnlySpan<byte> Sign(ReadOnlySpan<byte> input, IDigest hash)
         {
             throw new NotImplementedException();
         }
 
-        public bool Verify(byte[] input, byte[] signature, IDigest hash)
+        public bool Verify(ReadOnlySpan<byte> input, ReadOnlySpan<byte> signature, IDigest hash)
         {
             throw new NotImplementedException();
         }

@@ -9,12 +9,12 @@ namespace Crypto.Core.Hashing
         public int BlockSize => 0;
         public int HashSize => 0;
 
-        public void Update(byte[] buffer, int offset, int length)
+        public void Update(ReadOnlySpan<byte> buffer)
         {
             throw new NotImplementedException();
         }
 
-        public byte[] Digest()
+        public ReadOnlySpan<byte> Digest()
         {
             throw new NotImplementedException();
         }
