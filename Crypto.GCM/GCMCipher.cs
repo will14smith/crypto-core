@@ -54,13 +54,13 @@ namespace Crypto.GCM
 
             // setup H subkey
             _h = new byte[16];
-            Cipher.EncryptBlock(new byte[16], 0, _h, 0);
+            Cipher.EncryptBlock(new byte[16], _h);
 
             // setup tag hash
             _tagHash = new GHash(_h);
-            _tagHash.Update(a, 0, a.Length);
+            _tagHash.Update(a.Span);
             var tagAADPaddingLength = 16 - a.Length % 16;
-            _tagHash.Update(new byte[tagAADPaddingLength], 0, tagAADPaddingLength);
+            _tagHash.Update(new byte[tagAADPaddingLength]);
 
             // setup pre-counter block
             if (iv.Length == 12)
@@ -68,7 +68,7 @@ namespace Crypto.GCM
                 // IV || 0^31 ||1
 
                 _j0 = new byte[16];
-                Array.Copy(iv, _j0, 12);
+                iv.Span.CopyTo(_j0);
                 _j0[15] = 1;
             }
             else
@@ -78,11 +78,11 @@ namespace Crypto.GCM
                 var j0PaddingLength = 8 + (16 - iv.Length % 16) % 16;
 
                 var j0Hash = new GHash(_h);
-                j0Hash.Update(iv, 0, iv.Length);
-                j0Hash.Update(new byte[j0PaddingLength], 0, j0PaddingLength);
-                j0Hash.Update(EndianBitConverter.Big.GetBytes(_ivSize), 0, sizeof(long));
+                j0Hash.Update(iv.Span);
+                j0Hash.Update(new byte[j0PaddingLength]);
+                j0Hash.Update(EndianBitConverter.Big.GetBytes(_ivSize));
 
-                _j0 = j0Hash.Digest();
+                _j0 = j0Hash.Digest().ToArray();
             }
 
             _ctr = new CTRBlockCipher(Cipher);
@@ -96,17 +96,18 @@ namespace Crypto.GCM
         private int _bufferOffset;
         private CTRBlockCipher _ctr;
 
-        public int Encrypt(byte[] input, int inputOffset, byte[] output, int outputOffset, int length)
+        public int Encrypt(ReadOnlySpan<byte> input, Span<byte> output)
         {
             var total = 0;
 
-            for (var i = 0; i < length; i++)
+            var outputOffset = 0;
+            foreach (var t in input)
             {
-                _buffer[_bufferOffset++] = input[inputOffset + i];
+                _buffer[_bufferOffset++] = t;
 
                 if (_bufferOffset == BlockLength)
                 {
-                    EncryptBlock(output, outputOffset);
+                    EncryptBlock(output.Slice(outputOffset, BlockLength));
                     outputOffset += BlockLength;
                     total += BlockLength;
                 }
@@ -115,17 +116,17 @@ namespace Crypto.GCM
             return total;
         }
 
-        private void EncryptBlock(byte[] output, int outputOffset)
+        private void EncryptBlock(Span<byte> output)
         {
             // encrypt block
             var ciphertext = new byte[BlockLength];
-            _ctr.EncryptBlock(_buffer, 0, ciphertext, 0);
+            _ctr.EncryptBlock(_buffer, ciphertext);
 
             // copy to output
-            Array.Copy(ciphertext, 0, output, outputOffset, _bufferOffset);
+            ciphertext.AsSpan().Slice(0, _bufferOffset).CopyTo(output);
 
             // update tag hash
-            _tagHash.Update(output, outputOffset, _bufferOffset);
+            _tagHash.Update(output.Slice(0, _bufferOffset));
             _cSize += _bufferOffset * 8;
 
             // clear buffer
@@ -133,9 +134,9 @@ namespace Crypto.GCM
             Array.Clear(_buffer, 0, BlockLength);
         }
 
-        public int EncryptFinal(byte[] output, int offset, byte[] tag)
+        public int EncryptFinal(Span<byte> output, Span<byte> tag)
         {
-            SecurityAssert.AssertBuffer(tag, 0, TagLength);
+            // SecurityAssert.AssertBuffer(tag, 0, TagLength);
 
             var total = 0;
 
@@ -143,37 +144,38 @@ namespace Crypto.GCM
             {
                 total += _bufferOffset;
 
-                EncryptBlock(output, offset);
+                EncryptBlock(output);
             }
 
             var tagCiphertextPaddingLength = (16 - (int)(_cSize / 8) % 16) % 16;
-            _tagHash.Update(new byte[tagCiphertextPaddingLength], 0, tagCiphertextPaddingLength);
-            _tagHash.Update(EndianBitConverter.Big.GetBytes(_aSize), 0, sizeof(long));
-            _tagHash.Update(EndianBitConverter.Big.GetBytes(_cSize), 0, sizeof(long));
+            _tagHash.Update(new byte[tagCiphertextPaddingLength]);
+            _tagHash.Update(EndianBitConverter.Big.GetBytes(_aSize));
+            _tagHash.Update(EndianBitConverter.Big.GetBytes(_cSize));
 
             var ctr = new CTRBlockCipher(Cipher);
             ctr.Init(new IVParameter(null, _j0));
 
-            ctr.EncryptBlock(_tagHash.Digest(), 0, tag, 0);
+            ctr.EncryptBlock(_tagHash.Digest(), tag);
 
             return total;
         }
 
-        public int Decrypt(byte[] input, int inputOffset, byte[] output, int outputOffset, int length)
+        public int Decrypt(ReadOnlySpan<byte> input, Span<byte> output)
         {
-            SecurityAssert.AssertBuffer(input, inputOffset, length);
             // TODO round length up to BlockLength
-            SecurityAssert.AssertBuffer(output, outputOffset, length);
+            SecurityAssert.AssertInputOutputBuffers(input, output);
 
             var total = 0;
+            var outputOffset = 0;
 
-            for (var i = 0; i < length; i++)
+            // TODO this could be more efficient
+            foreach (var t in input)
             {
-                _buffer[_bufferOffset++] = input[inputOffset + i];
+                _buffer[_bufferOffset++] = t;
 
                 if (_bufferOffset == BlockLength)
                 {
-                    DecryptBlock(output, outputOffset);
+                    DecryptBlock(output.Slice(outputOffset));
                     outputOffset += BlockLength;
                     total += BlockLength;
                 }
@@ -182,17 +184,17 @@ namespace Crypto.GCM
             return total;
         }
 
-        private void DecryptBlock(byte[] output, int outputOffset)
+        private void DecryptBlock(Span<byte> output)
         {
             // encrypt block
             var plaintext = new byte[BlockLength];
-            _ctr.DecryptBlock(_buffer, 0, plaintext, 0);
+            _ctr.DecryptBlock(_buffer, plaintext);
 
             // copy to output
-            Array.Copy(plaintext, 0, output, outputOffset, _bufferOffset);
-
+            plaintext.AsSpan().Slice(0, _bufferOffset).CopyTo(output);
+                
             // update tag hash
-            _tagHash.Update(_buffer, 0, _bufferOffset);
+            _tagHash.Update(_buffer.AsSpan().Slice(0, _bufferOffset));
             _cSize += _bufferOffset * 8;
 
             // clear buffer
@@ -200,35 +202,36 @@ namespace Crypto.GCM
             Array.Clear(_buffer, 0, BlockLength);
         }
 
-        public int DecryptFinal(byte[] input, int inputOffset, byte[] output, int outputOffset)
+        public int DecryptFinal(ReadOnlySpan<byte> input, Span<byte> output)
         {
-            SecurityAssert.AssertBuffer(input, inputOffset, _bufferOffset + TagLength);
-            SecurityAssert.AssertBuffer(output, outputOffset, _bufferOffset);
+            // TODO SecurityAssert.AssertBuffer(input, inputOffset, _bufferOffset + TagLength);
+            // TODO SecurityAssert.AssertBuffer(output, outputOffset, _bufferOffset);
 
             var total = 0;
+            var inputOffset = 0;
             if (_bufferOffset != 0)
             {
                 total += _bufferOffset;
                 inputOffset += _bufferOffset;
 
-                DecryptBlock(output, outputOffset);
+                DecryptBlock(output);
             }
 
             var tagCiphertextPaddingLength = (16 - (int)(_cSize / 8) % 16) % 16;
-            _tagHash.Update(new byte[tagCiphertextPaddingLength], 0, tagCiphertextPaddingLength);
-            _tagHash.Update(EndianBitConverter.Big.GetBytes(_aSize), 0, sizeof(long));
-            _tagHash.Update(EndianBitConverter.Big.GetBytes(_cSize), 0, sizeof(long));
+            _tagHash.Update(new byte[tagCiphertextPaddingLength]);
+            _tagHash.Update(EndianBitConverter.Big.GetBytes(_aSize));
+            _tagHash.Update(EndianBitConverter.Big.GetBytes(_cSize));
 
             var tagCtr = new CTRBlockCipher(Cipher);
             tagCtr.Init(new IVParameter(null, _j0));
 
             var digest = _tagHash.Digest();
             var calculatedTag = new byte[16];
-            tagCtr.EncryptBlock(digest, 0, calculatedTag, 0);
+            tagCtr.EncryptBlock(digest, calculatedTag);
 
             var tag = new byte[16];
-            Array.Copy(input, inputOffset, tag, 0, TagLength);
-
+            input.Slice(inputOffset, TagLength).CopyTo(tag);
+            
             SecurityAssert.AssertHash(calculatedTag, tag);
 
             return total;

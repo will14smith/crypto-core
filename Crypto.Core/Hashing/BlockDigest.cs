@@ -80,6 +80,6 @@ namespace Crypto.Core.Hashing
 
         public abstract IDigest Clone();
 
-        protected abstract void UpdateBlock(Span<byte> buffer);
+        protected abstract void UpdateBlock(ReadOnlySpan<byte> buffer);
     }
 }

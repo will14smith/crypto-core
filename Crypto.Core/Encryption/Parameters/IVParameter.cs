@@ -1,14 +1,16 @@
-﻿namespace Crypto.Core.Encryption.Parameters
+﻿using System;
+
+namespace Crypto.Core.Encryption.Parameters
 {
     public class IVParameter : ICipherParameters
     {
-        public IVParameter(ICipherParameters parameters, byte[] iv)
+        public IVParameter(ICipherParameters parameters, ReadOnlySpan<byte> iv)
         {
-            IV = iv;
+            IV = iv.ToArray();
             Parameters = parameters;
         }
 
-        public byte[] IV { get; }
+        public ReadOnlyMemory<byte> IV { get; }
         public ICipherParameters Parameters { get; }
     }
 }

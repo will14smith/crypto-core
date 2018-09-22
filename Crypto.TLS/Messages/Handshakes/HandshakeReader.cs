@@ -37,7 +37,7 @@ namespace Crypto.TLS.Messages.Handshakes
         {
             SecurityAssert.Assert(record.Type == RecordType.Handshake);
 
-            using (var ms = new MemoryStream(record.Data))
+            using (var ms = new ReadOnlyMemoryStream(record.Data))
             {
                 var msReader = new EndianBinaryReader(EndianBitConverter.Big, ms);
 

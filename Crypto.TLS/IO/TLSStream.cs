@@ -96,7 +96,7 @@ namespace Crypto.TLS.IO
             SecurityAssert.Assert(_active);
 
             var data = _readQueue.Take(count);
-            Array.Copy(data, 0, buffer, offset, data.Length);
+            data.CopyTo(buffer.AsSpan(offset));
 
             return data.Length;
         }

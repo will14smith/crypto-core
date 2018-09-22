@@ -15,7 +15,7 @@ namespace Crypto.GCM.Tests
             var hash = new GHash(HexConverter.FromHex(key));
 
             var hashInput = HexConverter.FromHex(input);
-            hash.Update(hashInput, 0, hashInput.Length);
+            hash.Update(hashInput);
             var hashOutput = hash.Digest();
 
             Assert.Equal(expected, HexConverter.ToHex(hashOutput));

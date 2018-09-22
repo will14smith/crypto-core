@@ -28,7 +28,7 @@ namespace Crypto.Utils
         }
 
         [AssertionMethod]
-        public static void AssertHash(byte[] a, byte[] b, [CallerMemberName] string callerName = null, [CallerLineNumber] int callerLine = 0, [CallerFilePath] string callerFile = null)
+        public static void AssertHash(ReadOnlySpan<byte> a, ReadOnlySpan<byte> b, [CallerMemberName] string callerName = null, [CallerLineNumber] int callerLine = 0, [CallerFilePath] string callerFile = null)
         {
             InnerAssert(a != null, callerName, callerLine, callerFile);
             InnerAssert(b != null, callerName, callerLine, callerFile);

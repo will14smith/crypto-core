@@ -3,6 +3,7 @@ using Crypto.TLS.Config;
 using Crypto.TLS.Hashing;
 using Crypto.TLS.Messages.Handshakes;
 using Crypto.TLS.Suites.Providers;
+using Crypto.Utils;
 
 namespace Crypto.TLS.Services
 {
@@ -37,11 +38,11 @@ namespace Crypto.TLS.Services
 
             var label = _endConfig.End == ConnectionEnd.Server ? "client finished" : "server finished";
             var expectedData =
-                prf.Digest(_keyConfig.Master, label, message.VerifyExpectedHash)
+                prf.Digest(_keyConfig.Master, label, message.VerifyExpectedHash.Span)
                     .Take(FinishedMessage.VerifyDataLength)
                     .ToArray();
 
-            return expectedData.SequenceEqual(message.VerifyActual);
+            return BufferUtils.EqualConstantTime(expectedData, message.VerifyActual.Span);
         }
 
         public FinishedMessage Generate()

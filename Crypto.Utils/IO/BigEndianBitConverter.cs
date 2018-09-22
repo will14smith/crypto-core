@@ -1,4 +1,6 @@
-﻿namespace Crypto.Utils.IO
+﻿using System;
+
+namespace Crypto.Utils.IO
 {
     /// <summary>
     ///     Implementation of EndianBitConverter which converts to/from big-endian
@@ -50,12 +52,12 @@
         /// <param name="startIndex">The first index to use</param>
         /// <param name="bytesToConvert">The number of bytes to use</param>
         /// <returns>The value built from the given bytes</returns>
-        protected override long FromBytes(byte[] buffer, int startIndex, int bytesToConvert)
+        protected override long FromBytes(ReadOnlySpan<byte> buffer)
         {
             long ret = 0;
-            for (var i = 0; i < bytesToConvert; i++)
+            foreach (var t in buffer)
             {
-                ret = unchecked((ret << 8) | buffer[startIndex + i]);
+                ret = (ret << 8) | t;
             }
             return ret;
         }

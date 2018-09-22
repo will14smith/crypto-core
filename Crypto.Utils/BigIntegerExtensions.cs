@@ -59,7 +59,7 @@ namespace Crypto.Utils
             var arr = HexConverter.FromHex(str);
             return arr.ToBigInteger(endianness);
         }
-        
+
         public static BigInteger ToBigInteger(this IEnumerable<byte> arr, Endianness endianness = Endianness.BigEndian)
         {
             switch (endianness)
@@ -75,6 +75,27 @@ namespace Crypto.Utils
                     return result;
                 case Endianness.BigEndian:
                     return arr.Aggregate(BigInteger.Zero, (current, b) => current * 256 + b);
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(endianness), endianness, null);
+            }
+        }
+        public static BigInteger ToBigInteger(this ReadOnlySpan<byte> arr, Endianness endianness = Endianness.BigEndian)
+        {
+            var result = BigInteger.Zero;
+
+            switch (endianness)
+            {
+                case Endianness.LittleEndian:
+                    var power = BigInteger.One;
+                    foreach (var b in arr)
+                    {
+                        result = result + b * power;
+                        power *= 256;
+                    }
+                    return result;
+                case Endianness.BigEndian:
+                    foreach (var b in arr) result = result * 256 + b;
+                    return result;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(endianness), endianness, null);
             }

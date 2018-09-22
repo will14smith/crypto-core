@@ -20,20 +20,19 @@ namespace Crypto.RSA.Encryption
             {
                 if (PublicKey != null) return PublicKey.Modulus.GetByteLength();
                 if (PrivateKey != null) return PrivateKey.Modulus.GetByteLength();
-                
+
                 throw new InvalidOperationException();
             }
         }
 
-        public void Encrypt(byte[] input, int inputOffset, byte[] output, int outputOffset, int length)
+        public void Encrypt(ReadOnlySpan<byte> input, Span<byte> output)
         {
-            SecurityAssert.AssertBuffer(input, inputOffset, length);
             SecurityAssert.NotNull(PublicKey);
 
             var k = PublicKey.Modulus.GetByteLength();
-            SecurityAssert.Assert(length <= k - 11);
+            SecurityAssert.Assert(input.Length <= k - 11);
 
-            var ps = _random.RandomNonZeroBytes(k - length - 3);
+            var ps = _random.RandomNonZeroBytes(k - input.Length - 3);
             SecurityAssert.Assert(ps.Length >= 8);
 
             var em = new byte[k];
@@ -41,26 +40,25 @@ namespace Crypto.RSA.Encryption
             em[1] = 2;
             Array.Copy(ps, 0, em, 2, ps.Length);
             em[ps.Length + 2] = 0;
-            Array.Copy(input, inputOffset, em, ps.Length + 3, length);
+            input.CopyTo(em.AsSpan(ps.Length + 3));
 
-            var m = OS2IP(em, 0, em.Length);
+            var m = OS2IP(em);
             var c = EncryptPrimative(m, PublicKey);
 
             var result = I2OSP(c, k);
-            SecurityAssert.AssertBuffer(output, outputOffset, result.Length);
-            Array.Copy(result, 0, output, outputOffset, result.Length);
+            SecurityAssert.Assert(output.Length >= result.Length);
+            result.CopyTo(output);
         }
 
-        public void Decrypt(byte[] input, int inputOffset, byte[] output, int outputOffset, int length)
+        public void Decrypt(ReadOnlySpan<byte> input, Span<byte> output)
         {
-            SecurityAssert.AssertBuffer(input, inputOffset, length);
             SecurityAssert.NotNull(PrivateKey);
 
             var k = PrivateKey.Modulus.GetByteLength();
             SecurityAssert.Assert(k >= 11);
-            SecurityAssert.Assert(length == k);
+            SecurityAssert.Assert(input.Length == k);
 
-            var c = OS2IP(input, inputOffset, length);
+            var c = OS2IP(input);
             var m = DecryptPrimative(c, PrivateKey);
 
             var em = I2OSP(m, k);
@@ -74,8 +72,8 @@ namespace Crypto.RSA.Encryption
             // advance past zero
             mIdx++;
 
-            SecurityAssert.AssertBuffer(output, outputOffset, k - mIdx);
-            Array.Copy(em, mIdx, output, outputOffset, k - mIdx);
+            SecurityAssert.Assert(output.Length >= k - mIdx);
+            em.AsSpan(mIdx, k - mIdx).CopyTo(output);
         }
     }
 }

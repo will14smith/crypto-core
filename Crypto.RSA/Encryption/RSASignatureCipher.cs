@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Numerics;
 using Crypto.Core.Hashing;
 using Crypto.Core.Signing;
@@ -12,9 +13,8 @@ namespace Crypto.RSA.Encryption
     /// </summary>
     public class RSASignatureCipher : RSACipherBase, ISignatureCipher
     {
-        public byte[] Sign(byte[] input, IDigest hash)
+        public ReadOnlySpan<byte> Sign(ReadOnlySpan<byte> input, IDigest hash)
         {
-            SecurityAssert.NotNull(input);
             SecurityAssert.NotNull(hash);
             SecurityAssert.NotNull(PrivateKey);
 
@@ -22,29 +22,32 @@ namespace Crypto.RSA.Encryption
 
             var em = EMSA_PKCS1_v1_5_Encode(input, k, hash);
 
-            var m = OS2IP(em, 0, em.Length);
+            var m = OS2IP(em);
             var s = SignPrimative(m, PrivateKey);
 
             return I2OSP(s, k);
         }
 
-        public bool Verify(byte[] input, byte[] signature, IDigest hash)
+        public bool Verify(ReadOnlySpan<byte> input, ReadOnlySpan<byte> signature, IDigest hash)
         {
-            SecurityAssert.NotNull(input);
-            SecurityAssert.NotNull(signature);
             SecurityAssert.NotNull(hash);
             SecurityAssert.NotNull(PublicKey);
 
             var k = PublicKey.Modulus.GetByteLength();
             SecurityAssert.Assert(signature.Length == k);
 
-            var s = OS2IP(signature, 0, signature.Length);
+            var s = OS2IP(signature);
             var m = VerifyPrimative(s, PublicKey);
             var em = I2OSP(m, k);
 
             var em2 = EMSA_PKCS1_v1_5_Encode(input, k, hash);
 
-            return em.Length == em2.Length && em.SequenceEqual(em2);
+            if (em.Length != em2.Length)
+            {
+                return false;
+            }
+
+            return SpanExtensions.EqualConstantTime(em, em2);
         }
 
         private static BigInteger SignPrimative(BigInteger m, RSAPrivateKey key)

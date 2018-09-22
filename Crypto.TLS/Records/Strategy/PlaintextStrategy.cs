@@ -1,4 +1,5 @@
-﻿using Crypto.Utils;
+﻿using System;
+using Crypto.Utils;
 
 namespace Crypto.TLS.Records.Strategy
 {
@@ -20,12 +21,12 @@ namespace Crypto.TLS.Records.Strategy
             return new Record(type, version, data);
         }
 
-        public void Write(RecordType type, TLSVersion version, byte[] data)
+        public void Write(RecordType type, TLSVersion version, ReadOnlySpan<byte> data)
         {
             _connection.Writer.Write(type);
             _connection.Writer.Write(version);
             _connection.Writer.Write((ushort)data.Length);
-            _connection.Writer.Write(data, 0, data.Length);
+            _connection.Writer.Write(data);
         }
     }
 }

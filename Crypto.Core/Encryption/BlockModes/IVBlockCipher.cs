@@ -33,8 +33,8 @@ namespace Crypto.Core.Encryption.BlockModes
             var ivParam = ivParams.IV;
             SecurityAssert.NotNull(ivParam);
             SecurityAssert.Assert(ivParam.Length == BlockLength);
+            ivParam.Span.CopyTo(IV);
 
-            Array.Copy(ivParam, IV, BlockLength);
             IVInitialised = true;
 
             if (ivParams.Parameters != null)

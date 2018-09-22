@@ -1,8 +1,10 @@
-﻿namespace Crypto.TLS.Config
+﻿using System;
+
+namespace Crypto.TLS.Config
 {
     public class AEADCipherConfig
     {
-        public byte[] ClientIV { get; set; }
-        public byte[] ServerIV { get; set; }
+        public ReadOnlyMemory<byte> ClientIV { get; set; }
+        public ReadOnlyMemory<byte> ServerIV { get; set; }
     }
 }

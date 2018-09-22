@@ -7,16 +7,14 @@ namespace Crypto.GCM
 {
     public sealed class GHash : BlockDigest
     {
-        private readonly byte[] _key;
+        private readonly ReadOnlyMemory<byte> _key;
         private readonly byte[] _y;
 
-        public GHash(byte[] key)
+        public GHash(ReadOnlySpan<byte> key)
         {
-            SecurityAssert.NotNull(key);
             SecurityAssert.Assert(key.Length == 16);
 
-            _key = new byte[16];
-            Array.Copy(key, 0, _key, 0, 16);
+            _key = key.Slice(0, 16).ToArray();
 
             _y = new byte[16];
 
@@ -25,8 +23,7 @@ namespace Crypto.GCM
 
         private GHash(GHash clone) : base(clone)
         {
-            _key = new byte[16];
-            Array.Copy(clone._key, 0, _key, 0, 16);
+            _key = clone._key;
 
             _y = new byte[16];
             Array.Copy(clone._y, 0, _y, 0, 16);
@@ -37,7 +34,7 @@ namespace Crypto.GCM
         public override int BlockSize => 128;
         public override int HashSize => 128;
 
-        protected override void UpdateBlock(byte[] buffer)
+        protected override void UpdateBlock(ReadOnlySpan<byte> buffer)
         {
             // y(i) = GM{128}(y(i-1) ^ buffer, key)
             for (var i = 0; i < 16; i++)
@@ -46,8 +43,7 @@ namespace Crypto.GCM
             }
 
             var z = new byte[16];
-            var v = new byte[16];
-            Array.Copy(_key, v, 16);
+            var v = _key.ToArray();
 
             for (var i = 0; i < 128; i++)
             {
@@ -77,14 +73,14 @@ namespace Crypto.GCM
             Array.Copy(z, _y, 16);
         }
 
-        public override byte[] Digest()
+        public override ReadOnlySpan<byte> Digest()
         {
             SecurityAssert.Assert(WorkBufferEmpty);
 
             var digest = new byte[16];
             Array.Copy(_y, 0, digest, 0, 16);
 
-            return _y;
+            return digest;
         }
 
         public override void Reset()

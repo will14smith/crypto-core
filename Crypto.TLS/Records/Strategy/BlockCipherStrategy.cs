@@ -57,7 +57,7 @@ namespace Crypto.TLS.Records.Strategy
             var payload = _connection.Reader.ReadBytes(length - blockLength);
             var plaintext = new byte[payload.Length];
 
-            cipher.Decrypt(payload, 0, plaintext, 0, payload.Length);
+            cipher.Decrypt(payload, plaintext);
 
             var macAlgo = GetMAC(ConnectionDirection.Read);
             var macLength = macAlgo.HashSize / 8;
@@ -71,21 +71,18 @@ namespace Crypto.TLS.Records.Strategy
                 SecurityAssert.Assert(plaintext[i] == paddingLength);
             }
 
-            var mac = new byte[macLength];
-            Array.Copy(plaintext, contentLength, mac, 0, macLength);
-
-            var content = new byte[contentLength];
-            Array.Copy(plaintext, 0, content, 0, content.Length);
+            var content = plaintext.AsMemory(0, contentLength);
+            var mac = plaintext.AsSpan(contentLength, macLength);
 
             var seqNum = _sequenceConfig.GetThenIncrement(ConnectionDirection.Read);
-            var computedMac = ComputeMAC(macAlgo, seqNum, type, version, content);
+            var computedMac = ComputeMAC(macAlgo, seqNum, type, version, content.Span);
 
             SecurityAssert.AssertHash(mac, computedMac);
 
             return new Record(type, version, content);
         }
 
-        public void Write(RecordType type, TLSVersion version, byte[] data)
+        public void Write(RecordType type, TLSVersion version, ReadOnlySpan<byte> data)
         {
             var cipher = GetCipher();
 
@@ -107,10 +104,10 @@ namespace Crypto.TLS.Records.Strategy
 
             var offset = 0;
 
-            Array.Copy(data, 0, plaintext, offset, data.Length);
+            data.CopyTo(plaintext.AsSpan(offset));
             offset += data.Length;
 
-            Array.Copy(mac, 0, plaintext, offset, mac.Length);
+            mac.CopyTo(plaintext.AsSpan(offset));
             offset += mac.Length;
 
             for (; offset < payloadLength; offset++)
@@ -119,7 +116,7 @@ namespace Crypto.TLS.Records.Strategy
             }
 
             cipher.Init(new IVParameter(GetParameters(ConnectionDirection.Write), iv));
-            cipher.Encrypt(plaintext, 0, payload, 0, plaintext.Length);
+            cipher.Encrypt(plaintext, payload);
 
             _connection.Writer.Write(type);
             _connection.Writer.Write(version);
@@ -158,13 +155,12 @@ namespace Crypto.TLS.Records.Strategy
 
             var key = GetMACKey(direction);
 
-            SecurityAssert.NotNull(key);
             SecurityAssert.Assert(key.Length > 0);
 
             return new HMAC(digest, key);
         }
 
-        private byte[] GetMACKey(ConnectionDirection direction)
+        private ReadOnlySpan<byte> GetMACKey(ConnectionDirection direction)
         {
             switch (_endConfig.End)
             {
@@ -172,9 +168,9 @@ namespace Crypto.TLS.Records.Strategy
                     switch (direction)
                     {
                         case ConnectionDirection.Read:
-                            return _blockCipherConfig.ServerMACKey;
+                            return _blockCipherConfig.ServerMACKey.Span;
                         case ConnectionDirection.Write:
-                            return _blockCipherConfig.ClientMACKey;
+                            return _blockCipherConfig.ClientMACKey.Span;
                         default:
                             throw new ArgumentOutOfRangeException(nameof(direction), direction, null);
                     }
@@ -182,9 +178,9 @@ namespace Crypto.TLS.Records.Strategy
                     switch (direction)
                     {
                         case ConnectionDirection.Read:
-                            return _blockCipherConfig.ClientMACKey;
+                            return _blockCipherConfig.ClientMACKey.Span;
                         case ConnectionDirection.Write:
-                            return _blockCipherConfig.ServerMACKey;
+                            return _blockCipherConfig.ServerMACKey.Span;
                         default:
                             throw new ArgumentOutOfRangeException(nameof(direction), direction, null);
                     }
@@ -193,12 +189,12 @@ namespace Crypto.TLS.Records.Strategy
             }
         }
 
-        private byte[] ComputeMAC(IDigest macAlgo, long seqNum, RecordType type, TLSVersion version, byte[] content)
+        private ReadOnlySpan<byte> ComputeMAC(IDigest macAlgo, long seqNum, RecordType type, TLSVersion version, ReadOnlySpan<byte> content)
         {
-            macAlgo.Update(EndianBitConverter.Big.GetBytes(seqNum), 0, sizeof(long));
-            macAlgo.Update(new[] { (byte)type, version.Major, version.Major }, 0, 3);
-            macAlgo.Update(EndianBitConverter.Big.GetBytes((ushort)content.Length), 0, sizeof(ushort));
-            macAlgo.Update(content, 0, content.Length);
+            macAlgo.Update(EndianBitConverter.Big.GetBytes(seqNum));
+            macAlgo.Update(new[] { (byte)type, version.Major, version.Major });
+            macAlgo.Update(EndianBitConverter.Big.GetBytes((ushort)content.Length));
+            macAlgo.Update(content);
 
             return macAlgo.Digest();
         }

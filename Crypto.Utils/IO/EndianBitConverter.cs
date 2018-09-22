@@ -242,6 +242,10 @@ namespace Crypto.Utils.IO
         {
             return unchecked((ushort)CheckedFromBytes(value, startIndex, 2));
         }
+        public uint ToUInt16(ReadOnlySpan<byte> value)
+        {
+            return unchecked((ushort)CheckedFromBytes(value.Slice(0, 2)));
+        }
 
         /// <summary>
         ///     Returns a 32-bit unsigned integer converted from four bytes at a specified position in a byte array.
@@ -253,6 +257,10 @@ namespace Crypto.Utils.IO
         {
             return unchecked((uint)CheckedFromBytes(value, startIndex, 4));
         }
+        public uint ToUInt32(ReadOnlySpan<byte> value)
+        {
+            return unchecked((uint)CheckedFromBytes(value.Slice(0, 4)));
+        }
 
         /// <summary>
         ///     Returns a 64-bit unsigned integer converted from eight bytes at a specified position in a byte array.
@@ -263,6 +271,10 @@ namespace Crypto.Utils.IO
         public ulong ToUInt64(byte[] value, int startIndex)
         {
             return unchecked((ulong)CheckedFromBytes(value, startIndex, 8));
+        }
+        public ulong ToUInt64(ReadOnlySpan<byte> value)
+        {
+            return unchecked((ulong)CheckedFromBytes(value.Slice(0, 8)));
         }
 
         /// <summary>
@@ -299,7 +311,11 @@ namespace Crypto.Utils.IO
         private long CheckedFromBytes(byte[] value, int startIndex, int bytesToConvert)
         {
             CheckByteArgument(value, startIndex, bytesToConvert);
-            return FromBytes(value, startIndex, bytesToConvert);
+            return FromBytes(value.AsSpan(startIndex, bytesToConvert));
+        }
+        private long CheckedFromBytes(ReadOnlySpan<byte> value)
+        {
+            return FromBytes(value);
         }
 
         /// <summary>
@@ -311,7 +327,7 @@ namespace Crypto.Utils.IO
         /// <param name="startIndex">The index of the first byte to convert</param>
         /// <param name="bytesToConvert">The number of bytes to use in the conversion</param>
         /// <returns>The converted number</returns>
-        protected abstract long FromBytes(byte[] value, int startIndex, int bytesToConvert);
+        protected abstract long FromBytes(ReadOnlySpan<byte> value);
 
         #endregion
 

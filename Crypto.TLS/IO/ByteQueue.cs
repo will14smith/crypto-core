@@ -7,26 +7,25 @@ namespace Crypto.TLS.IO
 {
     public class ByteQueue
     {
-        private readonly Queue<byte[]> _data = new Queue<byte[]>();
+        private readonly Queue<ReadOnlyMemory<byte>> _data = new Queue<ReadOnlyMemory<byte>>();
         private int _offset;
 
         private readonly SemaphoreSlim _write = new SemaphoreSlim(1, 1);
         private readonly SemaphoreSlim _read = new SemaphoreSlim(0, 1);
 
-        public byte[] Take(int maxLength)
+        public ReadOnlySpan<byte> Take(int maxLength)
         {
             SecurityAssert.Assert(maxLength > 0);
 
             _read.Wait();
 
-            byte[] result;
+            ReadOnlyMemory<byte> result;
 
             var head = _data.Peek();
             if (maxLength < head.Length - _offset)
             {
-                result = new byte[maxLength];
-                Array.Copy(head, _offset, result, 0, maxLength);
-
+                result = head.Slice(_offset, maxLength);
+                
                 _offset += maxLength;
             }
             else
@@ -36,12 +35,11 @@ namespace Crypto.TLS.IO
                 _offset = 0;
                 _write.Release();
             }
-
-
-            return result;
+            
+            return result.Span;
         }
 
-        public void Put(byte[] data)
+        public void Put(ReadOnlyMemory<byte> data)
         {
             _write.Wait();
 

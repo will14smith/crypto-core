@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Linq;
+using System.Text;
 
 namespace Crypto.Utils
 {
     public static class HexConverter
     {
-        public static byte[] FromHex(string s)
+        public static ReadOnlySpan<byte> FromHex(string s)
         {
             SecurityAssert.Assert(s.Length % 2 == 0);
-            
+
             var buffer = new byte[s.Length / 2];
 
             for (var i = 0; i < buffer.Length; i++)
@@ -37,9 +38,19 @@ namespace Crypto.Utils
             throw new ArgumentOutOfRangeException(nameof(c));
         }
 
-        public static string ToHex(byte[] buffer)
+        public static string ToHex(ReadOnlySpan<byte> buffer)
         {
-            return string.Concat(buffer.Select(x => ToHex((byte)(x >> 4)).ToString() + ToHex((byte)(x & 0xf))).ToArray());
+            var sb = new StringBuilder();
+
+            for (var i = 0; i < buffer.Length; i++)
+            {
+                var x = buffer[i];
+
+                sb.Append(ToHex((byte)(x >> 4)));
+                sb.Append(ToHex((byte)(x & 0xf)));
+            }
+
+            return sb.ToString();
         }
         private static char ToHex(byte nibble)
         {

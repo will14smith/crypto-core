@@ -69,14 +69,16 @@ namespace Crypto.RSA.Encryption
             return bytes.AsEnumerable().Reverse().ToArray();
         }
 
-        internal static BigInteger OS2IP(IEnumerable<byte> x, int offset, int length)
+        internal static BigInteger OS2IP(ReadOnlySpan<byte> x)
         {
-            return x.Skip(offset).Take(length).Aggregate(BigInteger.Zero, (current, b) => current * 256 + b);
+            var result = BigInteger.Zero;
+            foreach (var b in x) result = result * 256 + b;
+            return result;
         }
 
-        internal static byte[] EMSA_PKCS1_v1_5_Encode(byte[] input, int emLen, IDigest hash)
+        internal static ReadOnlySpan<byte> EMSA_PKCS1_v1_5_Encode(ReadOnlySpan<byte> input, int emLen, IDigest hash)
         {
-            hash.Update(input, 0, input.Length);
+            hash.Update(input);
             var h = hash.Digest();
 
             byte[] t;
@@ -90,7 +92,7 @@ namespace Crypto.RSA.Encryption
                         hash.Id,
                         new ASN1Null()
                     }),
-                    new ASN1OctetString(h)
+                    new ASN1OctetString(h.ToArray())
                 }));
 
                 t = mem.ToArray();

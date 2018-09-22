@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using Crypto.Core.Encryption;
 using Crypto.Core.Encryption.Parameters;
 using Crypto.Utils;
@@ -9,8 +8,8 @@ namespace Crypto.RC4
     public class RC4Cipher : ICipher
     {
         private bool _keyInitialised;
-        private readonly byte[] _key;
-        private readonly byte[] _s;
+        private readonly Memory<byte> _key;
+        private readonly Memory<byte> _s;
 
         private int _i;
         private int _j;
@@ -40,10 +39,9 @@ namespace Crypto.RC4
 
             SecurityAssert.NotNull(keyParam);
             SecurityAssert.Assert(keyParam.Length == KeySize);
-            Array.Copy(keyParam, _key, KeySize);
+            keyParam.CopyTo(_key);
 
-            var tmp = BuildSchedule(_key);
-            Array.Copy(tmp, _s, _s.Length);
+            BuildSchedule(_key.Span, _s.Span);
 
             _i = 0;
             _j = 0;
@@ -51,50 +49,45 @@ namespace Crypto.RC4
             _keyInitialised = true;
         }
 
-        public void Encrypt(byte[] input, int inputOffset, byte[] output, int outputOffset, int length)
+        public void Encrypt(ReadOnlySpan<byte> input, Span<byte> output)
         {
             SecurityAssert.Assert(_keyInitialised);
-            SecurityAssert.AssertBuffer(input, inputOffset, length);
-            SecurityAssert.AssertBuffer(output, outputOffset, length);
+            SecurityAssert.AssertInputOutputBuffers(input, output);
 
-            for (var offset = 0; offset < length; offset++)
+            for (var offset = 0; offset < output.Length; offset++)
             {
-                output[outputOffset + offset] = (byte)(input[inputOffset + offset] ^ NextPGRA());
+                output[offset] = (byte)(input[ offset] ^ NextPGRA(_s.Span));
             }
         }
 
-        public void Decrypt(byte[] input, int inputOffset, byte[] output, int outputOffset, int length)
+        public void Decrypt(ReadOnlySpan<byte> input, Span<byte> output)
         {
-            Encrypt(input, inputOffset, output, outputOffset, length);
+            Encrypt(input, output);
         }
 
-        private static byte[] BuildSchedule(IReadOnlyList<byte> key)
+        private static void BuildSchedule(ReadOnlySpan<byte> key, Span<byte> schedule)
         {
-            var s = new byte[256];
-
-            for (var i = 0; i < s.Length; i++)
+            for (var i = 0; i < schedule.Length; i++)
             {
-                s[i] = (byte)i;
+                schedule[i] = (byte)i;
             }
 
             var j = 0;
 
-            for (var i = 0; i < s.Length; i++)
+            for (var i = 0; i < schedule.Length; i++)
             {
-                j = (j + s[i] + key[i % key.Count]) % 256;
+                j = (j + schedule[i] + key[i % key.Length]) % 256;
 
-                (s[i], s[j]) = (s[j], s[i]);
+                (schedule[i], schedule[j]) = (schedule[j], schedule[i]);
             }
-
-            return s;
         }
 
-        private byte NextPGRA()
+        private byte NextPGRA(Span<byte> schedule)
         {
             _i = (_i + 1) % 256;
-            _j = (_j + _s[_i]) % 256;
-            (_s[_i], _s[_j]) = (_s[_j], _s[_i]);
-            return _s[(_s[_i] + _s[_j]) % 256];
+            _j = (_j + schedule[_i]) % 256;
+            (schedule[_i], schedule[_j]) = (schedule[_j], schedule[_i]);
+            return schedule[(schedule[_i] + schedule[_j]) % 256];
         }
     }
 }

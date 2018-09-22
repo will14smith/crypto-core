@@ -21,13 +21,12 @@ namespace Crypto.TLS.RC4
         {
             var key = GetKey(end, direction);
 
-            SecurityAssert.NotNull(key);
             SecurityAssert.Assert(key.Length > 0);
 
             return new RC4KeyParameter(key);
         }
 
-        private byte[] GetKey(ConnectionEnd end, ConnectionDirection direction)
+        private ReadOnlySpan<byte> GetKey(ConnectionEnd end, ConnectionDirection direction)
         {
             switch (end)
             {
@@ -35,9 +34,9 @@ namespace Crypto.TLS.RC4
                     switch (direction)
                     {
                         case ConnectionDirection.Read:
-                            return _keyConfig.Server;
+                            return _keyConfig.Server.Span;
                         case ConnectionDirection.Write:
-                            return _keyConfig.Client;
+                            return _keyConfig.Client.Span;
                         default:
                             throw new ArgumentOutOfRangeException(nameof(direction), direction, null);
                     }
@@ -45,9 +44,9 @@ namespace Crypto.TLS.RC4
                     switch (direction)
                     {
                         case ConnectionDirection.Read:
-                            return _keyConfig.Client;
+                            return _keyConfig.Client.Span;
                         case ConnectionDirection.Write:
-                            return _keyConfig.Server;
+                            return _keyConfig.Server.Span;
                         default:
                             throw new ArgumentOutOfRangeException(nameof(direction), direction, null);
                     }

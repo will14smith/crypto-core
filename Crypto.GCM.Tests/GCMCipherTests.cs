@@ -1,6 +1,7 @@
 ﻿using Crypto.AES;
 using Crypto.Core.Encryption.Parameters;
 using Crypto.Utils;
+using System;
 using Xunit;
 
 namespace Crypto.GCM.Tests
@@ -32,8 +33,8 @@ namespace Crypto.GCM.Tests
             var encryptOutput = new byte[encryptInput.Length];
             var encryptTag = new byte[16];
 
-            var offset = gcm.Encrypt(encryptInput, 0, encryptOutput, 0, encryptInput.Length);
-            gcm.EncryptFinal(encryptOutput, offset, encryptTag);
+            var offset = gcm.Encrypt(encryptInput, encryptOutput);
+            gcm.EncryptFinal(encryptOutput.AsSpan().Slice(offset), encryptTag);
 
             Assert.Equal(ciphertext, HexConverter.ToHex(encryptOutput));
             Assert.Equal(tag, HexConverter.ToHex(encryptTag));
@@ -44,8 +45,8 @@ namespace Crypto.GCM.Tests
             var decryptInput = HexConverter.FromHex(ciphertext + tag);
             var decryptOutput = new byte[decryptInput.Length - encryptTag.Length];
 
-            offset = gcm.Decrypt(decryptInput, 0, decryptOutput, 0, decryptInput.Length - encryptTag.Length);
-            gcm.DecryptFinal(decryptInput, offset, decryptOutput, offset);
+            offset = gcm.Decrypt(decryptInput.Slice(0, decryptInput.Length - encryptTag.Length), decryptOutput);
+            gcm.DecryptFinal(decryptInput.Slice(offset), decryptOutput.AsSpan().Slice(offset));
 
             Assert.Equal(plaintext, HexConverter.ToHex(decryptOutput));
         }
@@ -75,8 +76,8 @@ namespace Crypto.GCM.Tests
             var encryptOutput = new byte[encryptInput.Length];
             var encryptTag = new byte[16];
 
-            var offset = gcm.Encrypt(encryptInput, 0, encryptOutput, 0, encryptInput.Length);
-            gcm.EncryptFinal(encryptOutput, offset, encryptTag);
+            var offset = gcm.Encrypt(encryptInput, encryptOutput);
+            gcm.EncryptFinal(encryptOutput.AsSpan().Slice(offset), encryptTag);
 
             Assert.Equal(ciphertext, HexConverter.ToHex(encryptOutput));
             Assert.Equal(tag, HexConverter.ToHex(encryptTag));
@@ -87,8 +88,8 @@ namespace Crypto.GCM.Tests
             var decryptInput = HexConverter.FromHex(ciphertext + tag);
             var decryptOutput = new byte[decryptInput.Length - encryptTag.Length];
 
-            offset = gcm.Decrypt(decryptInput, 0, decryptOutput, 0, decryptInput.Length - encryptTag.Length);
-            gcm.DecryptFinal(decryptInput, offset, decryptOutput, offset);
+            offset = gcm.Decrypt(decryptInput.Slice(0, decryptInput.Length - encryptTag.Length), decryptOutput);
+            gcm.DecryptFinal(decryptInput.Slice(offset), decryptOutput.AsSpan().Slice(offset));
 
             Assert.Equal(plaintext, HexConverter.ToHex(decryptOutput));
         }

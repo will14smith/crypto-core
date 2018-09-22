@@ -24,7 +24,7 @@ namespace Crypto.SHA.Tests
             var digest = new SHA256Digest(SHA256Digest.Mode.SHA224);
 
             var buffer = new byte[] { 0x24 };
-            digest.Update(buffer, 0, buffer.Length);
+            digest.Update(buffer);
 
             var result = digest.Digest();
 
@@ -37,7 +37,7 @@ namespace Crypto.SHA.Tests
             var digest = new SHA256Digest(SHA256Digest.Mode.SHA224);
 
             var buffer = Encoding.UTF8.GetBytes("The quick brown fox jumps over the lazy dog");
-            digest.Update(buffer, 0, buffer.Length);
+            digest.Update(buffer);
 
             var result = digest.Digest();
 
@@ -49,11 +49,11 @@ namespace Crypto.SHA.Tests
         {
             var digest = new SHA256Digest(SHA256Digest.Mode.SHA224);
             var buffer = Encoding.UTF8.GetBytes("The quick brown fox jumps");
-            digest.Update(buffer, 0, buffer.Length);
+            digest.Update(buffer);
 
             var digest2 = digest.Clone();
             buffer = Encoding.UTF8.GetBytes(" over the lazy dog");
-            digest2.Update(buffer, 0, buffer.Length);
+            digest2.Update(buffer);
 
             var result1 = digest.Digest();
             var result2 = digest2.Digest();
@@ -86,16 +86,15 @@ namespace Crypto.SHA.Tests
                 var msg = HexConverter.FromHex(lines[i + 1].Substring(6));
                 var expectedHash = lines[i + 2].Substring(5);
 
-                digest.Update(msg, 0, len);
+                digest.Update(msg.Slice(0, len));
                 var hash = digest.Digest();
 
                 AssertSHA224(expectedHash, hash);
             }
         }
 
-        private void AssertSHA224(string expected, byte[] actual)
+        private void AssertSHA224(string expected, ReadOnlySpan<byte> actual)
         {
-            Assert.NotNull(actual);
             Assert.Equal(28, actual.Length);
 
             var expectedBuffer = HexConverter.FromHex(expected);
@@ -103,7 +102,7 @@ namespace Crypto.SHA.Tests
             Console.WriteLine("Expecting : {0}", expected);
             Console.WriteLine("Actual    : {0}", HexConverter.ToHex(actual));
 
-            Assert.Equal(expectedBuffer, actual);
+            Assert.Equal(expectedBuffer.ToArray(), actual.ToArray());
         }
     }
 }

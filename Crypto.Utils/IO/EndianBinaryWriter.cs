@@ -139,7 +139,7 @@ namespace Crypto.Utils.IO
         public void Write(bool value)
         {
             BitConverter.CopyBytes(value, _buffer, 0);
-            WriteInternal(_buffer, 1);
+            WriteInternal(_buffer.AsSpan(0, 1));
         }
 
         /// <summary>
@@ -150,7 +150,7 @@ namespace Crypto.Utils.IO
         public void Write(short value)
         {
             BitConverter.CopyBytes(value, _buffer, 0);
-            WriteInternal(_buffer, 2);
+            WriteInternal(_buffer.AsSpan(0, 2));
         }
 
         /// <summary>
@@ -161,7 +161,7 @@ namespace Crypto.Utils.IO
         public void Write(int value)
         {
             BitConverter.CopyBytes(value, _buffer, 0);
-            WriteInternal(_buffer, 4);
+            WriteInternal(_buffer.AsSpan(0, 4));
         }
 
         /// <summary>
@@ -172,7 +172,7 @@ namespace Crypto.Utils.IO
         public void Write(long value)
         {
             BitConverter.CopyBytes(value, _buffer, 0);
-            WriteInternal(_buffer, 8);
+            WriteInternal(_buffer.AsSpan(0, 8));
         }
 
         /// <summary>
@@ -183,7 +183,7 @@ namespace Crypto.Utils.IO
         public void Write(ushort value)
         {
             BitConverter.CopyBytes(value, _buffer, 0);
-            WriteInternal(_buffer, 2);
+            WriteInternal(_buffer.AsSpan(0, 2));
         }
 
         /// <summary>
@@ -194,7 +194,7 @@ namespace Crypto.Utils.IO
         public void Write(uint value)
         {
             BitConverter.CopyBytes(value, _buffer, 0);
-            WriteInternal(_buffer, 4);
+            WriteInternal(_buffer.AsSpan(0, 4));
         }
 
         /// <summary>
@@ -205,7 +205,7 @@ namespace Crypto.Utils.IO
         public void Write(ulong value)
         {
             BitConverter.CopyBytes(value, _buffer, 0);
-            WriteInternal(_buffer, 8);
+            WriteInternal(_buffer.AsSpan(0, 8));
         }
 
         /// <summary>
@@ -216,7 +216,7 @@ namespace Crypto.Utils.IO
         public void Write(float value)
         {
             BitConverter.CopyBytes(value, _buffer, 0);
-            WriteInternal(_buffer, 4);
+            WriteInternal(_buffer.AsSpan(0, 4));
         }
 
         /// <summary>
@@ -227,7 +227,7 @@ namespace Crypto.Utils.IO
         public void Write(double value)
         {
             BitConverter.CopyBytes(value, _buffer, 0);
-            WriteInternal(_buffer, 8);
+            WriteInternal(_buffer.AsSpan(0, 8));
         }
 
         /// <summary>
@@ -238,7 +238,7 @@ namespace Crypto.Utils.IO
         public void Write(decimal value)
         {
             BitConverter.CopyBytes(value, _buffer, 0);
-            WriteInternal(_buffer, 16);
+            WriteInternal(_buffer.AsSpan(0, 16));
         }
 
         /// <summary>
@@ -248,7 +248,7 @@ namespace Crypto.Utils.IO
         public void Write(byte value)
         {
             _buffer[0] = value;
-            WriteInternal(_buffer, 1);
+            WriteInternal(_buffer.AsSpan(0, 1));
         }
 
         /// <summary>
@@ -258,7 +258,7 @@ namespace Crypto.Utils.IO
         public void Write(sbyte value)
         {
             _buffer[0] = unchecked((byte)value);
-            WriteInternal(_buffer, 1);
+            WriteInternal(_buffer.AsSpan(0, 1));
         }
 
         /// <summary>
@@ -271,7 +271,20 @@ namespace Crypto.Utils.IO
             {
                 throw new ArgumentNullException(nameof(value));
             }
-            WriteInternal(value, value.Length);
+            WriteInternal(value);
+        }
+
+        public void Write(ReadOnlyMemory<byte> value)
+        {
+            WriteInternal(value.Span);
+        }
+        public void Write(ReadOnlySpan<byte> value)
+        {
+            if (value == null)
+            {
+                throw new ArgumentNullException(nameof(value));
+            }
+            WriteInternal(value);
         }
 
         /// <summary>
@@ -308,7 +321,7 @@ namespace Crypto.Utils.IO
             }
             CheckDisposed();
             var data = Encoding.GetBytes(value, 0, value.Length);
-            WriteInternal(data, data.Length);
+            WriteInternal(data);
         }
 
         /// <summary>
@@ -325,7 +338,7 @@ namespace Crypto.Utils.IO
             CheckDisposed();
             var data = Encoding.GetBytes(value);
             Write7BitEncodedInt(data.Length);
-            WriteInternal(data, data.Length);
+            WriteInternal(data);
         }
 
         /// <summary>
@@ -373,10 +386,10 @@ namespace Crypto.Utils.IO
         /// </summary>
         /// <param name="bytes">The array of bytes to write from</param>
         /// <param name="length">The number of bytes to write</param>
-        private void WriteInternal(byte[] bytes, int length)
+        private void WriteInternal(ReadOnlySpan<byte> bytes)
         {
             CheckDisposed();
-            BaseStream.Write(bytes, 0, length);
+            BaseStream.Write(bytes);
         }
 
         #endregion

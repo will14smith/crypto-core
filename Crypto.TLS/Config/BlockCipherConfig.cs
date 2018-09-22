@@ -1,8 +1,10 @@
-﻿namespace Crypto.TLS.Config
+﻿using System;
+
+namespace Crypto.TLS.Config
 {
     public class BlockCipherConfig
     {
-        public byte[] ClientMACKey { get; set; }
-        public byte[] ServerMACKey { get; set; }
+        public ReadOnlyMemory<byte> ClientMACKey { get; set; }
+        public ReadOnlyMemory<byte> ServerMACKey { get; set; }
     }
 }

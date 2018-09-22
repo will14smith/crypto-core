@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -46,7 +47,7 @@ namespace Crypto.EC.Encryption
             _nField = new PrimeField(_domain.Order);
         }
 
-        public byte[] Sign(byte[] input, IDigest hash)
+        public ReadOnlySpan<byte> Sign(ReadOnlySpan<byte> input, IDigest hash)
         {
             if (_privateKey == null)
             {
@@ -54,7 +55,7 @@ namespace Crypto.EC.Encryption
             }
 
             // e = HASH(input)
-            hash.Update(input, 0, input.Length);
+            hash.Update(input);
             var e = hash.Digest();
 
             // z = the Ln leftmost bits of e, where Ln is the bit length of the group order n.
@@ -100,7 +101,7 @@ namespace Crypto.EC.Encryption
             }
         }
 
-        private FieldValue ToZ(IEnumerable<byte> e, int ln)
+        private FieldValue ToZ(ReadOnlySpan<byte> e, int ln)
         {
             // TODO handle sub byte lengths
 
@@ -109,14 +110,15 @@ namespace Crypto.EC.Encryption
                 throw new NotImplementedException();
             }
 
-            return _domain.Field.Value(e.Take(ln / 8).ToBigInteger());
+            return _domain.Field.Value(e.Slice(0, ln / 8).ToBigInteger());
         }
 
-        public bool Verify(byte[] input, byte[] signature, IDigest hash)
+        public bool Verify(ReadOnlySpan<byte> input, ReadOnlySpan<byte> signature, IDigest hash)
         {
             FieldValue r, s;
 
-            using (var buffer = new MemoryStream(signature))
+            // TODO this w/o memstream?
+            using (var buffer = new MemoryStream(signature.ToArray()))
             {
                 var reader = new DERReader(buffer);
 
@@ -142,7 +144,7 @@ namespace Crypto.EC.Encryption
             // check r and s are in [1, n-1]
 
             // e = HASH(input)
-            hash.Update(input, 0, input.Length);
+            hash.Update(input);
             var e = hash.Digest();
 
             // z = the Ln leftmost bits of e, where Ln is the bit length of the group order n.

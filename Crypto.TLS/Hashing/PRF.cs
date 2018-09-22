@@ -14,37 +14,37 @@ namespace Crypto.TLS.Hashing
             _digest = digest;
         }
 
-        public IEnumerable<byte> Digest(byte[] secret, string label, byte[] seed)
+        public IEnumerable<byte> Digest(ReadOnlyMemory<byte> secret, string label, ReadOnlySpan<byte> seed)
         {
             var labelBytes = Encoding.ASCII.GetBytes(label);
 
-            var properSeed = new byte[labelBytes.Length + seed.Length];
-            Array.Copy(labelBytes, 0, properSeed, 0, labelBytes.Length);
-            Array.Copy(seed, 0, properSeed, labelBytes.Length, seed.Length);
+            var properSeed = new byte[labelBytes.Length + seed.Length].AsMemory();
+            labelBytes.CopyTo(properSeed);
+            seed.CopyTo(properSeed.Span.Slice(labelBytes.Length));
 
             return P_hash(secret, properSeed);
         }
 
-        private IEnumerable<byte> P_hash(byte[] secret, byte[] seed)
+        private IEnumerable<byte> P_hash(ReadOnlyMemory<byte> secret, ReadOnlyMemory<byte> seed)
         {
-            var hmac = new HMAC(_digest, secret);
+            var hmac = new HMAC(_digest, secret.Span);
 
             var a = seed;
 
             while (true)
             {
                 hmac.Reset();
-                hmac.Update(a, 0, a.Length);
-                a = hmac.Digest();
+                hmac.Update(a.Span);
+                a = hmac.Digest().ToArray();
 
                 hmac.Reset();
-                hmac.Update(a, 0, a.Length);
-                hmac.Update(seed, 0, seed.Length);
+                hmac.Update(a.Span);
+                hmac.Update(seed.Span);
 
-                var b = hmac.Digest();
-                foreach (var x in b)
+                var b = hmac.Digest().ToArray();
+                for (var i = 0; i < b.Length; i++)
                 {
-                    yield return x;
+                    yield return b[i];
                 }
             }
         }

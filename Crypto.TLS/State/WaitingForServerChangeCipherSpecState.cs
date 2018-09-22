@@ -44,7 +44,7 @@ namespace Crypto.TLS.State
         private IState HandleChangeCipherSpec(Record record)
         {
             SecurityAssert.Assert(record.Length == 1);
-            SecurityAssert.Assert(record.Data[0] == 1);
+            SecurityAssert.Assert(record.Data.Span[0] == 1);
 
             Connection.RecordReaderStrategy = _cipherSuitesProvider.GetRecordReaderStrategy(ServiceProvider, _cipherSuiteConfig.CipherSuite);
 

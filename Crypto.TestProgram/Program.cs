@@ -43,34 +43,46 @@ namespace Crypto.TestProgram
 
             LoadCertificates(serviceProvider.GetRequiredService<CertificateManager>());
 
-            var server = new TcpListener(IPAddress.Any, 443);
+            var server = new TcpListener(IPAddress.Any, 4433);
             server.Start();
 
             while (true)
             {
-                var client = server.AcceptTcpClient();
-
-                Console.WriteLine("Client connected: " + client.Client.RemoteEndPoint);
-
-                var stream = new TLSStream(client.GetStream(), serviceProvider);
-
                 try
                 {
-                    stream.AuthenticateAsServer();
+                    var client = server.AcceptTcpClient();
+
+                    HandleClient(client, serviceProvider);
                 }
-                catch (UnableToEstablishSecureConnectionException ex)
+                catch (Exception ex)
                 {
                     Console.WriteLine(ex);
-                    continue;
                 }
-                 
-                var reader = new StreamReader(stream);
-                var writer = new StreamWriter(stream) { AutoFlush = true };
-
-                writer.WriteLine("Please enter a message to be echoed:");
-                var msg = reader.ReadLine();
-                writer.WriteLine("Thanks! Your message was: " + msg);
             }
+        }
+
+        private static void HandleClient(TcpClient client, ServiceProvider serviceProvider)
+        {
+            Console.WriteLine("Client connected: " + client.Client.RemoteEndPoint);
+
+            var stream = new TLSStream(client.GetStream(), serviceProvider);
+
+            try
+            {
+                stream.AuthenticateAsServer();
+            }
+            catch (UnableToEstablishSecureConnectionException ex)
+            {
+                Console.WriteLine(ex);
+                return;
+            }
+
+            var reader = new StreamReader(stream);
+            var writer = new StreamWriter(stream) {AutoFlush = true};
+
+            writer.WriteLine("Please enter a message to be echoed:");
+            var msg = reader.ReadLine();
+            writer.WriteLine("Thanks! Your message was: " + msg);
         }
 
         private static void LoadCertificates(CertificateManager certificates)

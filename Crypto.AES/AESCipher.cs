@@ -10,8 +10,8 @@ namespace Crypto.AES
         private const int AESBlockLength = 16;
 
         private bool _keyInitialised;
-        private readonly byte[] _key;
-        private readonly byte[] _roundKeys;
+        private readonly Memory<byte> _key;
+        private readonly Memory<byte> _roundKeys;
 
         public AESCipher(int keySize)
         {
@@ -40,23 +40,21 @@ namespace Crypto.AES
 
             SecurityAssert.NotNull(keyParam);
             SecurityAssert.Assert(keyParam.Length == KeySize);
-            Array.Copy(keyParam, _key, KeySize);
+            keyParam.CopyTo(_key);
 
-            var tmp = BuildRoundKeys(_key);
-            Array.Copy(tmp, _roundKeys, _roundKeys.Length);
+            BuildRoundKeys(_key.Span, _roundKeys.Span);
 
             _keyInitialised = true;
         }
 
-        public void EncryptBlock(byte[] input, int inputOffset, byte[] output, int outputOffset)
+        public void EncryptBlock(ReadOnlySpan<byte> input, Span<byte> output)
         {
             SecurityAssert.Assert(_keyInitialised);
-            SecurityAssert.AssertBuffer(input, inputOffset, BlockLength);
-            SecurityAssert.AssertBuffer(output, outputOffset, BlockLength);
+            SecurityAssert.AssertInputOutputBuffers(input, output, BlockLength);
 
             var rounds = KeySize / 4 + 6;
 
-            var state = ToState(input, inputOffset);
+            var state = ToState(input);
 
             AddRoundKey(state, 0);
 
@@ -72,18 +70,17 @@ namespace Crypto.AES
             ShiftRows(state);
             AddRoundKey(state, rounds);
 
-            FromState(state, output, outputOffset);
+            FromState(state, output);
         }
 
-        public void DecryptBlock(byte[] input, int inputOffset, byte[] output, int outputOffset)
+        public void DecryptBlock(ReadOnlySpan<byte> input, Span<byte> output)
         {
             SecurityAssert.Assert(_keyInitialised);
-            SecurityAssert.AssertBuffer(input, inputOffset, BlockLength);
-            SecurityAssert.AssertBuffer(output, outputOffset, BlockLength);
+            SecurityAssert.AssertInputOutputBuffers(input, output, BlockLength);
 
             var rounds = KeySize / 4 + 6;
 
-            var state = ToState(input, inputOffset);
+            var state = ToState(input);
 
             AddRoundKey(state, rounds);
 
@@ -99,40 +96,40 @@ namespace Crypto.AES
             InvSubBytes(state);
             AddRoundKey(state, 0);
 
-            FromState(state, output, outputOffset);
+            FromState(state, output);
         }
 
-        public static byte[,] ToState(byte[] input, int offset)
+        public static byte[,] ToState(ReadOnlySpan<byte> input)
         {
             var output = new byte[4, 4];
 
             for (var i = 0; i < AESBlockLength; i++)
             {
-                output[i / 4, i % 4] = input[offset + i];
+                output[i / 4, i % 4] = input[i];
             }
 
             return output;
         }
-        public static void FromState(byte[,] input, byte[] output, int offset)
+        public static void FromState(byte[,] state, Span<byte> output)
         {
             for (var i = 0; i < 4; i++)
             {
                 for (var j = 0; j < 4; j++)
                 {
-                    output[offset + i * 4 + j] = input[i, j];
+                    output[i * 4 + j] = state[i, j];
                 }
             }
         }
 
-        public static byte[] BuildRoundKeys(byte[] inputKey)
+        public static void BuildRoundKeys(ReadOnlySpan<byte> inputKey, Span<byte> roundKeys)
         {
             SecurityAssert.Assert(inputKey.Length == 16 || inputKey.Length == 24 || inputKey.Length == 32);
 
             var n = inputKey.Length;
             var b = n * 4 + 112;
-            var arr = new byte[b];
+            SecurityAssert.Assert(roundKeys.Length == b);
 
-            Array.Copy(inputKey, 0, arr, 0, n);
+            inputKey.CopyTo(roundKeys);
 
             var c = n;
             var i = 1;
@@ -143,7 +140,7 @@ namespace Crypto.AES
             {
                 for (var a = 0; a < 4; a++)
                 {
-                    t[a] = arr[a + c - 4];
+                    t[a] = roundKeys[a + c - 4];
                 }
                 // Every n-blocks do a complex calculation
                 if (c % n == 0)
@@ -162,16 +159,16 @@ namespace Crypto.AES
 
                 for (var a = 0; a < 4; a++)
                 {
-                    arr[c] = (byte)(arr[c - n] ^ t[a]);
+                    roundKeys[c] = (byte)(roundKeys[c - n] ^ t[a]);
                     c++;
                 }
             }
-
-            return arr;
         }
 
-        private static void ScheduleCore(byte[] arr, int i)
+        private static void ScheduleCore(Span<byte> arr, int i)
         {
+            SecurityAssert.Assert(arr.Length == 4);
+
             RotateLeft(arr);
 
             for (var a = 0; a < 4; a++)
@@ -207,7 +204,7 @@ namespace Crypto.AES
             {
                 for (var y = 0; y < 4; y++)
                 {
-                    state[x, y] ^= _roundKeys[round * 16 + x * 4 + y];
+                    state[x, y] ^= _roundKeys.Span[round * 16 + x * 4 + y];
                 }
             }
         }
@@ -254,8 +251,10 @@ namespace Crypto.AES
             RotateLeft(state, 3);
         }
 
-        private static void RotateLeft(byte[] arr)
+        private static void RotateLeft(Span<byte> arr)
         {
+            SecurityAssert.Assert(arr.Length == 4);
+
             var a = arr[0];
 
             arr[0] = arr[1];

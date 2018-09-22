@@ -62,15 +62,16 @@ namespace Crypto.TLS.Records.Strategy
             cipher.Init(GetParameters(ConnectionDirection.Read, aad, nonce));
 
             var plaintext = new byte[payload.Length - cipher.TagLength];
-            var plaintextLength = cipher.Decrypt(payload, 0, plaintext, 0, payload.Length - cipher.TagLength);
-            plaintextLength += cipher.DecryptFinal(payload, plaintextLength, plaintext, plaintextLength);
+
+            var plaintextLength = cipher.Decrypt(payload.AsSpan(0, payload.Length - cipher.TagLength), plaintext);
+            plaintextLength += cipher.DecryptFinal(payload.AsSpan(plaintextLength), plaintext.AsSpan(plaintextLength));
 
             Array.Resize(ref plaintext, plaintextLength);
 
             return new Record(type, version, plaintext);
         }
 
-        public void Write(RecordType type, TLSVersion version, byte[] data)
+        public void Write(RecordType type, TLSVersion version, ReadOnlySpan<byte> data)
         {
             var cipher = GetCipher();
 
@@ -89,14 +90,15 @@ namespace Crypto.TLS.Records.Strategy
             cipher.Init(GetParameters(ConnectionDirection.Write, aad, nonce));
 
             var tag = new byte[cipher.TagLength];
-            
+
             var payloadLength = explicitNonceLength;
-            payloadLength += cipher.Encrypt(data, 0, payload, payloadLength, data.Length);
-            payloadLength += cipher.EncryptFinal(payload, payloadLength, tag);
-            
+
+            payloadLength += cipher.Encrypt(data, payload.AsSpan(payloadLength));
+            payloadLength += cipher.EncryptFinal(payload.AsSpan(payloadLength), tag);
+
             Array.Copy(tag, 0, payload, payloadLength, tag.Length);
             payloadLength += tag.Length;
-            
+
             _connection.Writer.Write(type);
             _connection.Writer.Write(version);
             _connection.Writer.Write((ushort)payloadLength);
@@ -122,26 +124,25 @@ namespace Crypto.TLS.Records.Strategy
             throw new InvalidCastException("Cipher isn't an AEAD cipher");
         }
 
-        private ICipherParameters GetParameters(ConnectionDirection direction, byte[] aad, byte[] nonceExplicit)
+        private ICipherParameters GetParameters(ConnectionDirection direction, ReadOnlySpan<byte> aad, ReadOnlySpan<byte> nonceExplicit)
         {
             var end = _endConfig.End;
             var cipherParameterFactory = _cipherSuitesProvider.ResolveCipherParameterFactory(_cipherSuiteConfig.CipherSuite);
-            
+
             var innerParameters = cipherParameterFactory.Create(end, direction);
 
             var nonceImplicit = GetImplicitNonce(direction);
 
-            SecurityAssert.NotNull(nonceImplicit);
             SecurityAssert.Assert(nonceImplicit.Length > 0);
-            
-            var nonce = new byte[nonceImplicit.Length + nonceExplicit.Length];
-            Array.Copy(nonceImplicit, 0, nonce, 0, nonceImplicit.Length);
-            Array.Copy(nonceExplicit, 0, nonce, nonceImplicit.Length, nonceExplicit.Length);
+
+            var nonce = new byte[nonceImplicit.Length + nonceExplicit.Length].AsSpan();
+            nonceImplicit.CopyTo(nonce);
+            nonceExplicit.CopyTo(nonce.Slice(nonceImplicit.Length));
 
             return new AADParameter(new IVParameter(innerParameters, nonce), aad);
         }
 
-        private byte[] GetImplicitNonce(ConnectionDirection direction)
+        private ReadOnlySpan<byte> GetImplicitNonce(ConnectionDirection direction)
         {
             switch (_endConfig.End)
             {
@@ -149,9 +150,9 @@ namespace Crypto.TLS.Records.Strategy
                     switch (direction)
                     {
                         case ConnectionDirection.Read:
-                            return _aeadConfig.ServerIV;
+                            return _aeadConfig.ServerIV.Span;
                         case ConnectionDirection.Write:
-                            return _aeadConfig.ClientIV;
+                            return _aeadConfig.ClientIV.Span;
                         default:
                             throw new ArgumentOutOfRangeException(nameof(direction), direction, null);
                     }
@@ -159,9 +160,9 @@ namespace Crypto.TLS.Records.Strategy
                     switch (direction)
                     {
                         case ConnectionDirection.Read:
-                            return _aeadConfig.ClientIV;
+                            return _aeadConfig.ClientIV.Span;
                         case ConnectionDirection.Write:
-                            return _aeadConfig.ServerIV;
+                            return _aeadConfig.ServerIV.Span;
                         default:
                             throw new ArgumentOutOfRangeException(nameof(direction), direction, null);
                     }

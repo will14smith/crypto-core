@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Crypto.Certificates;
 using Crypto.Core.Randomness;
 using Crypto.RSA.Encryption;
@@ -78,9 +79,9 @@ namespace Crypto.TLS.RSA
             throw new System.NotImplementedException();
         }
 
-        private byte[] ReadMessage(byte[] body)
+        private ReadOnlySpan<byte> ReadMessage(ReadOnlySpan<byte> body)
         {
-            var length = EndianBitConverter.Big.ToUInt16(body, 0);
+            var length = EndianBitConverter.Big.ToUInt16(body);
             SecurityAssert.Assert(body.Length == length + 2);
 
             var key = (RSAPrivateKey)_certificateManager.GetPrivateKey(_certificateConfig.Certificate.SubjectPublicKey);
@@ -89,7 +90,8 @@ namespace Crypto.TLS.RSA
 
             var preMasterSecret = new byte[48];
 
-            rsa.Decrypt(body, 2, preMasterSecret, 0, length);
+            rsa.Decrypt(body.Slice(2), preMasterSecret);
+
             SecurityAssert.Assert(preMasterSecret[0] == _versionConfig.Version.Major);
             SecurityAssert.Assert(preMasterSecret[1] == _versionConfig.Version.Minor);
 

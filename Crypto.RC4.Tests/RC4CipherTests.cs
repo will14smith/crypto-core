@@ -16,7 +16,7 @@ namespace Crypto.RC4.Tests
             var rc4 = new RC4Cipher(128);
             rc4.Init(new RC4KeyParameter(key));
 
-            rc4.Encrypt(input, 0, output, 0, input.Length);
+            rc4.Encrypt(input, output);
 
             Assert.Equal(rc4.KeySize, 16);
             Assert.Equal("720c94b63edf44e131d950ca211a5a30", HexConverter.ToHex(output));
@@ -33,7 +33,7 @@ namespace Crypto.RC4.Tests
             var rc4 = new RC4Cipher(128);
             rc4.Init(new RC4KeyParameter(key));
 
-            rc4.Decrypt(input, 0, output, 0, input.Length);
+            rc4.Decrypt(input, output);
 
             Assert.Equal(rc4.KeySize, 16);
             Assert.Equal("540be91c8d1b503cacf2290801feb197", HexConverter.ToHex(output));

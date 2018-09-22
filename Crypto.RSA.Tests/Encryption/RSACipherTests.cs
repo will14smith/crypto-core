@@ -24,8 +24,8 @@ namespace Crypto.RSA.Tests.Encryption
             var encryptOutput = new byte[rsa.KeySize];
             var decryptOutput = new byte[input.Length];
 
-            rsa.Encrypt(input, 0, encryptOutput, 0, input.Length);
-            rsa.Decrypt(encryptOutput, 0, decryptOutput, 0, encryptOutput.Length);
+            rsa.Encrypt(input, encryptOutput);
+            rsa.Decrypt(encryptOutput, decryptOutput);
 
             Assert.Equal(input, decryptOutput);
         }
@@ -53,7 +53,7 @@ namespace Crypto.RSA.Tests.Encryption
             var rsa = new RSASignatureCipher();
             rsa.Init(new RSAPrivateKeyParameter(Key));
 
-            var signature = rsa.Sign(input, new SHA1Digest());
+            var signature = rsa.Sign(input, new SHA1Digest()).ToArray();
 
             signature[signature.Length - 1] ^= 1;
 

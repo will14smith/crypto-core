@@ -55,21 +55,21 @@ namespace Crypto.SHA
             return new SHA1Digest(this);
         }
 
-        public override void Update(byte[] buffer, int offset, int length)
+        public override void Update(ReadOnlySpan<byte> input)
         {
             SecurityAssert.Assert(!_complete);
 
-            base.Update(buffer, offset, length);
+            base.Update(input);
         }
 
-        protected override void UpdateBlock(byte[] buffer)
+        protected override void UpdateBlock(ReadOnlySpan<byte> buffer)
         {
             SecurityAssert.Assert(!_complete);
 
             var w = new uint[80];
             for (var i = 0; i < 16; i++)
             {
-                w[i] = EndianBitConverter.Big.ToUInt32(buffer, i << 2);
+                w[i] = EndianBitConverter.Big.ToUInt32(buffer.Slice(i << 2));
             }
             for (var i = 16; i < 80; i++) { w[i] = LeftRotate(w[i - 3] ^ w[i - 8] ^ w[i - 14] ^ w[i - 16], 1); }
 
@@ -128,7 +128,7 @@ namespace Crypto.SHA
             return a | b;
         }
 
-        public override byte[] Digest()
+        public override ReadOnlySpan<byte> Digest()
         {
             var paddingLength = 64 - (MessageSize % BlockSize) / 8;
             if (paddingLength <= 8) paddingLength += 64;
@@ -139,7 +139,7 @@ namespace Crypto.SHA
 
             Array.Copy(EndianBitConverter.Big.GetBytes(MessageSize), 0, padding, paddingLength - 8, 8);
 
-            Update(padding, 0, padding.Length);
+            Update(padding);
             SecurityAssert.Assert(WorkBufferEmpty);
 
             _complete = true;

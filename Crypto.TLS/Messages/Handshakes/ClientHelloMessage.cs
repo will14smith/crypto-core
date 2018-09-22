@@ -13,7 +13,7 @@ namespace Crypto.TLS.Messages.Handshakes
             : base(HandshakeType.ClientHello, version, randomBytes, sessionId, extensions)
         {
             SecurityAssert.NotNull(cipherSuites);
-            SecurityAssert.Assert(cipherSuites.Length >= 2 && cipherSuites.Length <= 0xFFFE);
+            SecurityAssert.Assert(cipherSuites.Length >= 1 && cipherSuites.Length <= 0x7FFF);
             CipherSuites = cipherSuites;
 
             SecurityAssert.NotNull(compressionMethods);
@@ -40,7 +40,7 @@ namespace Crypto.TLS.Messages.Handshakes
                 var randomBytes = reader.ReadBytes(32);
                 var sessionId = reader.ReadBytesVariable(1, 0, 32);
 
-                var cipherSuites = reader.ReadUInt16Variable<CipherSuite>(2, 2, 0xFFFE);
+                var cipherSuites = reader.ReadUInt16Variable<CipherSuite>(2, 1, 0x7FFF);
                 var compressionMethods = reader.ReadBytesVariable<CompressionMethod>(1, 1, 0xFF).ToArray();
 
                 var extensions = new List<HelloExtension>();

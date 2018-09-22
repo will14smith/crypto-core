@@ -1,20 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace Crypto.Utils
 {
     public static class BufferUtils
     {
-        public static void Xor(byte[] input, int inputOffset, byte[] target, int targetOffset, int length)
-        {
-            SecurityAssert.AssertBuffer(input, inputOffset, length);
-            SecurityAssert.AssertBuffer(target, targetOffset, length);
-
-            for (var i = 0; i < length; i++)
-            {
-                target[targetOffset + i] ^= input[inputOffset + i];
-            }
-        }
         public static void Xor(ReadOnlySpan<byte> input, Span<byte> output)
         {
             SecurityAssert.Assert(input.Length == output.Length);
@@ -25,24 +14,15 @@ namespace Crypto.Utils
             }
         }
 
-        public static bool EqualConstantTime(IReadOnlyList<byte> a, IReadOnlyList<byte> b)
+        public static bool EqualConstantTime(ReadOnlySpan<byte> a, ReadOnlySpan<byte> b)
         {
-            if (ReferenceEquals(a, b))
-            {
-                return true;
-            }
-            if (ReferenceEquals(a, null) || ReferenceEquals(b, null))
-            {
-                return false;
-            }
-
-            if (a.Count != b.Count)
+            if (a.Length != b.Length)
             {
                 return false;
             }
 
             var result = 0;
-            for (var i = 0; i < a.Count; i++)
+            for (var i = 0; i < a.Length; i++)
             {
                 result |= a[i] ^ b[i];
             }

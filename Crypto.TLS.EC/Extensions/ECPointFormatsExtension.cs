@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Crypto.TLS.Config;
 using Crypto.TLS.EC.Config;
 using Crypto.TLS.Extensions;
 using Crypto.TLS.Messages.Handshakes;
@@ -9,16 +10,25 @@ namespace Crypto.TLS.EC.Extensions
 {
     public class ECPointFormatsExtension : IExtension
     {
+        private readonly EndConfig _endConfig;
         private readonly ECPointFormatsConfig _ecPointFormatsConfig;
 
         public ECPointFormatsExtension(
+            EndConfig endConfig,
             ECPointFormatsConfig ecPointFormatsConfig)
         {
+            _endConfig = endConfig;
             _ecPointFormatsConfig = ecPointFormatsConfig;
         }
 
         public IEnumerable<HelloExtension> GenerateHelloExtensions()
         {
+            if (_endConfig.End == ConnectionEnd.Server && (_ecPointFormatsConfig.SupportedPointFormats == null || !_ecPointFormatsConfig.SupportedPointFormats.Any()))
+            {
+                // client doesn't support EC
+                yield break;
+            }
+            
             // This need kept in sync with Crypto.EC.Maths.CurveExtensions.PointFromBinary
             var localSupportedFormats = new[]
             {

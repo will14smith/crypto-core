@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Xunit;
 
 namespace Crypto.Utils.Tests
@@ -18,7 +19,7 @@ namespace Crypto.Utils.Tests
         [MemberData(nameof(TestCases))]
         public void FromHex_Correct(string input, byte[] expected)
         {
-            Assert.Equal(expected, HexConverter.FromHex(input));
+            Assert.Equal(expected.ToArray(), HexConverter.FromHex(input).ToArray());
         }
         [Fact]
         public void FromHex_IncorrectLength_ShouldThrow()

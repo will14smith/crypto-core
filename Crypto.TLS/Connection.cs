@@ -36,7 +36,7 @@ namespace Crypto.TLS
 
         public void WriteRecord(Record record)
         {
-            RecordWriterStrategy.Write(record.Type, record.Version, record.Data);
+            RecordWriterStrategy.Write(record.Type, record.Version, record.Data.Span);
         }
     }
 }

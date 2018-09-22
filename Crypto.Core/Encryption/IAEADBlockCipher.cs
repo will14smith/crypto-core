@@ -14,7 +14,7 @@ namespace Crypto.Core.Encryption
         //TODO other functions...
 
         int Encrypt(ReadOnlySpan<byte> input, Span<byte> output);
-        int EncryptFinal(Span<byte> output, ReadOnlySpan<byte> tag);
+        int EncryptFinal(Span<byte> output, Span<byte> tag);
 
         int Decrypt(ReadOnlySpan<byte> input, Span<byte> output);
         int DecryptFinal(ReadOnlySpan<byte> input, Span<byte> output);

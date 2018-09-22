@@ -27,7 +27,7 @@ namespace Crypto.TLS.Messages.Handshakes
             var body = message.GetBytes();
             var record = new Record(RecordType.Handshake, _versionConfig.Version, body);
 
-            _handshakeConfig.UpdateVerification(body, 0, body.Length);
+            _handshakeConfig.UpdateVerification(body);
             _connection.WriteRecord(record);
         }
     }

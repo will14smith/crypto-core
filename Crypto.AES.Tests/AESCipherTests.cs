@@ -66,14 +66,14 @@ namespace Crypto.AES.Tests
                 var plainInput = HexConverter.FromHex(plain);
                 var actual = new byte[aes.BlockLength];
 
-                aes.EncryptBlock(plainInput, 0, actual, 0);
+                aes.EncryptBlock(plainInput, actual);
 
                 Assert.Equal(cipher, HexConverter.ToHex(actual));
 
                 // decryption
                 var cipherInput = HexConverter.FromHex(cipher);
                 actual = new byte[aes.BlockLength];
-                aes.DecryptBlock(cipherInput, 0, actual, 0);
+                aes.DecryptBlock(cipherInput, actual);
 
                 Assert.Equal(plain, HexConverter.ToHex(actual));
             }
@@ -85,10 +85,10 @@ namespace Crypto.AES.Tests
             var input = HexConverter.FromHex("0102030405060708090a0b0c0d0e0f10");
             var expected = "01060b10050a0f04090e03080d02070c";
 
-            var state = AESCipher.ToState(input, 0);
+            var state = AESCipher.ToState(input);
             AESCipher.ShiftRows(state);
             var output = new byte[16];
-            AESCipher.FromState(state, output, 0);
+            AESCipher.FromState(state, output);
 
             Assert.Equal(expected, HexConverter.ToHex(output));
         }
@@ -99,10 +99,10 @@ namespace Crypto.AES.Tests
             var input = HexConverter.FromHex("dbf201c6130a01c6532201c6455c01c6");
             var expected = "67e17a12ffc24aa907d22241a9384a05";
 
-            var state = AESCipher.ToState(input, 0);
+            var state = AESCipher.ToState(input);
             AESCipher.MixColumns(state);
             var output = new byte[16];
-            AESCipher.FromState(state, output, 0);
+            AESCipher.FromState(state, output);
 
             Assert.Equal(expected, HexConverter.ToHex(output));
         }
@@ -112,10 +112,10 @@ namespace Crypto.AES.Tests
             var input = HexConverter.FromHex("67e17a12ffc24aa907d22241a9384a05");
             var expected = "dbf201c6130a01c6532201c6455c01c6";
 
-            var state = AESCipher.ToState(input, 0);
+            var state = AESCipher.ToState(input);
             AESCipher.InvMixColumns(state);
             var output = new byte[16];
-            AESCipher.FromState(state, output, 0);
+            AESCipher.FromState(state, output);
 
             Assert.Equal(expected, HexConverter.ToHex(output));
         }
@@ -134,9 +134,10 @@ namespace Crypto.AES.Tests
             foreach (var test in tests)
             {
                 var input = HexConverter.FromHex(test[0]);
+                var output = new byte[176];
                 var expected = test[1];
 
-                var output = AESCipher.BuildRoundKeys(input);
+                AESCipher.BuildRoundKeys(input, output);
 
                 Assert.Equal(expected, HexConverter.ToHex(output));
             }
@@ -155,9 +156,10 @@ namespace Crypto.AES.Tests
             foreach (var test in tests)
             {
                 var input = HexConverter.FromHex(test[0]);
+                var output = new byte[208];
                 var expected = test[1];
 
-                var output = AESCipher.BuildRoundKeys(input);
+                AESCipher.BuildRoundKeys(input, output);
 
                 Assert.Equal(expected, HexConverter.ToHex(output));
             }
@@ -176,9 +178,10 @@ namespace Crypto.AES.Tests
             foreach (var test in tests)
             {
                 var input = HexConverter.FromHex(test[0]);
+                var output = new byte[240];
                 var expected = test[1];
 
-                var output = AESCipher.BuildRoundKeys(input);
+                AESCipher.BuildRoundKeys(input, output);
 
                 Assert.Equal(expected, HexConverter.ToHex(output));
             }

@@ -9,16 +9,15 @@ namespace Crypto.TLS.Messages.Handshakes
         // TODO could in theory not be 12...
         public const int VerifyDataLength = 12; 
         
-        public byte[] VerifyActual { get; }
-        public byte[] VerifyExpectedHash { get; }
+        public ReadOnlyMemory<byte> VerifyActual { get; }
+        public ReadOnlyMemory<byte> VerifyExpectedHash { get; }
 
-        public FinishedMessage(byte[] verifyActual, byte[] verifyExpectedHash) : base(HandshakeType.Finished)
+        public FinishedMessage(ReadOnlySpan<byte> verifyActual, ReadOnlySpan<byte> verifyExpectedHash) : base(HandshakeType.Finished)
         {
-            SecurityAssert.NotNull(verifyActual);
             SecurityAssert.Assert(verifyActual.Length == VerifyDataLength);
 
-            VerifyActual = verifyActual;
-            VerifyExpectedHash = verifyExpectedHash;
+            VerifyActual = verifyActual.ToArray();
+            VerifyExpectedHash = verifyExpectedHash.ToArray();
         }
 
         protected override void Write(EndianBinaryWriter writer)
@@ -26,15 +25,11 @@ namespace Crypto.TLS.Messages.Handshakes
             writer.Write(VerifyActual);
         }
 
-        public static HandshakeMessage Read(byte[] body, byte[] currentHash)
+        public static HandshakeMessage Read(ReadOnlySpan<byte> body, ReadOnlySpan<byte> currentHash)
         {
-            var verifyData = new byte[VerifyDataLength];
-
             SecurityAssert.Assert(body.Length == VerifyDataLength);
 
-            Array.Copy(body, verifyData, VerifyDataLength);
-
-            return new FinishedMessage(verifyData, currentHash);
+            return new FinishedMessage(body.Slice(0, VerifyDataLength), currentHash);
         }
     }
 }

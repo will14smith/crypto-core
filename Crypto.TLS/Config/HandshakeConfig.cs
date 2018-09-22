@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Buffers;
 using System.Collections.Generic;
 using Crypto.Core.Hashing;
 using Crypto.TLS.Messages.Handshakes;
@@ -9,30 +10,25 @@ namespace Crypto.TLS.Config
 {
     public class HandshakeConfig
     {
-        private readonly List<byte[]> _messages = new List<byte[]>();
+        private readonly List<ReadOnlyMemory<byte>> _messages = new List<ReadOnlyMemory<byte>>();
                 
         public void UpdateVerification(HandshakeType type, uint length, byte[] body)
         {
-            UpdateVerification(new[] { (byte)type }, 0, 1);
-            UpdateVerification(EndianBitConverter.Big.GetBytes(length), 1, 3);
-            UpdateVerification(body, 0, body.Length);
+            UpdateVerification(new[] { (byte)type });
+            UpdateVerification(EndianBitConverter.Big.GetBytes(length).AsSpan(1, 3));
+            UpdateVerification(body);
         }
         
-        public void UpdateVerification(byte[] buffer, int offset, int length)
-        {
-            SecurityAssert.AssertBuffer(buffer, offset, length);
-            var output = new byte[length];
-            
-            Array.Copy(buffer, offset, output, 0, length);
-
-            _messages.Add(output);
+        public void UpdateVerification(ReadOnlySpan<byte> buffer)
+        {           
+            _messages.Add(buffer.ToArray());
         }
 
-        public byte[] ComputeVerification(IDigest digest)
+        public ReadOnlySpan<byte> ComputeVerification(IDigest digest)
         {
             foreach (var message in _messages)
             {
-                digest.Update(message, 0, message.Length);
+                digest.Update(message.Span);
             }
 
             return digest.Digest();

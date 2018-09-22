@@ -16,20 +16,22 @@ namespace Crypto.Core.Hashing
         }
 
         private readonly IDigest _digest;
-        private readonly byte[] _key;
+        private readonly ReadOnlyMemory<byte> _key;
 
         private HMACState _state;
 
-        public HMAC(IDigest digest, byte[] key)
+        public HMAC(IDigest digest, ReadOnlySpan<byte> inputKey)
         {
             SecurityAssert.NotNull(digest);
-            SecurityAssert.NotNull(key);
 
             _digest = digest;
-            _key = new byte[digest.BlockSize / 8];
-            
+           
             _state = HMACState.Uninitialised;
-            ProcessInputKey(key);
+
+            var key = new byte[digest.BlockSize / 8];
+            ProcessInputKey(inputKey, key);
+            _key = key;
+
             _state = HMACState.ProcessedKey;
 
             Reset();
@@ -54,7 +56,7 @@ namespace Crypto.Core.Hashing
 
             var innerHash = _digest.Digest();
 
-            var oPadKey = XorKey(_key, 0x5c);
+            var oPadKey = XorKey(_key.Span, 0x5c);
             _digest.Reset();
             _digest.Update(oPadKey);
             _digest.Update(innerHash);
@@ -66,7 +68,7 @@ namespace Crypto.Core.Hashing
         {
             SecurityAssert.Assert(_state != HMACState.Uninitialised);
 
-            var iPadKey = XorKey(_key, 0x36);
+            var iPadKey = XorKey(_key.Span, 0x36);
 
             _digest.Reset();
             _digest.Update(iPadKey);
@@ -79,31 +81,27 @@ namespace Crypto.Core.Hashing
             throw new NotImplementedException();
         }
 
-        private void ProcessInputKey(byte[] bytes)
+        private void ProcessInputKey(ReadOnlySpan<byte> input, Span<byte> output)
         {
             var blockLength = _digest.BlockSize / 8;
 
-            if (bytes.Length > blockLength)
+            if (input.Length > blockLength)
             {
-                _state = HMACState.Uninitialised;
-
                 _digest.Reset();
-                _digest.Update(bytes);
-                var keyHash = _digest.Digest();
-
-                keyHash.CopyTo(_key);
+                _digest.Update(input);
+                _digest.Digest().CopyTo(output);
             }
             else
             {
-                Array.Copy(bytes, _key, bytes.Length);
+                input.CopyTo(output);
             }
 
         }
-        private static byte[] XorKey(IReadOnlyList<byte> bytes, byte param)
+        private static ReadOnlySpan<byte> XorKey(ReadOnlySpan<byte> bytes, byte param)
         {
-            var result = new byte[bytes.Count];
+            var result = new byte[bytes.Length];
 
-            for (var i = 0; i < bytes.Count; i++)
+            for (var i = 0; i < bytes.Length; i++)
             {
                 result[i] = (byte)(bytes[i] ^ param);
             }

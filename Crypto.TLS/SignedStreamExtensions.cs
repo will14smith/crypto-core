@@ -18,8 +18,8 @@ namespace Crypto.TLS
 
             var signature = stream.Sign();
 
-            stream.InnerStream.Write(EndianBitConverter.Big.GetBytes((ushort)signature.Length), 0, 2);
-            stream.InnerStream.Write(signature, 0, signature.Length);
+            stream.InnerStream.Write(EndianBitConverter.Big.GetBytes((ushort)signature.Length));
+            stream.InnerStream.Write(signature);
         }
         
         public static void VerifyTlsSignature(this SignedStream stream, TLSHashAlgorithm hashAlgorithm, TLSSignatureAlgorithm signatureAlgorithm)
