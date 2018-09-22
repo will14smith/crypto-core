@@ -29,9 +29,10 @@ namespace Crypto.Core.Encryption.BlockModes
 
             BufferUtils.Xor(_workingIV, tmp);
 
-            Cipher.EncryptBlock(tmp, output.Slice(0, BlockLength));
+            var target = output.Slice(0, BlockLength);
+            Cipher.EncryptBlock(tmp, target);
 
-            output.Slice(BlockLength).CopyTo(_workingIV);
+            target.CopyTo(_workingIV);
         }
 
         public override void DecryptBlock(ReadOnlySpan<byte> input, Span<byte> output)
