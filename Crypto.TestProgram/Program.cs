@@ -45,6 +45,7 @@ namespace Crypto.TestProgram
 
             var server = new TcpListener(IPAddress.Any, 4433);
             server.Start();
+            Console.WriteLine("Listening on: " + server.LocalEndpoint);
 
             while (true)
             {
@@ -80,9 +81,12 @@ namespace Crypto.TestProgram
             var reader = new StreamReader(stream);
             var writer = new StreamWriter(stream) {AutoFlush = true};
 
-            writer.WriteLine("Please enter a message to be echoed:");
-            var msg = reader.ReadLine();
-            writer.WriteLine("Thanks! Your message was: " + msg);
+            reader.ReadLine();
+            writer.WriteLine("Hello!");
+
+            stream.Close();
+
+            Console.WriteLine("Client disconnected");
         }
 
         private static void LoadCertificates(CertificateManager certificates)

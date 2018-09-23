@@ -1,7 +1,9 @@
 ﻿using System;
 using System.IO;
 using System.Threading;
+using System.Threading.Tasks;
 using Crypto.TLS.Config;
+using Crypto.TLS.Messages.Alerts;
 using Crypto.TLS.Records;
 using Crypto.TLS.State;
 using Crypto.Utils;
@@ -18,6 +20,7 @@ namespace Crypto.TLS.IO
 
         private bool _active;
         private Thread _reader;
+        private readonly CancellationTokenSource cts = new CancellationTokenSource();
         private readonly ByteQueue _readQueue = new ByteQueue();
 
         public TLSStream(Stream inner, IServiceProvider services)
@@ -60,7 +63,8 @@ namespace Crypto.TLS.IO
 
                 if (state is CloseConnectionWithAlertState alertState)
                 {
-                    _inner.Close();
+                    WriteAlert(alertState.AlertMessage.Level, alertState.AlertMessage.Description);
+                    Close();
                     throw new UnableToEstablishSecureConnectionException(alertState.AlertMessage);
                 }
             }
@@ -69,21 +73,40 @@ namespace Crypto.TLS.IO
         private void StartReadThread()
         {
             _reader = new Thread(ReadThread);
-            _reader.Start();
+            _reader.Start(cts.Token);
         }
-        private void ReadThread()
+
+        private void ReadThread(object parameter)
         {
-            while (true)
+            var token = (CancellationToken) parameter;
+
+            while (!token.IsCancellationRequested)
             {
                 var connection = Services.GetRequiredService<Connection>();
-                var record = connection.ReadRecord();
+                Record record;
+
+                try
+                {
+                    record = connection.ReadRecord();
+                }
+                catch
+                {
+                    InternalClose();
+                    return;
+                }
 
                 switch (record.Type)
                 {
                     case RecordType.Application:
                         _readQueue.Put(record.Data);
                         break;
-                    // TODO handle alerts
+                    case RecordType.Alert:
+                        if (record.Data.Span[0] == 0x01 && record.Data.Span[1] == 0x00)
+                        {
+                            InternalClose();
+                            return;
+                        }
+                        break;
                     default:
                         // TODO terminate connection
                         throw new InvalidOperationException();
@@ -144,15 +167,36 @@ namespace Crypto.TLS.IO
 
         public override void Close()
         {
-            // TODO close TLS connection
-            _reader.Abort();
+            // TODO other actions?
+            WriteAlert(AlertLevel.Warning, AlertDescription.CloseNotify);
+
+            InternalClose();
+        }
+
+        private void InternalClose()
+        {
+            cts.Cancel();
+
+            _active = false;
+
+            _inner.Close();
             base.Close();
+        }
+
+        private void WriteAlert(AlertLevel level, AlertDescription description)
+        {
+            var data = new[] {(byte) level, (byte) description};
+
+            var versionConfig = Services.GetRequiredService<VersionConfig>();
+            var record = new Record(RecordType.Alert, versionConfig.Version, data);
+
+            Services.GetRequiredService<Connection>().WriteRecord(record);
         }
 
         protected override void Dispose(bool disposing)
         {
             // TODO close TLS connection if open
-            _servicesScope.Dispose();
+            // TODO _servicesScope.Dispose();
         }
     }
 }

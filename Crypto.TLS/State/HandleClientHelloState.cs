@@ -5,6 +5,7 @@ using Crypto.TLS.Config;
 using Crypto.TLS.Extensions;
 using Crypto.TLS.Messages.Alerts;
 using Crypto.TLS.Messages.Handshakes;
+using Crypto.Utils;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Crypto.TLS.State
@@ -119,6 +120,10 @@ namespace Crypto.TLS.State
                 if (extension.HasValue)
                 {
                     extension.Value.HandleHello(extensionMessage);
+                }
+                else
+                {
+                    Console.WriteLine("Unknown extension: " + extensionMessage.Type + " - data: " + HexConverter.ToHex(extensionMessage.Data));
                 }
             }
         }
