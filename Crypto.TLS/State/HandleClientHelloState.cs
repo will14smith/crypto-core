@@ -74,7 +74,7 @@ namespace Crypto.TLS.State
             var version = _negotiatior.DecideVersion(_handshake.Version);
             if (!version.HasValue)
             {
-                return CloseConnectionWithAlertState.New(_serviceProvider, new AlertMessage(AlertLevel.Fatal, AlertDescription.HandshakeFailure));
+                return CloseConnectionWithAlertState.New(_serviceProvider, new AlertMessage(AlertLevel.Fatal, AlertDescription.ProtocolVersion));
             }
             _versionConfig.Version = version.Value;
 

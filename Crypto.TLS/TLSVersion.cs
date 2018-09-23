@@ -17,8 +17,8 @@ namespace Crypto.TLS
 
         public override bool Equals(object obj)
         {
-            if (ReferenceEquals(null, obj)) return false;
-            return obj is TLSVersion && Equals((TLSVersion) obj);
+            if (obj is null) return false;
+            return obj is TLSVersion version && Equals(version);
         }
 
         public bool Equals(TLSVersion other)
@@ -42,6 +42,16 @@ namespace Crypto.TLS
         public static bool operator !=(TLSVersion left, TLSVersion right)
         {
             return !left.Equals(right);
+        }
+
+        public static bool operator <(TLSVersion left, TLSVersion right)
+        {
+            return left.Major < right.Major || !(left.Major > right.Major) && left.Minor < right.Minor;
+        }
+
+        public static bool operator >(TLSVersion left, TLSVersion right)
+        {
+            return left.Major > right.Major || !(left.Major < right.Major) && left.Minor > right.Minor;
         }
     }
 }

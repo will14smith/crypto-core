@@ -24,12 +24,13 @@ namespace Crypto.TLS
 
         public Option<TLSVersion> DecideVersion(TLSVersion maxSupportedVersion)
         {
-            if (maxSupportedVersion != TLSVersion.TLS1_2)
+            if (maxSupportedVersion < TLSVersion.TLS1_2)
             {
                 return Option.None<TLSVersion>();
             }
 
             return Option.Some(TLSVersion.TLS1_2);
+
         }
 
         public Option<CipherSuite> DecideCipherSuite(CipherSuite[] supportedCipherSuites)
