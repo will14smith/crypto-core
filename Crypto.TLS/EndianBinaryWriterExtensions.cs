@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Crypto.TLS.Records;
 using Crypto.Utils;
@@ -37,11 +38,11 @@ namespace Crypto.TLS
 
         public static void WriteByteVariable<T>(this EndianBinaryWriter writer, byte lengthSize, IReadOnlyCollection<T> data)
         {
-            writer.WriteByteVariable(lengthSize, data.Cast<byte>().ToList());
+            writer.WriteByteVariable(lengthSize, data.Cast<byte>().ToArray().AsSpan());
         }
-        public static void WriteByteVariable(this EndianBinaryWriter writer, byte lengthSize, IReadOnlyCollection<byte> data)
+        public static void WriteByteVariable(this EndianBinaryWriter writer, byte lengthSize, ReadOnlySpan<byte> data)
         {
-            writer.WriteLength(lengthSize, 1, data.Count);
+            writer.WriteLength(lengthSize, 1, data.Length);
             foreach (var item in data)
             {
                 writer.Write(item);
@@ -50,23 +51,23 @@ namespace Crypto.TLS
 
         public static void WriteUInt16Variable<T>(this EndianBinaryWriter writer, byte lengthSize, IReadOnlyCollection<T> data)
         {
-            writer.WriteUInt16Variable(lengthSize, data.Cast<ushort>().ToList());
+            writer.WriteUInt16Variable(lengthSize, data.Cast<ushort>().ToArray().AsSpan());
         }
-        public static void WriteUInt16Variable(this EndianBinaryWriter writer, byte lengthSize, IReadOnlyCollection<ushort> data)
+        public static void WriteUInt16Variable(this EndianBinaryWriter writer, byte lengthSize, ReadOnlySpan<ushort> data)
         {
-            writer.WriteLength(lengthSize, 2, data.Count);
+            writer.WriteLength(lengthSize, 2, data.Length);
             foreach (var item in data)
             {
                 writer.Write(item);
             }
         }
-        
+
         private static void WriteLength(this EndianBinaryWriter writer, byte lengthSize, byte elementSize, int count)
         {
             SecurityAssert.Assert(lengthSize > 0 && lengthSize <= 3);
 
             var length = elementSize * count;
-            
+
             switch (lengthSize)
             {
                 case 1:

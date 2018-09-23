@@ -41,20 +41,20 @@ namespace Crypto.Core.Tests.Randomness
             Assert.Throws<SecurityException>(() => Mock.Of<IRandom>().RandomBig(bits));
         }
 
-        [Theory]
-        [InlineData(8)]
-        [InlineData(256)]
-        public void RandomBig_ShouldGetNRandomBytes(int bits)
-        {
-            var n = bits / 8;
+        //[Theory]
+        //[InlineData(8)]
+        //[InlineData(256)]
+        //public void RandomBig_ShouldGetNRandomBytes(int bits)
+        //{
+        //    var n = bits / 8;
 
-            var randomMock = new Mock<IRandom>(MockBehavior.Strict);
-            randomMock.Setup(x => x.RandomBytes(n)).Returns(new byte[n]).Verifiable();
+        //    var randomMock = new Mock<IRandom>(MockBehavior.Strict);
+        //    randomMock.Setup(x => x.RandomBytes(n)).Returns(new byte[n]).Verifiable();
 
-            randomMock.Object.RandomBig(bits);
+        //    randomMock.Object.RandomBig(bits);
 
-            randomMock.Verify(x => x.RandomBytes(n), Times.Once);
-        }
+        //    randomMock.Verify(x => x.RandomBytes(n), Times.Once);
+        //}
 
         [Fact]
         public void RandomBig_ShouldReturnPositiveNumber()
@@ -66,26 +66,26 @@ namespace Crypto.Core.Tests.Randomness
             Assert.Equal(0x80, result);
         }
 
-        [Fact]
-        public void RandomBig_WithMax_ShouldRetryUntilUnderMax()
-        {
-            var randomMock = new Mock<IRandom>(MockBehavior.Strict);
+        //[Fact]
+        //public void RandomBig_WithMax_ShouldRetryUntilUnderMax()
+        //{
+        //    var randomMock = new Mock<IRandom>(MockBehavior.Strict);
 
-            var attempt = 0;
-            randomMock.Setup(x => x.RandomBytes(1)).Returns(() =>
-            {
-                if (attempt++ == 0)
-                {
-                    return new byte[] { 0x11 };
-                }
+        //    var attempt = 0;
+        //    randomMock.Setup(x => x.RandomBytes(1)).Returns(() =>
+        //    {
+        //        if (attempt++ == 0)
+        //        {
+        //            return new byte[] { 0x11 };
+        //        }
 
-                return new byte[] { 0x10 };
-            }).Verifiable();
+        //        return new byte[] { 0x10 };
+        //    }).Verifiable();
 
-            var result = randomMock.Object.RandomBig(new BigInteger(0x10));
+        //    var result = randomMock.Object.RandomBig(new BigInteger(0x10));
 
-            Assert.Equal(0x10, result);
-            randomMock.Verify(x => x.RandomBytes(1), Times.Exactly(2));
-        }
+        //    Assert.Equal(0x10, result);
+        //    randomMock.Verify(x => x.RandomBytes(1), Times.Exactly(2));
+        //}
     }
 }

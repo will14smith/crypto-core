@@ -49,7 +49,7 @@ namespace Crypto.Utils.Tests
 
             var bytes = input.ToByteArray(endianness);
 
-            Assert.Equal(expectedBytes, bytes);
+            Assert.Equal(HexConverter.ToHex(expectedBytes), HexConverter.ToHex(bytes));
         }
 
         [Theory]

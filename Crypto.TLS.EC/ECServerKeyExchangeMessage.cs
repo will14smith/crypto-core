@@ -33,8 +33,8 @@ namespace Crypto.TLS.EC
             var randomConfig = _serviceProvider.GetRequiredService<RandomConfig>();
 
             // signature needs these but the output doesn't
-            stream.HashAlgorithm.Update(randomConfig.Client);
-            stream.HashAlgorithm.Update(randomConfig.Server);
+            stream.HashAlgorithm.Update(randomConfig.Client.Span);
+            stream.HashAlgorithm.Update(randomConfig.Server.Span);
 
             Parameters.Write(writer);
 

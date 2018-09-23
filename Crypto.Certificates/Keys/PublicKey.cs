@@ -1,4 +1,6 @@
-﻿namespace Crypto.Certificates.Keys
+﻿using System;
+
+namespace Crypto.Certificates.Keys
 {
     public abstract class PublicKey
     {
@@ -16,6 +18,6 @@
         }
 
         protected abstract bool Equal(PublicKey key);
-        public abstract byte[] GetBytes();
+        public abstract ReadOnlySpan<byte> GetBytes();
     }
 }

@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Numerics;
 using Crypto.ASN1;
@@ -30,7 +31,7 @@ namespace Crypto.TLS.DH.Keys
                    && Y == other.Y;
         }
 
-        public override byte[] GetBytes()
+        public override ReadOnlySpan<byte> GetBytes()
         {
             var asn1 = new ASN1Integer(Y);
 

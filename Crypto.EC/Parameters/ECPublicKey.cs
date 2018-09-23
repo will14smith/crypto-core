@@ -1,4 +1,5 @@
-﻿using Crypto.Certificates.Keys;
+﻿using System;
+using Crypto.Certificates.Keys;
 using Crypto.EC.Maths;
 
 namespace Crypto.EC.Parameters
@@ -23,7 +24,7 @@ namespace Crypto.EC.Parameters
                    && Point.Equals(other.Point);
         }
 
-        public override byte[] GetBytes()
+        public override ReadOnlySpan<byte> GetBytes()
         {
             return Point.ToBytes();
         }

@@ -44,8 +44,8 @@ namespace Crypto.TLS.KeyExchanges
             var serverRandom = _randomConfig.Server;
 
             var random = new byte[clientRandom.Length + serverRandom.Length];
-            clientRandom.CopyTo(random.AsSpan());
-            serverRandom.CopyTo(random.AsSpan(clientRandom.Length));
+            clientRandom.CopyTo(random);
+            serverRandom.CopyTo(random.AsMemory(clientRandom.Length));
 
             var prfDigest = _cipherSuitesProvider.ResolvePRFHash(_cipherSuiteConfig.CipherSuite);
             var prf = new PRF(prfDigest);
@@ -69,8 +69,8 @@ namespace Crypto.TLS.KeyExchanges
             var prf = new PRF(prfDigest);
 
             var random = new byte[serverRandom.Length + clientRandom.Length];
-            serverRandom.CopyTo(random.AsSpan());
-            clientRandom.CopyTo(random.AsSpan(serverRandom.Length));
+            serverRandom.CopyTo(random);
+            clientRandom.CopyTo(random.AsMemory(serverRandom.Length));
 
             var macKeyLength = mac.HashSize / 8;
             var encKeyLength = cipher.KeySize;

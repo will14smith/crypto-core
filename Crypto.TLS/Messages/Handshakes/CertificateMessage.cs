@@ -28,7 +28,7 @@ namespace Crypto.TLS.Messages.Handshakes
             writer.WriteUInt24((uint)totalLength);
             foreach (var cert in certificates)
             {
-                writer.WriteByteVariable(3, cert);
+                writer.WriteByteVariable(3, cert.AsSpan());
             }
         }
 

@@ -95,7 +95,7 @@ namespace Crypto.TLS.State
 
             _randomConfig.Client = _handshake.RandomBytes;
             // TODO move this to an earlier state?
-            _randomConfig.Server = _random.RandomBytes(32);
+            _randomConfig.Server = _random.RandomBytes(32).ToArray();
 
             // TODO Generate a session id
             _sessionConfig.Id = new byte[0];

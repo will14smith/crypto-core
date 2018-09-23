@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using Crypto.Utils;
 using Crypto.Utils.IO;
 
@@ -6,7 +7,7 @@ namespace Crypto.TLS.Messages.Handshakes
 {
     public abstract class HelloMessage : HandshakeMessage
     {
-        protected HelloMessage(HandshakeType type, TLSVersion version, byte[] randomBytes, byte[] sessionId, HelloExtension[] extensions) : base(type)
+        protected HelloMessage(HandshakeType type, TLSVersion version, ReadOnlyMemory<byte> randomBytes, ReadOnlyMemory<byte> sessionId, HelloExtension[] extensions) : base(type)
         {
             Version = version;
 
@@ -24,8 +25,8 @@ namespace Crypto.TLS.Messages.Handshakes
         }
 
         public TLSVersion Version { get; }
-        public byte[] RandomBytes { get; }
-        public byte[] SessionId { get; }
+        public ReadOnlyMemory<byte> RandomBytes { get; }
+        public ReadOnlyMemory<byte> SessionId { get; }
 
         public HelloExtension[] Extensions { get; }
 
@@ -33,7 +34,7 @@ namespace Crypto.TLS.Messages.Handshakes
         {
             writer.Write(Version);
             writer.Write(RandomBytes);
-            writer.WriteByteVariable(1, SessionId);
+            writer.WriteByteVariable(1, SessionId.Span);
             WriteHello(writer);
 
             if (Extensions.Length == 0)

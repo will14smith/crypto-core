@@ -42,8 +42,8 @@ namespace Crypto.TLS.DH
             var randomConfig = _serviceProvider.GetRequiredService<RandomConfig>();
 
             // signature needs these but the output doesn't
-            stream.HashAlgorithm.Update(randomConfig.Client);
-            stream.HashAlgorithm.Update(randomConfig.Server);
+            stream.HashAlgorithm.Update(randomConfig.Client.Span);
+            stream.HashAlgorithm.Update(randomConfig.Server.Span);
 
             var pBuffer = P.ToByteArray(Endianness.BigEndian);
             var gBuffer = G.ToByteArray(Endianness.BigEndian);
@@ -72,8 +72,8 @@ namespace Crypto.TLS.DH
 
                 var randomConfig = serviceProvider.GetRequiredService<RandomConfig>();
 
-                stream.HashAlgorithm.Update(randomConfig.Client);
-                stream.HashAlgorithm.Update(randomConfig.Server);
+                stream.HashAlgorithm.Update(randomConfig.Client.Span);
+                stream.HashAlgorithm.Update(randomConfig.Server.Span);
 
                 var plength = reader.ReadUInt16();
                 var pbuffer = reader.ReadBytes(plength);

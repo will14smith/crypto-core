@@ -13,10 +13,28 @@ namespace Crypto.Core.Encryption
 
         //TODO other functions...
 
-        int Encrypt(ReadOnlySpan<byte> input, Span<byte> output);
-        int EncryptFinal(Span<byte> output, Span<byte> tag);
+        AEADResult Encrypt(ReadOnlySpan<byte> input, Span<byte> output);
+        AEADResult EncryptFinal(AEADResult previousResult);
 
-        int Decrypt(ReadOnlySpan<byte> input, Span<byte> output);
-        int DecryptFinal(ReadOnlySpan<byte> input, Span<byte> output);
+        AEADResult Decrypt(ReadOnlySpan<byte> input, Span<byte> output);
+        AEADResult DecryptFinal(AEADResult previousResult);
+    }
+
+    public ref struct AEADResult
+    {
+        public readonly ReadOnlySpan<byte> RemainingInput;
+        public readonly Span<byte> RemainingOutput;
+
+        public AEADResult(ReadOnlySpan<byte> remainingInput, Span<byte> remainingOutput)
+        {
+            RemainingInput = remainingInput;
+            RemainingOutput = remainingOutput;
+        }
+
+        public void Deconstruct(out ReadOnlySpan<byte> input, out Span<byte> output)
+        {
+            input = RemainingInput;
+            output = RemainingOutput;
+        }
     }
 }

@@ -27,13 +27,17 @@ namespace Crypto.Core.Randomness
             return _local.Next(min, max);
         }
 
-        public byte[] RandomBytes(int length)
+        public ReadOnlySpan<byte> RandomBytes(int length)
         {
             var buffer = new byte[length];
-            
             _local.NextBytes(buffer);
-
             return buffer;
+        }
+
+        public void RandomBytes(Span<byte> target)
+        {
+            // TODO is there a built in method for this w/o the buffer?
+            RandomBytes(target.Length).CopyTo(target);
         }
     }
 }

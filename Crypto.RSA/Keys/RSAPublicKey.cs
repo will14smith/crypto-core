@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Numerics;
 using Crypto.ASN1;
 using Crypto.Certificates.Keys;
@@ -25,7 +26,7 @@ namespace Crypto.RSA.Keys
             return Modulus == other.Modulus && Exponent == other.Exponent;
         }
 
-        public override byte[] GetBytes()
+        public override ReadOnlySpan<byte> GetBytes()
         {
             var asn1 = new ASN1Sequence(new[]
             {

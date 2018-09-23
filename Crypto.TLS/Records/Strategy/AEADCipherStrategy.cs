@@ -48,7 +48,7 @@ namespace Crypto.TLS.Records.Strategy
         {
             var cipher = GetCipher();
 
-            // TODO parametrised from CipherSpec
+            // TODO parametrized from CipherSpec
             var explicitNonceLength = 8;
 
             var nonce = _connection.Reader.ReadBytes(explicitNonceLength);
@@ -63,46 +63,37 @@ namespace Crypto.TLS.Records.Strategy
 
             var plaintext = new byte[payload.Length - cipher.TagLength];
 
-            var plaintextLength = cipher.Decrypt(payload.AsSpan(0, payload.Length - cipher.TagLength), plaintext);
-            plaintextLength += cipher.DecryptFinal(payload.AsSpan(plaintextLength), plaintext.AsSpan(plaintextLength));
-
-            Array.Resize(ref plaintext, plaintextLength);
-
+            var result = cipher.DecryptAll(payload, plaintext);
+            Array.Resize(ref plaintext, plaintext.Length - result.RemainingOutput.Length);
+            
             return new Record(type, version, plaintext);
         }
 
-        public void Write(RecordType type, TLSVersion version, ReadOnlySpan<byte> data)
+        public void Write(RecordType type, TLSVersion version, ReadOnlySpan<byte> input)
         {
             var cipher = GetCipher();
 
-            // TODO parametrised from CipherSpec
+            // TODO parametrized from CipherSpec
             var explicitNonceLength = 8;
-            var nonce = _random.RandomBytes(explicitNonceLength);
 
             var aad = new byte[13];
             Array.Copy(EndianBitConverter.Big.GetBytes(_sequenceConfig.GetThenIncrement(ConnectionDirection.Write)), 0, aad, 0, 8);
             Array.Copy(new[] { (byte)type, version.Major, version.Major }, 0, aad, 8, 3);
-            Array.Copy(EndianBitConverter.Big.GetBytes((ushort)data.Length), 0, aad, 11, 2);
+            Array.Copy(EndianBitConverter.Big.GetBytes((ushort)input.Length), 0, aad, 11, 2);
 
-            var payload = new byte[explicitNonceLength + data.Length + cipher.TagLength];
-            Array.Copy(nonce, payload, explicitNonceLength);
+            var payload = new byte[explicitNonceLength + input.Length + cipher.TagLength];
+
+            var nonce = payload.AsSpan(0, explicitNonceLength);
+            var encryptedInput = payload.AsSpan(explicitNonceLength);
+            
+            _random.RandomBytes(nonce);
 
             cipher.Init(GetParameters(ConnectionDirection.Write, aad, nonce));
-
-            var tag = new byte[cipher.TagLength];
-
-            var payloadLength = explicitNonceLength;
-
-            payloadLength += cipher.Encrypt(data, payload.AsSpan(payloadLength));
-            payloadLength += cipher.EncryptFinal(payload.AsSpan(payloadLength), tag);
-
-            Array.Copy(tag, 0, payload, payloadLength, tag.Length);
-            payloadLength += tag.Length;
+            cipher.EncryptAll(input, encryptedInput);
 
             _connection.Writer.Write(type);
             _connection.Writer.Write(version);
-            _connection.Writer.Write((ushort)payloadLength);
-            _connection.Writer.Write(payload, 0, payloadLength);
+            _connection.Writer.WriteByteVariable(2, payload.AsSpan());
         }
 
         private IAEADBlockCipher GetCipher()

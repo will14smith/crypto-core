@@ -80,14 +80,14 @@ namespace Crypto.TLS.State
             return _serviceProvider.GetRequiredService<WaitingForServerHelloState>();
         }
 
-        private byte[] GenerateClientRandom()
+        private ReadOnlyMemory<byte> GenerateClientRandom()
         {
-            var b = _random.RandomBytes(32);
+            var b = new byte[32];
 
             var epoch = (int)DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
-            var time = EndianBitConverter.Big.GetBytes(epoch);
+            EndianBitConverter.Big.CopyBytes(epoch, b, 0);
 
-            Array.Copy(time, 0, b, 0, time.Length);
+            _random.RandomBytes(b.AsSpan(4));
 
             return b;
         }

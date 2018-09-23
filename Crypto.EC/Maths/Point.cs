@@ -17,7 +17,7 @@ namespace Crypto.EC.Maths
         }
 
         // TODO different types
-        public byte[] ToBytes()
+        public ReadOnlySpan<byte> ToBytes()
         {
             var x = X.Value.ToByteArray(Endianness.BigEndian);
             var y = Y.Value.ToByteArray(Endianness.BigEndian);
@@ -27,11 +27,14 @@ namespace Crypto.EC.Maths
                 throw new NotImplementedException("Padding");
             }
 
-            return new[]
-            {
-                // Type
-                (byte) 0x4
-            }.Concat(x).Concat(y).ToArray();
+            var b = new byte[1 + x.Length + y.Length];
+            // Type
+            b[0] = 0x04;
+
+            x.CopyTo(b.AsSpan(1));
+            y.CopyTo(b.AsSpan(1 + x.Length));
+
+            return b;
         }
 
         public override bool Equals(object obj)

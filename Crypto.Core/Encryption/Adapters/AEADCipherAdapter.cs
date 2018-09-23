@@ -25,20 +25,15 @@ namespace Crypto.Core.Encryption.Adapters
         public void Encrypt(ReadOnlySpan<byte> input, Span<byte> output)
         {
             SecurityAssert.AssertInputOutputBuffers(input, output, input.Length + TagLength);
-
-            var tag = new byte[TagLength];
             
-            var offset = Cipher.Encrypt(input, output);
-            offset += Cipher.EncryptFinal(output.Slice(offset), tag);
-            tag.CopyTo(output.Slice(offset));
+            Cipher.EncryptFinal(Cipher.Encrypt(input, output));
         }
 
         public void Decrypt(ReadOnlySpan<byte> input, Span<byte> output)
         {
             SecurityAssert.AssertInputOutputBuffers(input, output, input.Length + TagLength);
 
-            var offset = Cipher.Decrypt(input, output);
-            Cipher.DecryptFinal(input.Slice(offset), output.Slice(offset));
+            Cipher.DecryptFinal(Cipher.Decrypt(input, output));
         }
     }
 }

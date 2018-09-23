@@ -32,7 +32,7 @@ namespace Crypto.Utils
             return length;
         }
 
-        public static byte[] ToByteArray(this BigInteger val, Endianness endianness = Endianness.BigEndian)
+        public static ReadOnlySpan<byte> ToByteArray(this BigInteger val, Endianness endianness = Endianness.BigEndian)
         {
             var bytes = new List<byte>();
 

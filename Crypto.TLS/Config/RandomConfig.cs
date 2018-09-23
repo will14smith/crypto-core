@@ -1,8 +1,10 @@
-﻿namespace Crypto.TLS.Config
+﻿using System;
+
+namespace Crypto.TLS.Config
 {
     public class RandomConfig
     {
-        public byte[] Client { get; set; }
-        public byte[] Server { get; set; }
+        public ReadOnlyMemory<byte> Client { get; set; }
+        public ReadOnlyMemory<byte> Server { get; set; }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Crypto.TLS.Extensions;
@@ -9,7 +10,7 @@ namespace Crypto.TLS.Messages.Handshakes
 {
     public class ClientHelloMessage : HelloMessage
     {
-        public ClientHelloMessage(TLSVersion version, byte[] randomBytes, byte[] sessionId, HelloExtension[] extensions, CipherSuite[] cipherSuites, CompressionMethod[] compressionMethods)
+        public ClientHelloMessage(TLSVersion version, ReadOnlyMemory<byte> randomBytes, ReadOnlyMemory<byte> sessionId, HelloExtension[] extensions, CipherSuite[] cipherSuites, CompressionMethod[] compressionMethods)
             : base(HandshakeType.ClientHello, version, randomBytes, sessionId, extensions)
         {
             SecurityAssert.NotNull(cipherSuites);

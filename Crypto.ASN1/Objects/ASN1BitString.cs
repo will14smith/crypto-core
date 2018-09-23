@@ -13,9 +13,9 @@ namespace Crypto.ASN1
             Value = value;
         }
 
-        public ASN1BitString(byte[] value)
+        public ASN1BitString(ReadOnlySpan<byte> value)
         {
-            Value = new BitArray(value);
+            Value = new BitArray(value.ToArray());
         }
 
         public override BigInteger ByteLength => (int)Math.Ceiling(Value.Count / 8m) + 1;

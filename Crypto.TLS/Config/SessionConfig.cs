@@ -1,7 +1,9 @@
-﻿namespace Crypto.TLS.Config
+﻿using System;
+
+namespace Crypto.TLS.Config
 {
     public class SessionConfig
     {
-        public byte[] Id { get; set; }
+        public ReadOnlyMemory<byte> Id { get; set; }
     }
 }
