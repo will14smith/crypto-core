@@ -7,6 +7,7 @@ using Crypto.TLS.AES;
 using Crypto.TLS.DH;
 using Crypto.TLS.DH.Config;
 using Crypto.TLS.EC;
+using Crypto.TLS.Extensions;
 using Crypto.TLS.GCM;
 using Crypto.TLS.IO;
 using Crypto.TLS.RC4;
@@ -38,7 +39,8 @@ namespace Crypto.TestProgram
             services.AddRSAKeyReaders();
             services.AddRSAKeyExchange();
             services.AddSHA();
-            
+            services.AddRenegotiationInfo();
+
             services.AddCipherSuites();
 
             return services;

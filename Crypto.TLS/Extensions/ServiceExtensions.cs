@@ -40,5 +40,14 @@ namespace Crypto.TLS.Extensions
         {
             return serviceProvider.GetRequiredService<ExtensionRegistry>().ResolveAll(serviceProvider);
         }
+
+        public static IServiceCollection AddRenegotiationInfo(this IServiceCollection serviceCollection)
+        {
+            serviceCollection
+                .RegisterExtension<RenegotiationInfoExtension>(RenegotiationInfoExtension.Type)
+                .AddScoped<RenegotiationInfoExtension.Config>();
+
+            return serviceCollection;
+        }
     }
 }
