@@ -49,21 +49,20 @@ namespace Crypto.RC4
             _keyInitialised = true;
         }
 
-        public void Encrypt(ReadOnlySpan<byte> input, Span<byte> output)
+        public CipherResult Encrypt(ReadOnlySpan<byte> input, Span<byte> output)
         {
             SecurityAssert.Assert(_keyInitialised);
             SecurityAssert.AssertInputOutputBuffers(input, output);
-
-            for (var offset = 0; offset < output.Length; offset++)
+            
+            for (var offset = 0; offset < input.Length; offset++)
             {
                 output[offset] = (byte)(input[ offset] ^ NextPGRA(_s.Span));
             }
+
+            return new CipherResult(new ReadOnlySpan<byte>(), output.Slice(input.Length));
         }
 
-        public void Decrypt(ReadOnlySpan<byte> input, Span<byte> output)
-        {
-            Encrypt(input, output);
-        }
+        public CipherResult Decrypt(ReadOnlySpan<byte> input, Span<byte> output) => Encrypt(input, output);
 
         private static void BuildSchedule(ReadOnlySpan<byte> key, Span<byte> schedule)
         {

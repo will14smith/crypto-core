@@ -17,7 +17,7 @@ namespace Crypto.TLS.Hashing
         public IEnumerable<byte> Digest(ReadOnlyMemory<byte> secret, string label, ReadOnlySpan<byte> seed)
         {
             var labelBytes = Encoding.ASCII.GetBytes(label);
-
+            
             var properSeed = new byte[labelBytes.Length + seed.Length].AsMemory();
             labelBytes.CopyTo(properSeed);
             seed.CopyTo(properSeed.Span.Slice(labelBytes.Length));

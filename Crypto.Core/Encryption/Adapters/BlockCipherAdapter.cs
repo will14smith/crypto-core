@@ -21,24 +21,28 @@ namespace Crypto.Core.Encryption.Adapters
             BlockCipher.Init(parameters);
         }
 
-        public void Encrypt(ReadOnlySpan<byte> input, Span<byte> output)
+        public CipherResult Encrypt(ReadOnlySpan<byte> input, Span<byte> output)
         {
             SecurityAssert.AssertInputOutputBuffers(input, output);
 
-            for (var i = 0; i < input.Length; i += BlockCipher.BlockLength)
+            while (input.Length >= BlockCipher.BlockLength)
             {
-                BlockCipher.EncryptBlock(input.Slice(i, BlockLength), output.Slice(i, BlockLength));
+                (input, output) = BlockCipher.EncryptBlock(input, output);
             }
+
+            return new CipherResult(input, output);
         }
 
-        public void Decrypt(ReadOnlySpan<byte> input, Span<byte> output)
+        public CipherResult Decrypt(ReadOnlySpan<byte> input, Span<byte> output)
         {
             SecurityAssert.AssertInputOutputBuffers(input, output);
 
-            for (var i = 0; i < input.Length; i += BlockCipher.BlockLength)
+            while (input.Length >= BlockCipher.BlockLength)
             {
-                BlockCipher.DecryptBlock(input.Slice(i, BlockLength), output.Slice(i, BlockLength));
+                (input, output) = BlockCipher.DecryptBlock(input, output);
             }
+
+            return new CipherResult(input, output);
         }
     }
 }

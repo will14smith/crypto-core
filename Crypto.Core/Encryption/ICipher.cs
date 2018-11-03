@@ -9,7 +9,25 @@ namespace Crypto.Core.Encryption
 
         void Init(ICipherParameters parameters);
 
-        void Encrypt(ReadOnlySpan<byte> input, Span<byte> output);
-        void Decrypt(ReadOnlySpan<byte> input, Span<byte> output);
+        CipherResult Encrypt(ReadOnlySpan<byte> input, Span<byte> output);
+        CipherResult Decrypt(ReadOnlySpan<byte> input, Span<byte> output);
+    }
+
+    public ref struct CipherResult
+    {
+        public readonly ReadOnlySpan<byte> RemainingInput;
+        public readonly Span<byte> RemainingOutput;
+
+        public CipherResult(ReadOnlySpan<byte> remainingInput, Span<byte> remainingOutput)
+        {
+            RemainingInput = remainingInput;
+            RemainingOutput = remainingOutput;
+        }
+
+        public void Deconstruct(out ReadOnlySpan<byte> input, out Span<byte> output)
+        {
+            input = RemainingInput;
+            output = RemainingOutput;
+        }
     }
 }

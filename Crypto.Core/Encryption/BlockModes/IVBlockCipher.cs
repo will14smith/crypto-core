@@ -8,7 +8,7 @@ namespace Crypto.Core.Encryption.BlockModes
     {
         public IBlockCipher Cipher { get; }
 
-        protected bool IVInitialised { get; private set; }
+        protected bool IVInitialized { get; private set; }
         protected byte[] IV { get; }
 
         protected IVBlockCipher(IBlockCipher cipher)
@@ -35,7 +35,7 @@ namespace Crypto.Core.Encryption.BlockModes
             SecurityAssert.Assert(ivParam.Length == BlockLength);
             ivParam.Span.CopyTo(IV);
 
-            IVInitialised = true;
+            IVInitialized = true;
 
             if (ivParams.Parameters != null)
             {
@@ -47,7 +47,7 @@ namespace Crypto.Core.Encryption.BlockModes
 
         protected abstract void Reset();
 
-        public abstract void EncryptBlock(ReadOnlySpan<byte> input, Span<byte> output);
-        public abstract void DecryptBlock(ReadOnlySpan<byte> input, Span<byte> output);
+        public abstract BlockResult EncryptBlock(ReadOnlySpan<byte> input, Span<byte> output);
+        public abstract BlockResult DecryptBlock(ReadOnlySpan<byte> input, Span<byte> output);
     }
 }

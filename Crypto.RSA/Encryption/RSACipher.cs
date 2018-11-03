@@ -25,7 +25,7 @@ namespace Crypto.RSA.Encryption
             }
         }
 
-        public void Encrypt(ReadOnlySpan<byte> input, Span<byte> output)
+        public CipherResult Encrypt(ReadOnlySpan<byte> input, Span<byte> output)
         {
             SecurityAssert.NotNull(PublicKey);
 
@@ -48,9 +48,11 @@ namespace Crypto.RSA.Encryption
             var result = I2OSP(c, k);
             SecurityAssert.Assert(output.Length >= result.Length);
             result.CopyTo(output);
+
+            return new CipherResult(new ReadOnlySpan<byte>(), output.Slice(result.Length));
         }
 
-        public void Decrypt(ReadOnlySpan<byte> input, Span<byte> output)
+        public CipherResult Decrypt(ReadOnlySpan<byte> input, Span<byte> output)
         {
             SecurityAssert.NotNull(PrivateKey);
 
@@ -74,6 +76,8 @@ namespace Crypto.RSA.Encryption
 
             SecurityAssert.Assert(output.Length >= k - mIdx);
             em.AsSpan(mIdx, k - mIdx).CopyTo(output);
+
+            return new CipherResult(new ReadOnlySpan<byte>(), output.Slice(k - mIdx));
         }
     }
 }

@@ -39,6 +39,13 @@ namespace Crypto.TLS.IO
             return result.Span;
         }
 
+        public int Take(Span<byte> data)
+        {
+            var span = Take(data.Length);
+            span.CopyTo(data);
+            return span.Length;
+        }
+
         public void Put(ReadOnlyMemory<byte> data)
         {
             _write.Wait();

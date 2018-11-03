@@ -4,6 +4,7 @@ using Crypto.TLS.Config;
 using Crypto.TLS.Hashing;
 using Crypto.TLS.Suites;
 using Crypto.TLS.Suites.Providers;
+using Crypto.Utils;
 
 namespace Crypto.TLS.KeyExchanges
 {
@@ -13,14 +14,14 @@ namespace Crypto.TLS.KeyExchanges
 
         private readonly RandomConfig _randomConfig;
         private readonly CipherSuiteConfig _cipherSuiteConfig;
-        
+
         private readonly KeyConfig _keyConfig;
         private readonly AEADCipherConfig _aeadConfig;
         private readonly BlockCipherConfig _blockConfig;
 
         public MasterSecretCalculator(
             ICipherSuitesProvider cipherSuitesProvider,
-            
+
             RandomConfig randomConfig,
             CipherSuiteConfig cipherSuiteConfig,
 
@@ -29,10 +30,10 @@ namespace Crypto.TLS.KeyExchanges
             BlockCipherConfig blockConfig)
         {
             _cipherSuitesProvider = cipherSuitesProvider;
-            
+
             _randomConfig = randomConfig;
             _cipherSuiteConfig = cipherSuiteConfig;
-            
+
             _keyConfig = keyConfig;
             _aeadConfig = aeadConfig;
             _blockConfig = blockConfig;
@@ -81,31 +82,20 @@ namespace Crypto.TLS.KeyExchanges
 
             var keyBlock = prf.Digest(masterSecret.ToArray(), "key expansion", random).Take(keyBlockLength).ToArray().AsMemory();
 
-            var offset = 0;
-
             // TODO technically AEAD has no mac (i.e. length == 0)
             if (!_cipherSuitesProvider.IsAEADCipher(cipherSuite))
             {
-                _blockConfig.ClientMACKey = keyBlock.Slice(offset, macKeyLength);
-                offset += macKeyLength;
-
-                _blockConfig.ServerMACKey = keyBlock.Slice(offset, macKeyLength);
-                offset += macKeyLength;
+                (_blockConfig.ClientMACKey, keyBlock) = keyBlock.Split(macKeyLength);
+                (_blockConfig.ServerMACKey, keyBlock) = keyBlock.Split(macKeyLength);
             }
 
-            _keyConfig.Client = keyBlock.Slice(offset, encKeyLength);
-            offset += encKeyLength;
+            (_keyConfig.Client, keyBlock) = keyBlock.Split(encKeyLength);
+            (_keyConfig.Server, keyBlock) = keyBlock.Split(encKeyLength);
 
-            _keyConfig.Server = keyBlock.Slice(offset, encKeyLength);
-            offset += encKeyLength;
-            
             if (_cipherSuitesProvider.IsAEADCipher(cipherSuite))
             {
-                _aeadConfig.ClientIV = keyBlock.Slice(offset, implicitIVLength);
-                offset += implicitIVLength;
-
-                _aeadConfig.ServerIV = keyBlock.Slice(offset, implicitIVLength);
-                offset += implicitIVLength;
+                (_aeadConfig.ClientIV, keyBlock) = keyBlock.Split(implicitIVLength);
+                (_aeadConfig.ServerIV, keyBlock) = keyBlock.Split(implicitIVLength);
             }
         }
     }

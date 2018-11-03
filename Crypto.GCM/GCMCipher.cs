@@ -120,7 +120,7 @@ namespace Crypto.GCM
             _ctr.EncryptBlock(_buffer, ciphertext);
 
             // copy to output
-            ciphertext.AsSpan().Slice(0, bufferLength).CopyTo(output);
+            ciphertext.AsSpan(0, bufferLength).CopyTo(output);
 
             // update tag hash
             _tagHash.Update(output.Slice(0, bufferLength));
@@ -186,10 +186,10 @@ namespace Crypto.GCM
             _ctr.DecryptBlock(_buffer, plaintext);
 
             // copy to output
-            plaintext.AsSpan().Slice(0, bufferLength).CopyTo(output);
+            plaintext.AsSpan(0, bufferLength).CopyTo(output);
                 
             // update tag hash
-            _tagHash.Update(_buffer.AsSpan().Slice(0, bufferLength));
+            _tagHash.Update(_buffer.AsSpan(0, bufferLength));
             _cSize += bufferLength * 8;
 
             // clear buffer

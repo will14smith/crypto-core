@@ -10,7 +10,7 @@ namespace Crypto.Utils
 
         public Option(T value) { HasValue = true; Value = value; }
 
-        public Option<TOut>Select<TOut>(Func<T, TOut> fn)
+        public Option<TOut> Select<TOut>(Func<T, TOut> fn)
         {
             return HasValue ? new Option<TOut>(fn(Value)) : new Option<TOut>();
         }
@@ -38,22 +38,22 @@ namespace Crypto.Utils
 
         public static Option<T> SelectMany<T>(this Option<Option<T>> opt)
         {
-            return opt.Select(x => x.Value);
+            return opt.OrElse(None<T>);
         }
         public static Option<TOut> SelectMany<TIn, TOut>(this Option<TIn> opt, Func<TIn, Option<TOut>> some)
         {
-            return opt.Select(some).Select(x => x.Value);
+            return opt.Select(some).OrElse(None<TOut>);
         }
     }
 
     public static class OptionExtensions
     {
-        public static Option<TCast> Cast<TValue, TCast>(this Option<TValue> opt) 
+        public static Option<TCast> Cast<TValue, TCast>(this Option<TValue> opt)
             where TCast : class
         {
             return opt.Select(x => x as TCast);
         }
-        
+
         public static Option<TValue> TryGet<TKey, TValue>(this IReadOnlyDictionary<TKey, TValue> dict, TKey key)
         {
             return dict.TryGetValue(key, out var value)

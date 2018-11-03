@@ -24,7 +24,7 @@ namespace Crypto.Core.Randomness
         public static BigInteger RandomBig(this IRandom random, int bits)
         {
             SecurityAssert.Assert(bits > 0 && bits % 8 == 0);
-            var value = random.RandomBytes((bits / 8) + 1).ToArray();
+            var value = random.RandomBytes(bits / 8).ToArray();
 
             // make sure it is positive
             if ((value[value.Length - 1] & 0x80) != 0)

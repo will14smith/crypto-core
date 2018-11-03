@@ -47,7 +47,7 @@ namespace Crypto.AES
             _keyInitialised = true;
         }
 
-        public void EncryptBlock(ReadOnlySpan<byte> input, Span<byte> output)
+        public BlockResult EncryptBlock(ReadOnlySpan<byte> input, Span<byte> output)
         {
             SecurityAssert.Assert(_keyInitialised);
             SecurityAssert.AssertInputOutputBuffers(input, output, BlockLength);
@@ -71,9 +71,11 @@ namespace Crypto.AES
             AddRoundKey(state, rounds);
 
             FromState(state, output);
+
+            return new BlockResult(input.Slice(BlockLength), output.Slice(BlockLength));
         }
 
-        public void DecryptBlock(ReadOnlySpan<byte> input, Span<byte> output)
+        public BlockResult DecryptBlock(ReadOnlySpan<byte> input, Span<byte> output)
         {
             SecurityAssert.Assert(_keyInitialised);
             SecurityAssert.AssertInputOutputBuffers(input, output, BlockLength);
@@ -97,6 +99,8 @@ namespace Crypto.AES
             AddRoundKey(state, 0);
 
             FromState(state, output);
+
+            return new BlockResult(input.Slice(BlockLength), output.Slice(BlockLength));
         }
 
         public static byte[,] ToState(ReadOnlySpan<byte> input)

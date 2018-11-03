@@ -117,11 +117,9 @@ namespace Crypto.TLS.IO
         public override int Read(byte[] buffer, int offset, int count)
         {
             SecurityAssert.Assert(_active);
+            SecurityAssert.AssertBuffer(buffer, offset, count);
 
-            var data = _readQueue.Take(count);
-            data.CopyTo(buffer.AsSpan(offset));
-
-            return data.Length;
+            return _readQueue.Take(buffer.AsSpan(offset, count));
         }
 
         public override void Write(byte[] buffer, int offset, int count)
@@ -129,9 +127,8 @@ namespace Crypto.TLS.IO
             SecurityAssert.Assert(_active);
             SecurityAssert.AssertBuffer(buffer, offset, count);
 
-            var data = new byte[count];
-            Array.Copy(buffer, offset, data, 0, count);
-
+            var data = buffer.AsMemory(offset, count);
+            
             var versionConfig = Services.GetRequiredService<VersionConfig>();
             var record = new Record(RecordType.Application, versionConfig.Version, data);
 

@@ -13,23 +13,17 @@ namespace Crypto.Core.Encryption.BlockModes
 
         protected override void Reset()
         {
-            SecurityAssert.Assert(IVInitialised);
+            SecurityAssert.Assert(IVInitialized);
 
             _counter = new byte[BlockLength];
             Array.Copy(IV, 0, _counter, 0, BlockLength);
         }
 
-        public override void EncryptBlock(ReadOnlySpan<byte> input, Span<byte> output)
-        {
-            ProcessBlock(input, output);
-        }
+        public override BlockResult EncryptBlock(ReadOnlySpan<byte> input, Span<byte> output) => ProcessBlock(input, output);
 
-        public override void DecryptBlock(ReadOnlySpan<byte> input, Span<byte> output)
-        {
-            ProcessBlock(input, output);
-        }
+        public override BlockResult DecryptBlock(ReadOnlySpan<byte> input, Span<byte> output) => ProcessBlock(input, output);
 
-        private void ProcessBlock(ReadOnlySpan<byte> input, Span<byte> output)
+        private BlockResult ProcessBlock(ReadOnlySpan<byte> input, Span<byte> output)
         {
             SecurityAssert.AssertInputOutputBuffers(input, output, BlockLength);
 
@@ -44,6 +38,8 @@ namespace Crypto.Core.Encryption.BlockModes
 
             // increment counter
             Inc();
+
+            return new BlockResult(input.Slice(BlockLength), output.Slice(BlockLength));
         }
 
         public void Inc()

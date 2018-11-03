@@ -22,18 +22,22 @@ namespace Crypto.Core.Encryption.Adapters
             Cipher.Init(parameters);
         }
 
-        public void Encrypt(ReadOnlySpan<byte> input, Span<byte> output)
+        public CipherResult Encrypt(ReadOnlySpan<byte> input, Span<byte> output)
         {
             SecurityAssert.AssertInputOutputBuffers(input, output, input.Length + TagLength);
             
-            Cipher.EncryptFinal(Cipher.Encrypt(input, output));
+            (input, output) = Cipher.EncryptFinal(Cipher.Encrypt(input, output));
+
+            return new CipherResult(input, output);
         }
 
-        public void Decrypt(ReadOnlySpan<byte> input, Span<byte> output)
+        public CipherResult Decrypt(ReadOnlySpan<byte> input, Span<byte> output)
         {
             SecurityAssert.AssertInputOutputBuffers(input, output, input.Length + TagLength);
 
-            Cipher.DecryptFinal(Cipher.Decrypt(input, output));
+            (input, output) = Cipher.DecryptFinal(Cipher.Decrypt(input, output));
+
+            return new CipherResult(input, output);
         }
     }
 }

@@ -13,15 +13,15 @@ namespace Crypto.Core.Encryption.BlockModes
 
         protected override void Reset()
         {
-            SecurityAssert.Assert(IVInitialised);
+            SecurityAssert.Assert(IVInitialized);
 
             _workingIV = new byte[BlockLength];
             Array.Copy(IV, _workingIV, BlockLength);
         }
 
-        public override void EncryptBlock(ReadOnlySpan<byte> input, Span<byte> output)
+        public override BlockResult EncryptBlock(ReadOnlySpan<byte> input, Span<byte> output)
         {
-            SecurityAssert.Assert(IVInitialised);
+            SecurityAssert.Assert(IVInitialized);
             SecurityAssert.AssertInputOutputBuffers(input, output, BlockLength);
 
             var tmp = new byte[BlockLength];
@@ -33,18 +33,23 @@ namespace Crypto.Core.Encryption.BlockModes
             Cipher.EncryptBlock(tmp, target);
 
             target.CopyTo(_workingIV);
+
+            return new BlockResult(input.Slice(BlockLength), output.Slice(BlockLength));
         }
 
-        public override void DecryptBlock(ReadOnlySpan<byte> input, Span<byte> output)
+        public override BlockResult DecryptBlock(ReadOnlySpan<byte> input, Span<byte> output)
         {
-            SecurityAssert.Assert(IVInitialised);
+            SecurityAssert.Assert(IVInitialized);
             SecurityAssert.AssertInputOutputBuffers(input, output, BlockLength);
 
-            Cipher.DecryptBlock(input.Slice(0, BlockLength), output.Slice(0, BlockLength));
+            var inputBlock = input.Slice(0, BlockLength);
+            var outputBlock = output.Slice(0, BlockLength);
 
-            BufferUtils.Xor(_workingIV, output.Slice(0, BlockLength));
+            Cipher.DecryptBlock(inputBlock, outputBlock);
+            BufferUtils.Xor(_workingIV, outputBlock);
+            inputBlock.CopyTo(_workingIV);
 
-            input.Slice(0, BlockLength).CopyTo(_workingIV);
+            return new BlockResult(input.Slice(BlockLength), output.Slice(BlockLength));
         }
     }
 }

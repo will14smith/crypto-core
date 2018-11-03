@@ -21,14 +21,8 @@ namespace Crypto.Core.Encryption.BlockModes
             Cipher.Init(parameters);
         }
 
-        public void EncryptBlock(ReadOnlySpan<byte> input, Span<byte> output)
-        {
-            Cipher.EncryptBlock(input, output);
-        }
+        public BlockResult EncryptBlock(ReadOnlySpan<byte> input, Span<byte> output) => Cipher.EncryptBlock(input, output);
 
-        public void DecryptBlock(ReadOnlySpan<byte> input, Span<byte> output)
-        {
-            Cipher.DecryptBlock(input, output);
-        }
+        public BlockResult DecryptBlock(ReadOnlySpan<byte> input, Span<byte> output) => Cipher.DecryptBlock(input, output);
     }
 }

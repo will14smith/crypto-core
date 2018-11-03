@@ -38,14 +38,18 @@ namespace Crypto.Core.Tests.Encryption
         {
         }
 
-        public void EncryptBlock(ReadOnlySpan<byte> input, Span<byte> output)
+        public BlockResult EncryptBlock(ReadOnlySpan<byte> input, Span<byte> output)
         {
             input.CopyTo(output);
+
+            return new BlockResult(Span<byte>.Empty, output.Slice(input.Length));
         }
 
-        public void DecryptBlock(ReadOnlySpan<byte> input, Span<byte> output)
+        public BlockResult DecryptBlock(ReadOnlySpan<byte> input, Span<byte> output)
         {
             input.CopyTo(output);
+
+            return new BlockResult(Span<byte>.Empty, output.Slice(input.Length));
         }
     }
 }

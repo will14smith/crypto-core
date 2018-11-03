@@ -12,18 +12,22 @@ namespace Crypto.Core.Encryption
         {
         }
 
-        public void Encrypt(ReadOnlySpan<byte> input, Span<byte> output)
+        public CipherResult Encrypt(ReadOnlySpan<byte> input, Span<byte> output)
         {
             SecurityAssert.AssertInputOutputBuffers(input, output);
 
             input.CopyTo(output);
+
+            return new CipherResult(new ReadOnlySpan<byte>(), output.Slice(input.Length));
         }
 
-        public void Decrypt(ReadOnlySpan<byte> input, Span<byte> output)
+        public CipherResult Decrypt(ReadOnlySpan<byte> input, Span<byte> output)
         {
             SecurityAssert.AssertInputOutputBuffers(input, output);
 
             input.CopyTo(output);
+
+            return new CipherResult(new ReadOnlySpan<byte>(), output.Slice(input.Length));
         }
     }
 }
