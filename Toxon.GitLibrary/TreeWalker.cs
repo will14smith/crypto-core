@@ -9,11 +9,11 @@ namespace Toxon.GitLibrary
 {
     public class TreeWalker
     {
-        private readonly GitFileManager _fileManager;
+        private readonly ObjectManager _objectManager;
 
-        public TreeWalker(GitFileManager fileManager)
+        public TreeWalker(ObjectManager objectManager)
         {
-            _fileManager = fileManager;
+            _objectManager = objectManager;
         }
 
         public async Task<IReadOnlyCollection<FileEntry>> WalkAsync(ObjectRef rootRef, TreeObject root, string rootPath = "")
@@ -23,7 +23,7 @@ namespace Toxon.GitLibrary
             foreach (var (_, entry) in root.Entries)
             {
                 // TODO don't need whole object
-                var obj = await _fileManager.ReadObjectAsync(entry.ObjectHash);
+                var obj = await _objectManager.ReadAsync(entry.ObjectHash);
 
                 var path = Path.Combine(rootPath, entry.Path);
 

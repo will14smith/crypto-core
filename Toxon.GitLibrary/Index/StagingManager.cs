@@ -11,11 +11,16 @@ namespace Toxon.GitLibrary.Index
     {
         private readonly GitFileManager _fileManager;
         private readonly IndexManager _index;
+        private readonly ObjectManager _objectManager;
+        private readonly HeadManager _headManager;
 
         public StagingManager(GitFileManager fileManager, IndexManager index)
         {
             _fileManager = fileManager;
             _index = index;
+
+            _objectManager = new ObjectManager(_fileManager);
+            _headManager = new HeadManager(_fileManager);
         }
 
         public async Task<IReadOnlyCollection<IndexEntry>> ListAsync()
@@ -27,12 +32,12 @@ namespace Toxon.GitLibrary.Index
 
         public Task<CommitObject> CommitAsync(CommitObject.Actor author, CommitObject.Actor committer, string message)
         {
-            return new StagingCommitter(_index, _fileManager).CommitAsync(author, committer, message);
+            return new StagingCommitter(_index, _objectManager, _headManager).CommitAsync(author, committer, message);
         }
 
         public Task BuildIndexAsync(ObjectRef commitRef = null)
         {
-            return new IndexFileBuilder(new IndexFileSerializer(_fileManager), _fileManager).BuildIndexAsync();
+            return new IndexFileBuilder(new IndexFileSerializer(_fileManager), _objectManager, _headManager).BuildIndexAsync();
         }
 
         public async Task<IndexEntry> StageAsync(IFile file)
@@ -41,7 +46,7 @@ namespace Toxon.GitLibrary.Index
             using (var reader = file.OpenReader())
                 content = reader.ReadAll();
 
-            var objectRef = await ObjectWriter.WriteAsync(_fileManager, new BlobObject(content));
+            var objectRef = await _objectManager.WriteAsync(new BlobObject(content));
             var indexEntry = await _index.StageAsync(file, objectRef);
 
             return indexEntry;

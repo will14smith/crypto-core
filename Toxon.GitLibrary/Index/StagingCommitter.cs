@@ -9,25 +9,25 @@ namespace Toxon.GitLibrary.Index
     public class StagingCommitter
     {
         private readonly IndexManager _index;
-        private readonly GitFileManager _fileManager;
+        private readonly ObjectManager _objectManager;
+        private readonly HeadManager _headManager;
 
-        public StagingCommitter(IndexManager index, GitFileManager fileManager)
+        public StagingCommitter(IndexManager index, ObjectManager objectManager, HeadManager headManager)
         {
             _index = index;
-            _fileManager = fileManager;
+            _objectManager = objectManager;
+            _headManager = headManager;
         }
 
         public async Task<CommitObject> CommitAsync(CommitObject.Actor author, CommitObject.Actor committer, string message)
         {
-            var headManager = new HeadManager(_fileManager);
-
             var entries = await _index.Raw.ListAsync();
             var rootTree = await BuildTreeFromEntriesAsync(entries);
-            var parents = new[] { await headManager.ReadAsync() };
+            var parents = new[] { await _headManager.ReadAsync() };
 
             var commit = new CommitObject(rootTree, parents, author, committer, message);
-            var commitRef = await ObjectWriter.WriteAsync(_fileManager, commit);
-            await headManager.WriterAsync(commitRef);
+            var commitRef = await _objectManager.WriteAsync(commit);
+            await _headManager.WriterAsync(commitRef);
 
             return commit;
         }
@@ -67,7 +67,7 @@ namespace Toxon.GitLibrary.Index
             }
 
             var tree = new TreeObject(entries);
-            return await ObjectWriter.WriteAsync(_fileManager, tree);
+            return await _objectManager.WriteAsync(tree);
         }
 
         private abstract class TreeNode
