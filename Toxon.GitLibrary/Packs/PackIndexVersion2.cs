@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using Crypto.Utils;
 using Crypto.Utils.IO;
 using Toxon.GitLibrary.Objects;
 
@@ -52,5 +53,40 @@ namespace Toxon.GitLibrary.Packs
         public ReadOnlyMemory<uint> Crc32Values { get; }
         public ReadOnlyMemory<uint> Uint32Offsets { get; }
         public ReadOnlyMemory<ulong> Uint64Offsets { get; }
+
+        public override Option<ulong> LookupOffset(ObjectRef objectRef)
+        {
+            var (lowerIndex, upperIndex) = LookupBounds(objectRef);
+            var index = LookupIndex(objectRef, lowerIndex, upperIndex);
+            if (!index.HasValue) return Option.None<ulong>();
+
+            var offset32 = Uint32Offsets.Span[(int)index.Value];
+            if ((offset32 & 0x80000000) == 0) return Option.Some<ulong>(offset32);
+
+            var offset64 = Uint64Offsets.Span[(int)(offset32 & 0x7fffffff)];
+            return Option.Some(offset64);
+        }
+
+        private (uint, uint) LookupBounds(ObjectRef objectRef)
+        {
+            var firstByte = objectRef.Hash.First.Span[0];
+
+            var lower = firstByte > 0 ? FirstLevelFanOut.Span[firstByte - 1] : 0;
+            var upper = FirstLevelFanOut.Span[firstByte];
+
+            return (lower, upper);
+        }
+
+        private Option<uint> LookupIndex(ObjectRef objectRef, uint lowerIndex, uint upperIndex)
+        {
+            // TODO this could be a binary search
+            for (var i = lowerIndex; i < upperIndex; i++)
+            {
+                var indexRef = ObjectRefs.Span[(int)i];
+                if (objectRef.Hash.SequenceEquals(indexRef.Hash)) return Option.Some(i);
+            }
+
+            return Option.None<uint>();
+        }
     }
 }

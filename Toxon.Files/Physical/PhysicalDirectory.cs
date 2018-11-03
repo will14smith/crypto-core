@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using Crypto.Utils;
 
 namespace Toxon.Files.Physical
@@ -64,6 +66,19 @@ namespace Toxon.Files.Physical
             return Option.Some<IFile>(new PhysicalFile(_rootPath, relativePath));
         }
 
+        public IEnumerable<IFile> GetFiles(string glob)
+        {
+            var path = Path.Combine(_rootPath, RootRelativePath);
+            var files = Directory.GetFiles(path, glob, SearchOption.TopDirectoryOnly);
+
+            foreach (var file in files)
+            {
+                var relativePath = GetRelativePath(file, _rootPath);
+
+                yield return new PhysicalFile(_rootPath, relativePath);
+            }
+        }
+
         public Option<IFile> CreateFile(string subPath)
         {
             var relativePath = Path.Combine(RootRelativePath, subPath.TrimEnd('\n'));
@@ -85,5 +100,18 @@ namespace Toxon.Files.Physical
             File.Delete(path);
             return true;
         }
+
+        private string GetRelativePath(string path, string root)
+        {
+            Uri pathUri = new Uri(path);
+            // Folders must end in a slash
+            if (!root.EndsWith(Path.DirectorySeparatorChar.ToString()))
+            {
+                root += Path.DirectorySeparatorChar;
+            }
+            Uri folderUri = new Uri(root);
+            return Uri.UnescapeDataString(folderUri.MakeRelativeUri(pathUri).ToString().Replace('/', Path.DirectorySeparatorChar));
+        }
+
     }
 }

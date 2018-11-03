@@ -77,5 +77,19 @@ namespace Toxon.GitLibrary
 
             return Task.FromResult(file);
         }
+
+        public Task<Option<IDirectory>> GetPackDirectory(bool createIfNotExists = false)
+        {
+            var objectsDirectory = _repositoryFolder.GetDirectory("objects");
+            if (!objectsDirectory.HasValue) throw new Exception("invalid repository");
+
+            var directory = objectsDirectory.Value.GetDirectory("pack");
+            if (!directory.HasValue && createIfNotExists)
+            {
+                directory = objectsDirectory.Value.CreateDirectory("pack");
+            }
+
+            return Task.FromResult(directory);
+        }
     }
 }

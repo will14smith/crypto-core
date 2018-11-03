@@ -35,12 +35,12 @@ namespace Toxon.GitLibrary.Packs
             return new PackFile(objects);
         }
 
-        public static Object ReadObject(Stream input, int objectOffset)
+        public static Object ReadObject(Stream input, ulong objectOffset)
         {
             var reader = new EndianBinaryReader(EndianBitConverter.Big, input);
             VerifyHeader(reader);
 
-            input.Seek(objectOffset, SeekOrigin.Begin);
+            input.Seek((long)objectOffset, SeekOrigin.Begin);
             var (type, content) = ReadObject(reader);
 
             return ObjectReader.Read(type, content);

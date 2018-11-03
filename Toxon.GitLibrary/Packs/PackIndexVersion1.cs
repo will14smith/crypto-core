@@ -1,4 +1,5 @@
 ﻿using System;
+using Crypto.Utils;
 using Crypto.Utils.IO;
 using Toxon.GitLibrary.Objects;
 
@@ -45,6 +46,38 @@ namespace Toxon.GitLibrary.Packs
 
         public ReadOnlyMemory<uint> FirstLevelFanOut { get; }
         public ReadOnlyMemory<Entry> Entries { get; }
+
+        public override Option<ulong> LookupOffset(ObjectRef objectRef)
+        {
+            var (lowerIndex, upperIndex) = LookupBounds(objectRef);
+            var entry = LookupEntry(objectRef, lowerIndex, upperIndex);
+            return entry.Select(x => (ulong) x.Offset);
+        }
+
+        private (uint, uint) LookupBounds(ObjectRef objectRef)
+        {
+            var firstByte = objectRef.Hash.First.Span[0];
+
+            var lower = firstByte > 0 ? FirstLevelFanOut.Span[firstByte - 1] : 0;
+            var upper = FirstLevelFanOut.Span[firstByte];
+
+            return (lower, upper);
+        }
+
+        private Option<Entry> LookupEntry(ObjectRef objectRef, uint lowerIndex, uint upperIndex)
+        {
+            // TODO this could be a binary search
+            for (var i = lowerIndex; i < upperIndex; i++)
+            {
+                var entry = Entries.Span[(int)i];
+                if (objectRef.Hash.SequenceEquals(entry.ObjectRef.Hash))
+                {
+                    return Option.Some(entry);
+                }
+            }
+
+            return Option.None<Entry>();
+        }
 
         public class Entry
         {

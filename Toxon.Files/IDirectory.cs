@@ -1,4 +1,5 @@
-﻿using Crypto.Utils;
+﻿using System.Collections.Generic;
+using Crypto.Utils;
 
 namespace Toxon.Files
 {
@@ -11,6 +12,7 @@ namespace Toxon.Files
         Option<IDirectory> CreateDirectory(string subPath, bool asRoot = false);
 
         Option<IFile> GetFile(string subPath);
+        IEnumerable<IFile> GetFiles(string glob);
         Option<IFile> CreateFile(string subPath);
         bool RemoveFile(string subPath);
     }

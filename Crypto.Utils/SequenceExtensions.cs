@@ -88,6 +88,70 @@ namespace Crypto.Utils
             }
         }
 
+        public static bool SequenceEquals<T>(in this ReadOnlySequence<T> a, in ReadOnlySequence<T> b)
+            where T : IEquatable<T>
+        {
+            if (a.Length != b.Length) return false;
+
+            var aIterator = b.GetEnumerator();
+            var bIterator = b.GetEnumerator();
+
+            if (!aIterator.MoveNext()) return b.IsEmpty;
+            if (!bIterator.MoveNext()) return a.IsEmpty;
+
+            var aCurrent = aIterator.Current;
+            var bCurrent = bIterator.Current;
+
+            while (true)
+            {
+                if (aCurrent.Length > bCurrent.Length)
+                {
+                    if (!aCurrent.Slice(0, bCurrent.Length).SequenceEquals(bCurrent)) return false;
+
+                    aCurrent = aCurrent.Slice(bCurrent.Length);
+                    bCurrent = ReadOnlyMemory<T>.Empty;
+                }
+                else if (aCurrent.Length < bCurrent.Length)
+                {
+                    if (!aCurrent.SequenceEquals(bCurrent.Slice(0, aCurrent.Length))) return false;
+
+                    aCurrent = ReadOnlyMemory<T>.Empty;
+                    bCurrent = bCurrent.Slice(aCurrent.Length);
+                }
+                else
+                {
+                    if (!aCurrent.SequenceEquals(bCurrent)) return false;
+
+                    aCurrent = ReadOnlyMemory<T>.Empty;
+                    bCurrent = ReadOnlyMemory<T>.Empty;
+                }
+
+                if (aCurrent.IsEmpty)
+                {
+                    var aMoveNext = aIterator.MoveNext();
+                    if (!aMoveNext) return bCurrent.IsEmpty && !bIterator.MoveNext();
+
+                    aCurrent = aIterator.Current;
+                }
+
+                if (bCurrent.IsEmpty)
+                {
+                    var bMoveNext = bIterator.MoveNext();
+                    if (!bMoveNext) return false;
+
+                    bCurrent = bIterator.Current;
+                }
+            }
+
+            return true;
+        }
+
+        public static bool SequenceEquals<T>(in this ReadOnlyMemory<T> a, in ReadOnlyMemory<T> b)
+            where T : IEquatable<T>
+        {
+            return a.Length == b.Length && a.Span.StartsWith(b.Span);
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool StartsWith<T>(in this ReadOnlySequence<T> source, ReadOnlySpan<T> value) where T : IEquatable<T>
         {

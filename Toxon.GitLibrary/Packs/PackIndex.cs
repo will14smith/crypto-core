@@ -1,6 +1,8 @@
 ﻿using System;
 using System.IO;
+using Crypto.Utils;
 using Crypto.Utils.IO;
+using Toxon.GitLibrary.Objects;
 
 namespace Toxon.GitLibrary.Packs
 {
@@ -28,5 +30,7 @@ namespace Toxon.GitLibrary.Packs
         }
 
         public ReadOnlyMemory<byte> PackHash { get; }
+
+        public abstract Option<ulong> LookupOffset(ObjectRef objectRef);
     }
 }
