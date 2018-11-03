@@ -147,6 +147,10 @@ namespace Toxon.GitLibrary.Packs
             var instructions = new List<DeltaInstruction>();
 
             var offset = 0;
+
+            var sourceSize = ReadDeltaSize(content, ref offset);
+            var targetSize = ReadDeltaSize(content, ref offset);
+
             while (offset < content.Length)
             {
                 var op = content.Span[offset++];
@@ -181,6 +185,24 @@ namespace Toxon.GitLibrary.Packs
 
             return instructions;
         }
+
+        private static ulong ReadDeltaSize(in ReadOnlyMemory<byte> content, ref int offset)
+        {
+            byte b;
+
+            var length = 0ul;
+            var shift = 0;
+            do
+            {
+                b = content.Span[offset++];
+
+                length += (ulong)((b & 0x7f) << shift);
+                shift += 7;
+            } while ((b & 0x80) != 0);
+
+            return length;
+        }
+
         private static ReadOnlySequence<byte> ApplyDeltaInstructions(IEnumerable<DeltaInstruction> instructions, in ReadOnlySequence<byte> baseContent)
         {
             var output = new List<ReadOnlyMemory<byte>>();

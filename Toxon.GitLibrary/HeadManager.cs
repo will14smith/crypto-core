@@ -32,7 +32,7 @@ namespace Toxon.GitLibrary
             if (buffer.StartsWith(Ref.Span))
             {
                 var refPathSlice = buffer.Slice(Ref.Length);
-                var refPath = Encoding.UTF8.GetString(refPathSlice);
+                var refPath = Encoding.UTF8.GetString(refPathSlice).Trim();
 
                 var refManager = new RefManager(_fileManager);
                 return await refManager.ReadAsync(refPath);

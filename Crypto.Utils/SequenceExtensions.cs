@@ -108,11 +108,9 @@ namespace Crypto.Utils
                     return false;
                 }
 
+                if (segment.Length >= value.Length) return true;
+
                 value = value.Slice(segment.Length);
-                if (value.IsEmpty)
-                {
-                    return true;
-                }
             }
 
             return true;

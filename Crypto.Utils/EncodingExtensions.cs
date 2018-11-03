@@ -38,6 +38,8 @@ namespace Crypto.Utils
 
         public static int GetChars(this Encoding encoding, ReadOnlySpan<byte> input, Span<char> output)
         {
+            if (input.IsEmpty) return 0;
+
             unsafe
             {
                 fixed (byte* inputPtr = input)
