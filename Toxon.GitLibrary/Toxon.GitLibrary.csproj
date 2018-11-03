@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <LangVersion>7.2</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- :( TODO remove this -->
+    <PackageReference Include="SharpZipLib" Version="1.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Crypto.SHA\Crypto.SHA.csproj" />
+    <ProjectReference Include="..\Crypto.Utils\Crypto.Utils.csproj" />
+    <ProjectReference Include="..\Toxon.Files\Toxon.Files.csproj" />
+  </ItemGroup>
+
+</Project>

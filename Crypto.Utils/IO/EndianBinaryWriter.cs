@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Buffers;
 using System.IO;
 using System.Text;
 
@@ -274,6 +275,20 @@ namespace Crypto.Utils.IO
             WriteInternal(value);
         }
 
+        public void Write(ReadOnlySequence<byte> value)
+        {
+            if (value.IsSingleSegment)
+            {
+                WriteInternal(value.First.Span);
+            }
+            else
+            {
+                foreach (var segment in value)
+                {
+                    WriteInternal(segment.Span);
+                }
+            }
+        }
         public void Write(ReadOnlyMemory<byte> value)
         {
             WriteInternal(value.Span);
