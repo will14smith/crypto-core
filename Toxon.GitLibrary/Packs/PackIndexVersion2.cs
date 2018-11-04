@@ -1,5 +1,8 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
+using Crypto.Core.Signing;
+using Crypto.SHA;
 using Crypto.Utils;
 using Crypto.Utils.IO;
 using Toxon.GitLibrary.Objects;
@@ -34,6 +37,27 @@ namespace Toxon.GitLibrary.Packs
 
             return new PackIndexVersion2(fanOut, objectRefs, crc32Values, uint32Offsets, uint64Offsets, packHash);
         }
+
+        public static void Write(Stream output, PackIndexVersion2 index)
+        {
+            var signedStream = new SignedStream(output, new NullSignatureCipher(), new SHA1Digest());
+            var writer = new EndianBinaryWriter(EndianBitConverter.Big, signedStream);
+
+            for (var i = 0; i < index.FirstLevelFanOut.Length; i++)
+            {
+                writer.Write(index.FirstLevelFanOut.Span[i]);
+            }
+
+            foreach (var objectRef in index.ObjectRefs.Span) writer.Write(objectRef.Hash);
+            foreach (var crc32 in index.Crc32Values.Span) writer.Write(crc32);
+            foreach (var offset in index.Uint32Offsets.Span) writer.Write(offset);
+            foreach (var offset in index.Uint64Offsets.Span) writer.Write(offset);
+            writer.Write(index.PackHash);
+
+            writer.Flush();
+            var hash = signedStream.HashAlgorithm.Digest();
+            output.Write(hash);
+        }
     }
 
     public class PackIndexVersion2 : PackIndex
@@ -65,6 +89,11 @@ namespace Toxon.GitLibrary.Packs
 
             var offset64 = Uint64Offsets.Span[(int)(offset32 & 0x7fffffff)];
             return Option.Some(offset64);
+        }
+
+        public override void Write(Stream output)
+        {
+            PackIndexVersion2Serializer.Write(output, this);
         }
 
         private (uint, uint) LookupBounds(ObjectRef objectRef)

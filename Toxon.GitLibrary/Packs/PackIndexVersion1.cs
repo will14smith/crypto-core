@@ -1,4 +1,7 @@
 ﻿using System;
+using System.IO;
+using Crypto.Core.Signing;
+using Crypto.SHA;
 using Crypto.Utils;
 using Crypto.Utils.IO;
 using Toxon.GitLibrary.Objects;
@@ -33,6 +36,26 @@ namespace Toxon.GitLibrary.Packs
 
             return new PackIndexVersion1.Entry(offset, objectRef);
         }
+
+        public static void Write(Stream output, PackIndexVersion1 index)
+        {
+            var signedStream = new SignedStream(output, new NullSignatureCipher(), new SHA1Digest());
+            var writer = new EndianBinaryWriter(EndianBitConverter.Big, signedStream);
+
+            foreach (var fanOut in index.FirstLevelFanOut.Span) writer.Write(fanOut);
+            foreach (var entry in index.Entries.Span) WriteEntry(writer, entry);
+            writer.Write(index.PackHash);
+
+            writer.Flush();
+            var hash = signedStream.HashAlgorithm.Digest();
+            output.Write(hash);
+        }
+
+        private static void WriteEntry(EndianBinaryWriter writer, PackIndexVersion1.Entry entry)
+        {
+            writer.Write(entry.Offset);
+            writer.Write(entry.ObjectRef.Hash);
+        }
     }
 
     public class PackIndexVersion1 : PackIndex
@@ -51,7 +74,12 @@ namespace Toxon.GitLibrary.Packs
         {
             var (lowerIndex, upperIndex) = LookupBounds(objectRef);
             var entry = LookupEntry(objectRef, lowerIndex, upperIndex);
-            return entry.Select(x => (ulong) x.Offset);
+            return entry.Select(x => (ulong)x.Offset);
+        }
+
+        public override void Write(Stream output)
+        {
+            PackIndexVersion1Serializer.Write(output, this);
         }
 
         private (uint, uint) LookupBounds(ObjectRef objectRef)

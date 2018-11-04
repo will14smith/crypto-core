@@ -20,6 +20,11 @@ namespace Toxon.GitLibrary.Packs
 
             return PackIndexVersion2Serializer.Read(reader);
         }
+
+        public static void Write(Stream output, PackIndex index)
+        {
+            index.Write(output);
+        }
     }
 
     public abstract class PackIndex
@@ -32,5 +37,6 @@ namespace Toxon.GitLibrary.Packs
         public ReadOnlyMemory<byte> PackHash { get; }
 
         public abstract Option<ulong> LookupOffset(ObjectRef objectRef);
+        public abstract void Write(Stream output);
     }
 }
