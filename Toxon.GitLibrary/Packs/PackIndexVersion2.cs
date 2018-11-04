@@ -43,6 +43,9 @@ namespace Toxon.GitLibrary.Packs
             var signedStream = new SignedStream(output, new NullSignatureCipher(), new SHA1Digest());
             var writer = new EndianBinaryWriter(EndianBitConverter.Big, signedStream);
 
+            writer.Write(0xff744f63u);
+            writer.Write(2u);
+
             for (var i = 0; i < index.FirstLevelFanOut.Length; i++)
             {
                 writer.Write(index.FirstLevelFanOut.Span[i]);
