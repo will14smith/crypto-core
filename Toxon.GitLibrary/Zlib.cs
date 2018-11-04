@@ -41,5 +41,41 @@ namespace Toxon.GitLibrary
 
             return memories.ToSequence();
         }
+
+        public static void Deflate(in Stream output, in ReadOnlySequence<byte> input)
+        {
+            const int deflateBufferSize = 1024;
+
+            var deflater = new Deflater(Deflater.BEST_COMPRESSION, false);
+
+            foreach (var segment in input)
+            {
+                // TODO :( ToArray
+                deflater.SetInput(segment.ToArray());
+
+                while (!deflater.IsNeedingInput)
+                {
+                    // TODO :( Allocate buffer
+                    var buffer = new byte[deflateBufferSize];
+                    var deflateLength = deflater.Deflate(buffer, 0, deflateBufferSize);
+                    if (deflateLength == 0) break;
+
+                    output.Write(buffer, 0, deflateLength);
+                }
+            }
+
+            deflater.Finish();
+            while (!deflater.IsFinished)
+            {
+                // TODO :( Allocate buffer
+                var buffer = new byte[deflateBufferSize];
+                var deflateLength = deflater.Deflate(buffer, 0, deflateBufferSize);
+                if (deflateLength == 0) break;
+
+                output.Write(buffer, 0, deflateLength);
+            }
+
+            output.Flush();
+        }
     }
 }

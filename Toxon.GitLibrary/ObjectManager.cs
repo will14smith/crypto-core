@@ -57,9 +57,10 @@ namespace Toxon.GitLibrary
             throw new Exception("invalid object ref");
         }
 
-        public Task<ObjectRef> WriteAsync(Object obj)
+        public async Task<ObjectRef> WriteAsync(Object obj)
         {
-            throw new NotImplementedException();
+            // TODO check it doesn't exist (raw or in a pack file)
+            return await ObjectWriter.WriteAsync(_fileManager, obj);
         }
     }
 }
