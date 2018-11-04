@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Buffers;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 
 namespace Crypto.Utils
@@ -24,7 +25,11 @@ namespace Crypto.Utils
 
         public static ReadOnlySequence<T> ToSequence<T>(this IReadOnlyList<ReadOnlyMemory<T>> items)
         {
-            if (items == null || items.Count == 0) throw new ArgumentException(nameof(items));
+            if (items == null) return ReadOnlySequence<T>.Empty;
+
+            items = items.Where(x => !x.IsEmpty).ToList();
+
+            if (items.Count == 0) return ReadOnlySequence<T>.Empty;
 
             var startSegment = new MemorySequenceSegment<T>(items[0]);
             var endSegment = startSegment;
@@ -49,12 +54,12 @@ namespace Crypto.Utils
         public static ReadOnlySequence<T> Concat<T>(this ReadOnlySequence<T> head, IReadOnlyCollection<ReadOnlySequence<T>> tails)
         {
             var headEnumerator = head.GetEnumerator();
-            if (!headEnumerator.MoveNext()) throw new NotImplementedException();
+            if (!headEnumerator.MoveNextSkipEmpty()) throw new NotImplementedException();
 
             var startSegment = new MemorySequenceSegment<T>(headEnumerator.Current);
             var endSegment = startSegment;
 
-            while (headEnumerator.MoveNext())
+            while (headEnumerator.MoveNextSkipEmpty())
             {
                 endSegment = endSegment.Add(headEnumerator.Current);
             }
@@ -62,7 +67,7 @@ namespace Crypto.Utils
             foreach (var tail in tails)
             {
                 var tailEnumerator = tail.GetEnumerator();
-                while (tailEnumerator.MoveNext())
+                while (tailEnumerator.MoveNextSkipEmpty())
                 {
                     endSegment = endSegment.Add(tailEnumerator.Current);
                 }
@@ -93,11 +98,11 @@ namespace Crypto.Utils
         {
             if (a.Length != b.Length) return false;
 
-            var aIterator = b.GetEnumerator();
+            var aIterator = a.GetEnumerator();
             var bIterator = b.GetEnumerator();
 
-            if (!aIterator.MoveNext()) return b.IsEmpty;
-            if (!bIterator.MoveNext()) return a.IsEmpty;
+            if (!aIterator.MoveNextSkipEmpty()) return b.IsEmpty;
+            if (!bIterator.MoveNextSkipEmpty()) return a.IsEmpty;
 
             var aCurrent = aIterator.Current;
             var bCurrent = bIterator.Current;
@@ -115,8 +120,8 @@ namespace Crypto.Utils
                 {
                     if (!aCurrent.SequenceEquals(bCurrent.Slice(0, aCurrent.Length))) return false;
 
-                    aCurrent = ReadOnlyMemory<T>.Empty;
                     bCurrent = bCurrent.Slice(aCurrent.Length);
+                    aCurrent = ReadOnlyMemory<T>.Empty;
                 }
                 else
                 {
@@ -128,7 +133,7 @@ namespace Crypto.Utils
 
                 if (aCurrent.IsEmpty)
                 {
-                    var aMoveNext = aIterator.MoveNext();
+                    var aMoveNext = aIterator.MoveNextSkipEmpty();
                     if (!aMoveNext) return bCurrent.IsEmpty && !bIterator.MoveNext();
 
                     aCurrent = aIterator.Current;
@@ -136,14 +141,21 @@ namespace Crypto.Utils
 
                 if (bCurrent.IsEmpty)
                 {
-                    var bMoveNext = bIterator.MoveNext();
+                    var bMoveNext = bIterator.MoveNextSkipEmpty();
                     if (!bMoveNext) return false;
 
                     bCurrent = bIterator.Current;
                 }
             }
+        }
 
-            return true;
+        private static bool MoveNextSkipEmpty<T>(this ref ReadOnlySequence<T>.Enumerator enumerator)
+        {
+            while (true)
+            {
+                if (!enumerator.MoveNext()) return false;
+                if (!enumerator.Current.IsEmpty) return true;
+            }
         }
 
         public static bool SequenceEquals<T>(in this ReadOnlyMemory<T> a, in ReadOnlyMemory<T> b)

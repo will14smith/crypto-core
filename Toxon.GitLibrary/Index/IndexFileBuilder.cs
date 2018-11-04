@@ -38,6 +38,11 @@ namespace Toxon.GitLibrary.Index
 
             foreach (var (_, treeEntry) in tree.Entries)
             {
+                // TODO handle items which aren't files/folders (e.g. links)
+                var modeType = treeEntry.Mode >> 9;
+                if (modeType != 0x20 && modeType != 0x40)
+                    continue;
+
                 var obj = await _objectManager.ReadAsync(treeEntry.ObjectHash);
                 var path = Path.Combine(treePath, treeEntry.Path);
 
@@ -55,7 +60,6 @@ namespace Toxon.GitLibrary.Index
 
                     default: throw new ArgumentOutOfRangeException(nameof(obj));
                 }
-
             }
 
             return entries;

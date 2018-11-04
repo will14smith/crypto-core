@@ -14,7 +14,7 @@ namespace Toxon.GitLibrary.Packs
     {
         private static readonly ReadOnlyMemory<byte> Signature = Encoding.UTF8.GetBytes("PACK");
 
-        public static PackFile Read(Stream input)
+        public static PackFile Read(Stream input, PackIndex index)
         {
             var reader = new EndianBinaryReader(EndianBitConverter.Big, input);
             VerifyHeader(reader);
@@ -24,7 +24,7 @@ namespace Toxon.GitLibrary.Packs
             var objects = new Object[objectCount];
             for (var i = 0; i < objectCount; i++)
             {
-                var (type, content) = ReadObject(reader);
+                var (type, content) = ReadObject(reader, index);
 
                 objects[i] = ObjectReader.Read(type, content);
             }
@@ -35,13 +35,13 @@ namespace Toxon.GitLibrary.Packs
             return new PackFile(objects);
         }
 
-        public static Object ReadObject(Stream input, ulong objectOffset)
+        public static Object ReadObject(Stream input, PackIndex index, ulong objectOffset)
         {
             var reader = new EndianBinaryReader(EndianBitConverter.Big, input);
             VerifyHeader(reader);
 
             input.Seek((long)objectOffset, SeekOrigin.Begin);
-            var (type, content) = ReadObject(reader);
+            var (type, content) = ReadObject(reader, index);
 
             return ObjectReader.Read(type, content);
         }
@@ -57,7 +57,7 @@ namespace Toxon.GitLibrary.Packs
             if (version != 2) throw new Exception("unsupported version");
         }
 
-        private static (ObjectType, ReadOnlySequence<byte>) ReadObject(EndianBinaryReader reader)
+        private static (ObjectType, ReadOnlySequence<byte>) ReadObject(EndianBinaryReader reader, PackIndex index)
         {
             var objectOffset = reader.BaseStream.Position;
             var (type, length) = ReadTypeAndLength(reader);
@@ -69,8 +69,8 @@ namespace Toxon.GitLibrary.Packs
                 case PackObjectType.Blob: return (ObjectType.Blob, Zlib.Inflate(reader.BaseStream));
                 case PackObjectType.Tag: throw new NotImplementedException();
 
-                case PackObjectType.OfsDelta: return ReadOfsDelta(reader, objectOffset);
-                case PackObjectType.RefDelta: return ReadRefDelta(reader);
+                case PackObjectType.OfsDelta: return ReadOfsDelta(reader, index, objectOffset);
+                case PackObjectType.RefDelta: return ReadRefDelta(reader, index);
 
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -96,11 +96,10 @@ namespace Toxon.GitLibrary.Packs
             return (type, length);
         }
 
-        private static (ObjectType, ReadOnlySequence<byte>) ReadOfsDelta(EndianBinaryReader reader, long objectOffset)
+        private static (ObjectType, ReadOnlySequence<byte>) ReadOfsDelta(EndianBinaryReader reader, PackIndex index, long objectOffset)
         {
-            // parse
             var c = reader.ReadByte();
-            ulong offset = c & 0x7fu;
+            long offset = c & 0x7fu;
 
             while ((c & 0x80) != 0)
             {
@@ -109,36 +108,26 @@ namespace Toxon.GitLibrary.Packs
                 offset = (offset << 7) | (c & 0x7fu);
             }
 
-            var instructions = ReadDeltaInstructions(reader);
+            offset = objectOffset - offset;
 
-            // decode
-            var stream = reader.BaseStream;
-            var savedOffset = stream.Position;
-            stream.Position = objectOffset - (long)offset;
+            var (sourceSize, targetSize, instructions) = ReadDeltaInstructions(reader);
 
-            var (baseType, baseContent) = ReadObject(reader);
-            var content = ApplyDeltaInstructions(instructions, baseContent);
-
-            stream.Position = savedOffset;
-
-            return (baseType, content);
+            return ApplyDelta(reader, index, offset, instructions);
         }
 
-        private static (ObjectType, ReadOnlySequence<byte>) ReadRefDelta(EndianBinaryReader reader)
+        private static (ObjectType, ReadOnlySequence<byte>) ReadRefDelta(EndianBinaryReader reader, PackIndex index)
         {
-            //var baseObjectRef = new ObjectRef(reader.ReadBytes(20));
-            //var instructions = ReadDeltaInstructions(reader);
+            var baseObjectRef = new ObjectRef(reader.ReadBytes(20));
+            var offset = index.LookupOffset(baseObjectRef);
+            if (!offset.HasValue) throw new Exception("object ref is not in same pack file");
 
-            //ObjectType baseType;
-            //ReadOnlySequence<byte> baseContent;
+            var (sourceSize, targetSize, instructions) = ReadDeltaInstructions(reader);
 
-            //var content = ApplyDeltaInstructions(instructions, baseContent);
 
-            //return (baseType, content);
-            throw new NotImplementedException();
+            return ApplyDelta(reader, index, (long)offset.Value, instructions);
         }
 
-        private static IReadOnlyList<DeltaInstruction> ReadDeltaInstructions(EndianBinaryReader reader)
+        private static (ulong, ulong, IReadOnlyList<DeltaInstruction>) ReadDeltaInstructions(EndianBinaryReader reader)
         {
             var inflatedContent = Zlib.Inflate(reader.BaseStream);
             // TODO :( remove ToArray
@@ -183,7 +172,7 @@ namespace Toxon.GitLibrary.Packs
                 }
             }
 
-            return instructions;
+            return (sourceSize, targetSize, instructions);
         }
 
         private static ulong ReadDeltaSize(in ReadOnlyMemory<byte> content, ref int offset)
@@ -201,6 +190,20 @@ namespace Toxon.GitLibrary.Packs
             } while ((b & 0x80) != 0);
 
             return length;
+        }
+
+        private static (ObjectType, ReadOnlySequence<byte>) ApplyDelta(EndianBinaryReader reader, PackIndex index, long offset, IEnumerable<DeltaInstruction> instructions)
+        {
+            var stream = reader.BaseStream;
+            var savedOffset = stream.Position;
+            stream.Position = offset;
+
+            var (baseType, baseContent) = ReadObject(reader, index);
+            var content = ApplyDeltaInstructions(instructions, baseContent);
+
+            stream.Position = savedOffset;
+
+            return (baseType, content);
         }
 
         private static ReadOnlySequence<byte> ApplyDeltaInstructions(IEnumerable<DeltaInstruction> instructions, in ReadOnlySequence<byte> baseContent)
