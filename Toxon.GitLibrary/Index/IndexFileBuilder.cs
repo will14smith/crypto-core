@@ -43,6 +43,7 @@ namespace Toxon.GitLibrary.Index
                 if (modeType != 0x20 && modeType != 0x40)
                     continue;
 
+                // TODO don't need the whole object for blobs
                 var obj = await _objectManager.ReadAsync(treeEntry.ObjectHash);
                 var path = Path.Combine(treePath, treeEntry.Path);
 

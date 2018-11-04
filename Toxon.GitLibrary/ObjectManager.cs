@@ -50,7 +50,7 @@ namespace Toxon.GitLibrary
 
                 using (var reader = packFile.Value.OpenReader())
                 {
-                    return PackFileSerializer.ReadObject(reader, index, offset.Value);
+                    return PackFileResolver.ReadObject(reader, index, offset.Value);
                 }
             }
 

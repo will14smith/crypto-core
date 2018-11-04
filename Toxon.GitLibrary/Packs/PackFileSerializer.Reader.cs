@@ -50,7 +50,7 @@ namespace Toxon.GitLibrary.Packs
             if (version != 2) throw new Exception("unsupported version");
         }
 
-        private static PackObject ReadObject(EndianBinaryReader reader)
+        internal static PackObject ReadObject(EndianBinaryReader reader)
         {
             var objectOffset = reader.BaseStream.Position;
             var (type, length) = ReadTypeAndLength(reader);

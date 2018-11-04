@@ -1,20 +1,16 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using Crypto.Core.Signing;
 using Crypto.SHA;
 using Crypto.Utils;
 using Crypto.Utils.IO;
-using Toxon.GitLibrary.Objects;
-using Object = Toxon.GitLibrary.Objects.Object;
 
 namespace Toxon.GitLibrary.Packs
 {
     public partial class PackFileSerializer
     {
-        public static void Read(Stream output, PackFile pack)
+        public static void Write(Stream output, PackFile pack)
         {
-            // TODO compress objects using deltas
-
+            // TODO compress objects using deltas (needs to be done by whatever is building the PackFiles)
             var signedStream = new SignedStream(output, new NullSignatureCipher(), new SHA1Digest());
             var writer = new EndianBinaryWriter(EndianBitConverter.Big, signedStream);
 
@@ -39,27 +35,12 @@ namespace Toxon.GitLibrary.Packs
             writer.Write(version);
         }
 
-        private static void WriteObject(EndianBinaryWriter writer, Object obj)
+        private static void WriteObject(EndianBinaryWriter writer, PackObject obj)
         {
-            var objBuffer = obj.ToBuffer();
+            var length = obj.Content.Length;
+            WriteTypeAndLength(writer, obj.Type, length);
 
-            var type = ObjectToPackType(obj.Type);
-            var length = objBuffer.Length;
-            WriteTypeAndLength(writer, type, length);
-
-            Zlib.Deflate(writer.BaseStream, objBuffer);
-        }
-
-        private static PackObjectType ObjectToPackType(ObjectType type)
-        {
-            switch (type)
-            {
-                case ObjectType.Blob: return PackObjectType.Blob;
-                case ObjectType.Commit: return PackObjectType.Commit;
-                case ObjectType.Tree: return PackObjectType.Tree;
-
-                default: throw new ArgumentOutOfRangeException(nameof(type), type, null);
-            }
+            Zlib.Deflate(writer.BaseStream, obj.Content);
         }
 
         private static void WriteTypeAndLength(EndianBinaryWriter writer, PackObjectType type, long length)
