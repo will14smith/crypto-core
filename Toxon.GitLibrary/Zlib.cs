@@ -41,6 +41,37 @@ namespace Toxon.GitLibrary
 
             return memories.ToSequence();
         }
+        public static ReadOnlySequence<byte> Inflate(in ReadOnlySequence<byte> input)
+        {
+            const int inflateBufferSize = 1024;
+
+            var inflater = new Inflater(false);
+
+            var memories = new List<ReadOnlyMemory<byte>>();
+            var inputIterator = input.GetEnumerator();
+
+            while (!inflater.IsFinished)
+            {
+                if (!inputIterator.MoveNext()) throw new Exception("input ended before inflation");
+
+                // TODO :( ToArray
+                var buffer = inputIterator.Current.ToArray();
+                inflater.SetInput(buffer, 0, buffer.Length);
+
+                while (!inflater.IsNeedingInput)
+                {
+                    var output = new byte[inflateBufferSize];
+                    var inflateLength = inflater.Inflate(output, 0, inflateBufferSize);
+                    if (inflateLength == 0) break;
+
+                    memories.Add(new ReadOnlyMemory<byte>(output, 0, inflateLength));
+                }
+
+                if (inflater.IsNeedingDictionary) throw new Exception("missing dictionary");
+            }
+
+            return memories.ToSequence();
+        }
 
         public static void Deflate(in Stream output, in ReadOnlySequence<byte> input)
         {
