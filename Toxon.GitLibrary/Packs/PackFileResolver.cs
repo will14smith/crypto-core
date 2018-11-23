@@ -8,56 +8,67 @@ using Object = Toxon.GitLibrary.Objects.Object;
 
 namespace Toxon.GitLibrary.Packs
 {
+    public delegate Option<ulong> PackIndexLookup(ObjectRef objectRef);
+
     public class PackFileResolver
     {
-        public static Object ReadObject(Stream packReader, PackIndex index, ulong objectOffset)
+        public static Option<Object> ReadObject(Stream packReader, PackIndexLookup lookup, ulong objectOffset)
         {
             var packObject = PackFileSerializer.ReadObject(packReader, objectOffset);
 
-            var (objectType, objectContent) = ReadObject(packReader, index, packObject);
+            var objOpt = ReadObject(packReader, lookup, packObject);
+            if (!objOpt.HasValue) return Option.None<Object>();
 
-            return ObjectReader.Read(objectType, objectContent);
+            var (objectType, objectContent) = objOpt.Value;
+
+            var obj = ObjectReader.Read(objectType, objectContent);
+            return Option.Some(obj);
         }
 
-        public static (ObjectType, ReadOnlySequence<byte>) ReadObject(Stream packReader, PackIndex index, PackObject packObject)
+        public static Option<(ObjectType, ReadOnlySequence<byte>)> ReadObject(Stream packReader, PackIndexLookup lookup, PackObject packObject)
         {
             switch (packObject)
             {
                 case PackObject.Standard standard:
                     switch (standard.Type)
                     {
-                        case PackObjectType.Commit: return (ObjectType.Commit, standard.Content);
-                        case PackObjectType.Tree: return (ObjectType.Tree, standard.Content);
-                        case PackObjectType.Blob: return (ObjectType.Blob, standard.Content);
+                        case PackObjectType.Commit: return Option.Some((ObjectType.Commit, standard.Content));
+                        case PackObjectType.Tree: return Option.Some((ObjectType.Tree, standard.Content));
+                        case PackObjectType.Blob: return Option.Some((ObjectType.Blob, standard.Content));
                         case PackObjectType.Tag: throw new NotImplementedException();
 
                         default: throw new ArgumentOutOfRangeException();
                     }
 
-                case PackObject.OffsetDelta offsetDelta: return ApplyDelta(packReader, index, offsetDelta.Offset, offsetDelta.Instructions);
+                case PackObject.OffsetDelta offsetDelta:
+                    return ApplyDelta(packReader, lookup, offsetDelta.Offset, offsetDelta.SourceSize, offsetDelta.TargetSize, offsetDelta.Instructions);
 
                 case PackObject.RefDelta refDelta:
-                    var offset = index.LookupOffset(refDelta.ObjectRef);
-                    if (!offset.HasValue) throw new Exception("invalid object ref");
-                    return ApplyDelta(packReader, index, offset.Value, refDelta.Instructions);
+                    var offsetOpt = lookup(refDelta.ObjectRef);
+                    return offsetOpt.SelectMany(offset => ApplyDelta(packReader, lookup, offset, refDelta.SourceSize, refDelta.TargetSize, refDelta.Instructions));
 
                 default: throw new ArgumentOutOfRangeException(nameof(packObject));
             }
         }
 
-        private static (ObjectType, ReadOnlySequence<byte>) ApplyDelta(Stream packReader, PackIndex index, ulong offset, IEnumerable<DeltaInstruction> instructions)
+        private static Option<(ObjectType, ReadOnlySequence<byte>)> ApplyDelta(Stream packReader, PackIndexLookup lookup, ulong offset, ulong sourceSize, ulong targetSize, IEnumerable<DeltaInstruction> instructions)
         {
             var savedOffset = packReader.Position;
             packReader.Position = 0;
 
             var basePackObject = PackFileSerializer.ReadObject(packReader, offset);
-            var (baseObjectType, baseObjectContent) = ReadObject(packReader, index, basePackObject);
+            var baseObjectOpt = ReadObject(packReader, lookup, basePackObject);
+            if (!baseObjectOpt.HasValue) return Option.None<(ObjectType, ReadOnlySequence<byte>)>();
+            var (baseObjectType, baseObjectContent) = baseObjectOpt.Value;
+
+            if ((ulong)baseObjectContent.Length != sourceSize) throw new Exception("base object is incorrect length");
 
             var content = ApplyDeltaInstructions(instructions, baseObjectContent);
+            if ((ulong)content.Length != targetSize) throw new Exception("content is incorrect length");
 
             packReader.Position = savedOffset;
 
-            return (baseObjectType, content);
+            return Option.Some((baseObjectType, content));
         }
 
         private static ReadOnlySequence<byte> ApplyDeltaInstructions(IEnumerable<DeltaInstruction> instructions, in ReadOnlySequence<byte> baseContent)

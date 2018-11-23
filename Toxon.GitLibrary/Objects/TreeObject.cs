@@ -20,7 +20,7 @@ namespace Toxon.GitLibrary.Objects
 
         public override ReadOnlySequence<byte> ToBuffer()
         {
-            var entries = Entries.OrderBy(x => x.Key).Select(x => x.Value.ToBuffer()).ToArray();
+            var entries = Entries.Select(x => x.Value.ToBuffer()).ToArray();
 
             var prefix = Encoding.UTF8.GetBytes("tree " + entries.Sum(x => x.Length));
             var header = SequenceExtensions.Create<byte>(prefix, new byte[] { 0 });
@@ -65,16 +65,19 @@ namespace Toxon.GitLibrary.Objects
         internal static ReadOnlySequence<byte> FormatOctalMode(ushort mode)
         {
             var buffer = new byte[6];
+            var start = 0;
 
-            for (var i = 5; i >= 0; i--)
+            for (var i = 0; i < 6; i++)
             {
-                var n = (mode >> (3 * i)) & 7;
+                var n = (mode >> (3 * (5 - i))) & 7;
                 var d = (byte)('0' + n);
 
-                buffer[5 - i] = d;
+                if (n == 0 && start == i) start++;
+
+                buffer[i] = d;
             }
 
-            return SequenceExtensions.Create<byte>(buffer);
+            return SequenceExtensions.Create<byte>(buffer).Slice(start);
         }
         private static ushort ParseOctalMode(ReadOnlySequence<byte> octalMode)
         {

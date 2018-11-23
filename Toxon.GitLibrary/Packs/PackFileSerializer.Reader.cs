@@ -108,7 +108,7 @@ namespace Toxon.GitLibrary.Packs
             var content = Zlib.Inflate(reader.BaseStream);
             var (sourceSize, targetSize, instructions) = ReadDeltaInstructions(content);
 
-            return new PackObject.OffsetDelta((ulong)offset, instructions, content);
+            return new PackObject.OffsetDelta((ulong)offset, sourceSize, targetSize, instructions, content);
         }
 
         private static PackObject ReadRefDelta(EndianBinaryReader reader)
@@ -118,7 +118,7 @@ namespace Toxon.GitLibrary.Packs
             var content = Zlib.Inflate(reader.BaseStream);
             var (sourceSize, targetSize, instructions) = ReadDeltaInstructions(content);
 
-            return new PackObject.RefDelta(baseObjectRef, instructions, content);
+            return new PackObject.RefDelta(baseObjectRef, sourceSize, targetSize, instructions, content);
         }
 
         private static (ulong, ulong, IReadOnlyList<DeltaInstruction>) ReadDeltaInstructions(ReadOnlySequence<byte> inflatedContent)
@@ -132,7 +132,8 @@ namespace Toxon.GitLibrary.Packs
 
             var sourceSize = ReadDeltaSize(content, ref offset);
             var targetSize = ReadDeltaSize(content, ref offset);
-
+            var totalSize = 0ul;
+            
             while (offset < content.Length)
             {
                 var op = content.Span[offset++];
@@ -145,25 +146,34 @@ namespace Toxon.GitLibrary.Packs
                     var data = content.Slice(offset, length);
                     offset += length;
 
+                    totalSize += (uint)length;
                     instructions.Add(new DeltaInstruction.Add(data));
                 }
                 else
                 {
                     uint instructionOffset = 0;
-                    uint instructionLength = 0;
+                    uint length = 0;
 
                     if ((op & 0x1) != 0) instructionOffset |= (uint) content.Span[offset++] << 0;
                     if ((op & 0x2) != 0) instructionOffset |= (uint) content.Span[offset++] << 8;
                     if ((op & 0x4) != 0) instructionOffset |= (uint) content.Span[offset++] << 16;
                     if ((op & 0x8) != 0) instructionOffset |= (uint) content.Span[offset++] << 24;
 
-                    if ((op & 0x10) != 0) instructionLength |= (uint) content.Span[offset++] << 0;
-                    if ((op & 0x20) != 0) instructionLength |= (uint) content.Span[offset++] << 8;
-                    if ((op & 0x40) != 0) instructionLength |= (uint) content.Span[offset++] << 16;
+                    if ((op & 0x10) != 0) length |= (uint) content.Span[offset++] << 0;
+                    if ((op & 0x20) != 0) length |= (uint) content.Span[offset++] << 8;
+                    if ((op & 0x40) != 0) length |= (uint) content.Span[offset++] << 16;
 
-                    instructions.Add(new DeltaInstruction.Copy(instructionOffset, instructionLength));
+                    if (length == 0)
+                        length = 0x10000;
+
+                    if (instructionOffset + length > sourceSize) throw new Exception("copy instruction would overflow");
+
+                    totalSize += length;
+                    instructions.Add(new DeltaInstruction.Copy(instructionOffset, length));
                 }
             }
+
+            if (targetSize != totalSize) throw new Exception("instructions do not fill the target");
 
             return (sourceSize, targetSize, instructions);
         }

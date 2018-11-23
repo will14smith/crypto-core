@@ -39,12 +39,16 @@ namespace Toxon.GitLibrary.Packs
         public class OffsetDelta : PackObject
         {
             public ulong Offset { get; }
+            public ulong SourceSize { get; }
+            public ulong TargetSize { get; }
             public IReadOnlyList<DeltaInstruction> Instructions { get; }
             public override PackObjectType Type => PackObjectType.OfsDelta;
 
-            public OffsetDelta(ulong offset, IReadOnlyList<DeltaInstruction> instructions, ReadOnlySequence<byte> content) : base(content)
+            public OffsetDelta(ulong offset, ulong sourceSize, ulong targetSize, IReadOnlyList<DeltaInstruction> instructions, ReadOnlySequence<byte> content) : base(content)
             {
                 Offset = offset;
+                SourceSize = sourceSize;
+                TargetSize = targetSize;
                 Instructions = instructions;
             }
         }
@@ -52,12 +56,16 @@ namespace Toxon.GitLibrary.Packs
         public class RefDelta : PackObject
         {
             public ObjectRef ObjectRef { get; }
+            public ulong SourceSize { get; }
+            public ulong TargetSize { get; }
             public IReadOnlyList<DeltaInstruction> Instructions { get; }
             public override PackObjectType Type => PackObjectType.RefDelta;
 
-            public RefDelta(ObjectRef objectRef, IReadOnlyList<DeltaInstruction> instructions, ReadOnlySequence<byte> content) : base(content)
+            public RefDelta(ObjectRef objectRef, ulong sourceSize, ulong targetSize, IReadOnlyList<DeltaInstruction> instructions, ReadOnlySequence<byte> content) : base(content)
             {
                 ObjectRef = objectRef;
+                SourceSize = sourceSize;
+                TargetSize = targetSize;
                 Instructions = instructions;
             }
         }

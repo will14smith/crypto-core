@@ -50,7 +50,9 @@ namespace Toxon.GitLibrary
 
                 using (var reader = packFile.Value.OpenReader())
                 {
-                    return PackFileResolver.ReadObject(reader, index, offset.Value);
+                    var objectOpt = PackFileResolver.ReadObject(reader, index.LookupOffset, offset.Value);
+                    if (!objectOpt.HasValue) throw new Exception("invalid object ref");
+                    return objectOpt.Value;
                 }
             }
 
