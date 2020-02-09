@@ -13,8 +13,8 @@ namespace Crypto.RSA.Encryption
 {
     public class RSACipherBase
     {
-        internal RSAPublicKey PublicKey;
-        internal RSAPrivateKey PrivateKey;
+        internal RSAPublicKey? PublicKey;
+        internal RSAPrivateKey? PrivateKey;
 
         public void Init(ICipherParameters parameters)
         {

@@ -1,6 +1,6 @@
 ﻿namespace Crypto.Core.Encryption.Parameters
 {
-    public class NullCipherParameter
+    public class NullCipherParameter : ICipherParameters
     {
         
     }

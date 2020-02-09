@@ -30,7 +30,7 @@ namespace Crypto.RSA.Encryption
             SecurityAssert.AssertBuffer(input, inputOffset, length);
             SecurityAssert.NotNull(PublicKey);
 
-            var k = PublicKey.Modulus.GetByteLength();
+            var k = PublicKey!.Modulus.GetByteLength();
             SecurityAssert.Assert(length <= k - 11);
 
             var ps = _random.RandomNonZeroBytes(k - length - 3);
@@ -44,7 +44,7 @@ namespace Crypto.RSA.Encryption
             Array.Copy(input, inputOffset, em, ps.Length + 3, length);
 
             var m = OS2IP(em, 0, em.Length);
-            var c = EncryptPrimative(m, PublicKey);
+            var c = EncryptPrimative(m, PublicKey!);
 
             var result = I2OSP(c, k);
             SecurityAssert.AssertBuffer(output, outputOffset, result.Length);
@@ -56,12 +56,12 @@ namespace Crypto.RSA.Encryption
             SecurityAssert.AssertBuffer(input, inputOffset, length);
             SecurityAssert.NotNull(PrivateKey);
 
-            var k = PrivateKey.Modulus.GetByteLength();
+            var k = PrivateKey!.Modulus.GetByteLength();
             SecurityAssert.Assert(k >= 11);
             SecurityAssert.Assert(length == k);
 
             var c = OS2IP(input, inputOffset, length);
-            var m = DecryptPrimative(c, PrivateKey);
+            var m = DecryptPrimative(c, PrivateKey!);
 
             var em = I2OSP(m, k);
 

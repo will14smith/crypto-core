@@ -18,12 +18,12 @@ namespace Crypto.RSA.Encryption
             SecurityAssert.NotNull(hash);
             SecurityAssert.NotNull(PrivateKey);
 
-            var k = PrivateKey.Modulus.GetByteLength();
+            var k = PrivateKey!.Modulus.GetByteLength();
 
             var em = EMSA_PKCS1_v1_5_Encode(input, k, hash);
 
             var m = OS2IP(em, 0, em.Length);
-            var s = SignPrimative(m, PrivateKey);
+            var s = SignPrimative(m, PrivateKey!);
 
             return I2OSP(s, k);
         }
@@ -35,11 +35,11 @@ namespace Crypto.RSA.Encryption
             SecurityAssert.NotNull(hash);
             SecurityAssert.NotNull(PublicKey);
 
-            var k = PublicKey.Modulus.GetByteLength();
+            var k = PublicKey!.Modulus.GetByteLength();
             SecurityAssert.Assert(signature.Length == k);
 
             var s = OS2IP(signature, 0, signature.Length);
-            var m = VerifyPrimative(s, PublicKey);
+            var m = VerifyPrimative(s, PublicKey!);
             var em = I2OSP(m, k);
 
             var em2 = EMSA_PKCS1_v1_5_Encode(input, k, hash);

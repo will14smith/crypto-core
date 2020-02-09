@@ -38,12 +38,12 @@ namespace Crypto.RSA.Keys
             var keySeq = asn1 as ASN1Sequence;
             SecurityAssert.Assert(keySeq != null && keySeq.Count == 2);
 
-            var modulusInt = keySeq.Elements[0] as ASN1Integer;
+            var modulusInt = keySeq!.Elements[0] as ASN1Integer;
             SecurityAssert.NotNull(modulusInt);
-            var exponentInt = keySeq.Elements[1] as ASN1Integer;
+            var exponentInt = keySeq!.Elements[1] as ASN1Integer;
             SecurityAssert.NotNull(exponentInt);
 
-            return new RSAPublicKey(modulusInt.Value, exponentInt.Value);
+            return new RSAPublicKey(modulusInt!.Value, exponentInt!.Value);
         }
 
         public PrivateKey ReadPrivateKey(X509AlgorithmIdentifier algorithm, byte[] input)

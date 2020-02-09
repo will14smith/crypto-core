@@ -13,7 +13,7 @@ namespace Crypto.RSA.Keys
 
             var keySeq = asn1Key as ASN1Sequence;
             SecurityAssert.NotNull(keySeq);
-            SecurityAssert.Assert(keySeq.Count == 9);
+            SecurityAssert.Assert(keySeq!.Count == 9);
 
             Modulus = GetInteger(keySeq, 1);
             var publicExponent = GetInteger(keySeq, 2);
@@ -47,7 +47,7 @@ namespace Crypto.RSA.Keys
             var intElem = elem as ASN1Integer;
             SecurityAssert.NotNull(intElem);
 
-            return intElem.Value;
+            return intElem!.Value;
         }
 
         protected override bool Equal(PrivateKey key)

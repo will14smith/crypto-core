@@ -23,8 +23,7 @@ namespace Crypto.Core.Encryption.BlockModes
 
         public virtual void Init(ICipherParameters parameters)
         {
-            var ivParams = parameters as IVParameter;
-            if (ivParams == null)
+            if (!(parameters is IVParameter ivParams))
             {
                 Cipher.Init(parameters);
                 return;
@@ -37,7 +36,7 @@ namespace Crypto.Core.Encryption.BlockModes
             Array.Copy(ivParam, IV, BlockLength);
             IVInitialised = true;
 
-            if (ivParams.Parameters != null)
+            if (ivParams.HasParameters)
             {
                 Cipher.Init(ivParams.Parameters);
             }
