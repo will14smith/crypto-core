@@ -17,11 +17,11 @@ namespace Crypto.EC.Encryption
     public class ECDSA : ISignatureCipher
     {
         private int _ln;
-        private PrimeField _nField;
+        private PrimeField? _nField;
 
-        private DomainParameters _domain;
-        private Point _publicKey;
-        private FieldValue _privateKey;
+        private DomainParameters? _domain;
+        private Point? _publicKey;
+        private FieldValue? _privateKey;
 
         private readonly IRandom _random;
 
@@ -48,9 +48,9 @@ namespace Crypto.EC.Encryption
 
         public byte[] Sign(byte[] input, IDigest hash)
         {
-            if (_privateKey == null)
+            if (_privateKey is null || _domain is null || _nField is null)
             {
-                throw new InvalidOperationException("ECDSA not initialised with private key");
+                throw new InvalidOperationException("ECDSA not initialised");
             }
 
             // e = HASH(input)
@@ -102,6 +102,8 @@ namespace Crypto.EC.Encryption
 
         private FieldValue ToZ(IEnumerable<byte> e, int ln)
         {
+            if (_domain is null) { throw new InvalidOperationException("ECDSA not initialised"); }            
+            
             // TODO handle sub byte lengths
 
             if (ln % 8 != 0)
@@ -114,6 +116,8 @@ namespace Crypto.EC.Encryption
 
         public bool Verify(byte[] input, byte[] signature, IDigest hash)
         {
+            if (_publicKey is null || _domain is null || _nField is null) { throw new InvalidOperationException("ECDSA not initialised"); }            
+
             FieldValue r, s;
 
             using (var buffer = new MemoryStream(signature))
@@ -122,17 +126,17 @@ namespace Crypto.EC.Encryption
 
                 var seq = reader.Read() as ASN1Sequence;
                 SecurityAssert.NotNull(seq);
-                SecurityAssert.Assert(seq.Count == 2);
+                SecurityAssert.Assert(seq!.Count == 2);
 
                 var ri = seq.Elements[0] as ASN1Integer;
                 SecurityAssert.NotNull(ri);
-                r = _nField.Value(ri.Value);
-                SecurityAssert.Assert(r.Value == ri.Value);
+                r = _nField.Value(ri!.Value);
+                SecurityAssert.Assert(r.Value == ri!.Value);
 
                 var si = seq.Elements[1] as ASN1Integer;
                 SecurityAssert.NotNull(si);
-                s = _nField.Value(si.Value);
-                SecurityAssert.Assert(s.Value == si.Value);
+                s = _nField.Value(si!.Value);
+                SecurityAssert.Assert(s.Value == si!.Value);
             }
 
             // check QA != O
@@ -160,7 +164,7 @@ namespace Crypto.EC.Encryption
             // (x1, y2) = u1 * G + u2 * QA
             var point = Point.Add(_domain.Curve,
                     a: Point.Multiply(_domain.Curve, u1, _domain.Generator),
-                    b: Point.Multiply(_domain.Curve, u2, _publicKey));
+                    b: Point.Multiply(_domain.Curve, u2, _publicKey))!;
 
             // return r == x1 (mod n)
             return r == point.X;

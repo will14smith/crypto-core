@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Crypto.Utils;
 
 namespace Crypto.EC.Maths
 {
@@ -11,6 +11,10 @@ namespace Crypto.EC.Maths
 
         protected Curve(IField field, FieldValue a, FieldValue b)
         {
+            SecurityAssert.NotNull(field);
+            SecurityAssert.NotNull(a);
+            SecurityAssert.NotNull(b);
+            
             Field = field;
 
             A = a;
@@ -28,11 +32,11 @@ namespace Crypto.EC.Maths
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != GetType()) return false;
-            return Equals((Curve) obj);
+            
+            return obj.GetType() == GetType() && Equals((Curve) obj);
         }
 
-        protected bool Equals(Curve other)
+        private bool Equals(Curve other)
         {
             return Equals(Field, other.Field) && Equals(A, other.A) && Equals(B, other.B);
         }
@@ -41,9 +45,9 @@ namespace Crypto.EC.Maths
         {
             unchecked
             {
-                var hashCode = (Field != null ? Field.GetHashCode() : 0);
-                hashCode = (hashCode * 397) ^ (A != null ? A.GetHashCode() : 0);
-                hashCode = (hashCode * 397) ^ (B != null ? B.GetHashCode() : 0);
+                var hashCode = Field.GetHashCode();
+                hashCode = (hashCode * 397) ^ A.GetHashCode();
+                hashCode = (hashCode * 397) ^ B.GetHashCode();
                 return hashCode;
             }
         }

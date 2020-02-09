@@ -16,8 +16,7 @@ namespace Crypto.EC.Maths
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
-            var other = obj as FieldValue;
-            return other != null && Equals(other);
+            return obj is FieldValue other && Equals(other);
         }
 
         public bool Equals(FieldValue other)

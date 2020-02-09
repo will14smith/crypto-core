@@ -38,8 +38,7 @@ namespace Crypto.EC.Maths
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
-            var other = obj as Point;
-            return other != null && Equals(other);
+            return obj is Point other && Equals(other);
         }
 
         public bool Equals(Point other)
@@ -56,7 +55,7 @@ namespace Crypto.EC.Maths
             }
         }
 
-        public static Point Add(Curve curve, Point a, Point b)
+        public static Point? Add(Curve curve, Point? a, Point? b)
         {
             if (a == null) { return b; }
             if (b == null) { return a; }
@@ -88,12 +87,12 @@ namespace Crypto.EC.Maths
         {
             var i = a.Value;
 
-            if (i < 0)
+            if (i <= 0)
             {
                 throw new NotImplementedException();
             }
 
-            Point result = null;
+            Point? result = null;
 
             while (i > 0)
             {
@@ -102,12 +101,12 @@ namespace Crypto.EC.Maths
                     result = Add(curve, result, b);
                 }
 
-                b = Add(curve, b, b);
+                b = Add(curve, b, b)!;
 
                 i >>= 1;
             }
 
-            return result;
+            return result!;
         }
     }
 }

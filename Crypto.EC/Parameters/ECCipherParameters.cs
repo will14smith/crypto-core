@@ -7,7 +7,7 @@ namespace Crypto.EC.Parameters
     {
         public DomainParameters Domain { get; }
         public ECPublicKey PublicKey { get; }
-        public ECPrivateKey PrivateKey { get; }
+        public ECPrivateKey? PrivateKey { get; }
 
         public ECCipherParameters(DomainParameters domain, ECPublicKey publicKey)
         {
