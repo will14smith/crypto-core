@@ -7,5 +7,6 @@ namespace Crypto.TLS.SHA
         public static readonly TLSHashAlgorithm SHA1 = new TLSHashAlgorithm(2);
         public static readonly TLSHashAlgorithm SHA256 = new TLSHashAlgorithm(4);
         public static readonly TLSHashAlgorithm SHA384 = new TLSHashAlgorithm(5);
+        public static readonly TLSHashAlgorithm SHA512 = new TLSHashAlgorithm(6);
     }
 }
