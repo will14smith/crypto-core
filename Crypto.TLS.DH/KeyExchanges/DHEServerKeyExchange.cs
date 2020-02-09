@@ -44,6 +44,11 @@ namespace Crypto.TLS.DH.KeyExchanges
 
         public IEnumerable<HandshakeMessage> GenerateServerHandshakeMessages()
         {
+            if (_certificateConfig.CertificateChain is null)
+            {
+                throw new InvalidOperationException("Certificate chain is not initialized");
+            }
+
             // 512 is "approx" 256-bits of security
             _dhExchangeConfig.X = _random.RandomBig(512);
 

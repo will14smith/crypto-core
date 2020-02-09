@@ -26,7 +26,7 @@ namespace Crypto.TLS.DH.Keys
             var y = asn1 as ASN1Integer;
             SecurityAssert.NotNull(y);
 
-            return new DHPublicKey(parameters, y.Value);
+            return new DHPublicKey(parameters, y!.Value);
         }
 
         public PrivateKey ReadPrivateKey(X509AlgorithmIdentifier algorithm, byte[] input)
@@ -49,12 +49,12 @@ namespace Crypto.TLS.DH.Keys
             var keySeq = algorithm.Parameters[0] as ASN1Sequence;
             SecurityAssert.Assert(keySeq != null && keySeq.Count == 2);
 
-            var p = keySeq.Elements[0] as ASN1Integer;
+            var p = keySeq!.Elements[0] as ASN1Integer;
             SecurityAssert.NotNull(p);
-            var g = keySeq.Elements[1] as ASN1Integer;
+            var g = keySeq!.Elements[1] as ASN1Integer;
             SecurityAssert.NotNull(g);
 
-            return new DHParameterConfig(p.Value, g.Value);
+            return new DHParameterConfig(p!.Value, g!.Value);
         }
     }
 }

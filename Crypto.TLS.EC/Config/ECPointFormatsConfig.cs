@@ -4,6 +4,6 @@ namespace Crypto.TLS.EC.Config
 {
     public class ECPointFormatsConfig
     {
-        public IReadOnlyCollection<ECPointFormat> SupportedPointFormats { get; set; }
+        public IReadOnlyCollection<ECPointFormat>? SupportedPointFormats { get; set; }
     }
 }

@@ -5,6 +5,6 @@ namespace Crypto.TLS.EC.Config
 {
     public class SupportedGroupsConfig
     {
-        public IReadOnlyCollection<NamedCurve> SupportedGroups { get; set; }
+        public IReadOnlyCollection<NamedCurve>? SupportedGroups { get; set; }
     }
 }

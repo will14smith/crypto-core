@@ -11,7 +11,7 @@ namespace Crypto.TLS.DH
 {
     public static class ServiceCollectionExtensions
     {
-        public static void AddDHKeyExchange(this IServiceCollection services, [CanBeNull] DHParameterConfig parameters = null)
+        public static void AddDHKeyExchange(this IServiceCollection services, DHParameterConfig? parameters = null)
         {
             services.AddTransient<DHServerKeyExchange>();
             services.AddTransient<DHClientKeyExchange>();

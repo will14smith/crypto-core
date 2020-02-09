@@ -13,7 +13,7 @@ namespace Crypto.TLS.DH.Keys
             var param = input as ASN1Integer;
             SecurityAssert.NotNull(param);
 
-            X = param.Value;
+            X = param!.Value;
             
             var y = BigInteger.ModPow(parameters.G, X, parameters.P);
             

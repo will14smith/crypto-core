@@ -2,7 +2,7 @@
 {
     public class RandomConfig
     {
-        public byte[] Client { get; set; }
-        public byte[] Server { get; set; }
+        public byte[]? Client { get; set; }
+        public byte[]? Server { get; set; }
     }
 }

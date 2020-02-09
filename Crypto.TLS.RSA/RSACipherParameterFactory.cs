@@ -23,6 +23,11 @@ namespace Crypto.TLS.RSA
 
         public ICipherParameters Create(ConnectionEnd end, ConnectionDirection direction)
         {
+            if (_certificateConfig.Certificate is null)
+            {
+                throw new InvalidOperationException("Certificate is not initialized");
+            }
+            
             var publicKey = (RSAPublicKey)_certificateConfig.Certificate.SubjectPublicKey;
 
             switch (end)

@@ -149,9 +149,9 @@ namespace Crypto.TLS.Records.Strategy
                     switch (direction)
                     {
                         case ConnectionDirection.Read:
-                            return _aeadConfig.ServerIV;
+                            return _aeadConfig.ServerIV ?? throw new InvalidOperationException("Server AEAD IV is not initialized");
                         case ConnectionDirection.Write:
-                            return _aeadConfig.ClientIV;
+                            return _aeadConfig.ClientIV ?? throw new InvalidOperationException("Client AEAD IV is not initialized");
                         default:
                             throw new ArgumentOutOfRangeException(nameof(direction), direction, null);
                     }
@@ -159,9 +159,9 @@ namespace Crypto.TLS.Records.Strategy
                     switch (direction)
                     {
                         case ConnectionDirection.Read:
-                            return _aeadConfig.ClientIV;
+                            return _aeadConfig.ClientIV ?? throw new InvalidOperationException("Client AEAD IV is not initialized");
                         case ConnectionDirection.Write:
-                            return _aeadConfig.ServerIV;
+                            return _aeadConfig.ServerIV ?? throw new InvalidOperationException("Server AEAD IV is not initialized");
                         default:
                             throw new ArgumentOutOfRangeException(nameof(direction), direction, null);
                     }

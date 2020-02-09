@@ -17,7 +17,7 @@ namespace Crypto.TLS.IO
         private IServiceProvider Services => _servicesScope.ServiceProvider;
 
         private bool _active;
-        private Thread _reader;
+        private Thread? _reader;
         private readonly ByteQueue _readQueue = new ByteQueue();
 
         public TLSStream(Stream inner, IServiceProvider services)
@@ -48,7 +48,7 @@ namespace Crypto.TLS.IO
             while (true)
             {
                 Console.WriteLine("In state " + state.State);
-                state = state.Run();
+                state = state.Run() ?? throw new InvalidOperationException($"State transitioned to null, previous state was {state.GetType()}");
 
                 if (state is ActiveState)
                 {
@@ -145,7 +145,7 @@ namespace Crypto.TLS.IO
         public override void Close()
         {
             // TODO close TLS connection
-            _reader.Abort();
+            _reader?.Abort();
             base.Close();
         }
 

@@ -16,7 +16,7 @@ namespace Crypto.EC.Tests.Maths.Prime
             var a = new Point(field.Value(3), field.Value(6));
             var b = new Point(field.Value(11), field.Value(17));
 
-            var c = Point.Add(curve, a, b);
+            var c = Point.Add(curve, a, b)!;
 
             Assert.Equal(field.Value(47), c.X);
             Assert.Equal(field.Value(79), c.Y);
@@ -30,7 +30,7 @@ namespace Crypto.EC.Tests.Maths.Prime
 
             var a = new Point(field.Value(59), field.Value(32));
 
-            var c = Point.Add(curve, a, a);
+            var c = Point.Add(curve, a, a)!;
 
             Assert.Equal(field.Value(80), c.X);
             Assert.Equal(field.Value(10), c.Y);

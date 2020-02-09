@@ -40,16 +40,16 @@ namespace Crypto.TLS.EC.Keys
 
                 var seq = asn1 as ASN1Sequence;
                 SecurityAssert.NotNull(seq);
-                SecurityAssert.Assert(seq.Count >= 2);
+                SecurityAssert.Assert(seq!.Count >= 2);
 
-                var version = seq.Elements[0] as ASN1Integer;
+                var version = seq!.Elements[0] as ASN1Integer;
                 SecurityAssert.NotNull(version);
-                SecurityAssert.Assert(version.Value == 1);
+                SecurityAssert.Assert(version!.Value == 1);
 
-                var dString = seq.Elements[1] as ASN1OctetString;
+                var dString = seq!.Elements[1] as ASN1OctetString;
                 SecurityAssert.NotNull(dString);
                 
-                var d = parameters.Field.Value(dString.Value.ToBigInteger(Endianness.BigEndian));
+                var d = parameters.Field.Value(dString!.Value.ToBigInteger(Endianness.BigEndian));
 
                 var q = Point.Multiply(
                     parameters.Curve,
@@ -71,7 +71,7 @@ namespace Crypto.TLS.EC.Keys
             var curve = algorithm.Parameters[0] as ASN1ObjectIdentifier;
             SecurityAssert.NotNull(curve);
 
-            return _namedCurvesRegistry.Resolve(curve);
+            return _namedCurvesRegistry.Resolve(curve!);
         }
     }
 }

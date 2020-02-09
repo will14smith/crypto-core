@@ -2,7 +2,7 @@
 {
     public class BlockCipherConfig
     {
-        public byte[] ClientMACKey { get; set; }
-        public byte[] ServerMACKey { get; set; }
+        public byte[]? ClientMACKey { get; set; }
+        public byte[]? ServerMACKey { get; set; }
     }
 }

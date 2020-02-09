@@ -42,6 +42,11 @@ namespace Crypto.TLS.KeyExchanges
 
         public byte[] Compute(byte[] preMasterSecret)
         {
+            if (_randomConfig.Client is null || _randomConfig.Server is null)
+            {
+                throw new InvalidOperationException("Random config is not initialized");
+            }
+            
             var clientRandom = _randomConfig.Client;
             var serverRandom = _randomConfig.Server;
 
@@ -58,8 +63,12 @@ namespace Crypto.TLS.KeyExchanges
 
         public void ComputeKeysAndUpdateConfig(byte[] masterSecret)
         {
+            if (_randomConfig.Client is null || _randomConfig.Server is null)
+            {
+                throw new InvalidOperationException("Random config is not initialized");
+            }
+
             _keyConfig.Master = masterSecret;
-            Console.WriteLine(HexConverter.ToHex(_keyConfig.Master));
 
             var cipherSuite = _cipherSuiteConfig.CipherSuite;
 

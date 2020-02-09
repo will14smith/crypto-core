@@ -46,14 +46,13 @@ namespace Crypto.RSA.Keys
             return new RSAPublicKey(modulusInt!.Value, exponentInt!.Value);
         }
 
-        public PrivateKey ReadPrivateKey(X509AlgorithmIdentifier algorithm, byte[] input)
+        public PrivateKey ReadPrivateKey(X509AlgorithmIdentifier? algorithm, byte[] input)
         {
-            using (var ms = new MemoryStream(input))
-            {
-                var asn1 = new DERReader(ms);
+            using var ms = new MemoryStream(input);
+            
+            var asn1 = new DERReader(ms);
 
-                return new RSAPrivateKey(asn1.Read());
-            }
+            return new RSAPrivateKey(asn1.Read());
         }
     }
 }

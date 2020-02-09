@@ -2,6 +2,6 @@
 {
     public class SessionConfig
     {
-        public byte[] Id { get; set; }
+        public byte[]? Id { get; set; }
     }
 }

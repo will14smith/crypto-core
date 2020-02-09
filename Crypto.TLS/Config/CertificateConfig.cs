@@ -5,7 +5,7 @@ namespace Crypto.TLS.Config
 {
     public class CertificateConfig
     {
-        public IReadOnlyList<X509Certificate> CertificateChain { get; set; }
-        public X509Certificate Certificate => CertificateChain[0];
+        public IReadOnlyList<X509Certificate>? CertificateChain { get; set; }
+        public X509Certificate? Certificate => CertificateChain?[0];
     }
 }

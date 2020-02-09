@@ -4,6 +4,6 @@
     {
         ConnectionState State { get; }
 
-        IState Run();
+        IState? Run();
     }
 }

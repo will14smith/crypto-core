@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Numerics;
 using Crypto.Certificates;
@@ -31,6 +32,11 @@ namespace Crypto.TLS.DH.KeyExchanges
         
         public IEnumerable<HandshakeMessage> GenerateServerHandshakeMessages()
         {
+            if (_certificateConfig.CertificateChain is null)
+            {
+                throw new InvalidOperationException("Certificate chain is not initialized");
+            }
+            
             yield return new CertificateMessage(_certificateConfig.CertificateChain);
         }
 
@@ -53,13 +59,18 @@ namespace Crypto.TLS.DH.KeyExchanges
 
         private DHPrivateKey GetPrivateKey()
         {
+            if (_certificateConfig.Certificate is null)
+            {
+                throw new InvalidOperationException("Certificate is not initialized");
+            }
+
             var cert = _certificateConfig.Certificate;
             var key = _certificateManager.GetPrivateKey(cert.SubjectPublicKey);
 
             var dhKey = key as DHPrivateKey;
             SecurityAssert.NotNull(dhKey);
 
-            return dhKey;
+            return dhKey!;
         }
 
     }

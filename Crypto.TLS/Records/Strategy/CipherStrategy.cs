@@ -130,9 +130,9 @@ namespace Crypto.TLS.Records.Strategy
                     switch (direction)
                     {
                         case ConnectionDirection.Read:
-                            return _blockCipherConfig.ServerMACKey;
+                            return _blockCipherConfig.ServerMACKey ?? throw new InvalidOperationException("Server MAC key is not initialized");;
                         case ConnectionDirection.Write:
-                            return _blockCipherConfig.ClientMACKey;
+                            return _blockCipherConfig.ClientMACKey ?? throw new InvalidOperationException("Client MAC key is not initialized");;
                         default:
                             throw new ArgumentOutOfRangeException(nameof(direction), direction, null);
                     }
@@ -140,9 +140,9 @@ namespace Crypto.TLS.Records.Strategy
                     switch (direction)
                     {
                         case ConnectionDirection.Read:
-                            return _blockCipherConfig.ClientMACKey;
+                            return _blockCipherConfig.ClientMACKey ?? throw new InvalidOperationException("Client MAC key is not initialized");;
                         case ConnectionDirection.Write:
-                            return _blockCipherConfig.ServerMACKey;
+                            return _blockCipherConfig.ServerMACKey ?? throw new InvalidOperationException("Server MAC key is not initialized");;
                         default:
                             throw new ArgumentOutOfRangeException(nameof(direction), direction, null);
                     }

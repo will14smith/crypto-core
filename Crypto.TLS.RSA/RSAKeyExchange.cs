@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Crypto.Certificates;
 using Crypto.Core.Randomness;
 using Crypto.RSA.Encryption;
@@ -56,6 +57,11 @@ namespace Crypto.TLS.RSA
 
         public IEnumerable<HandshakeMessage> GenerateServerHandshakeMessages()
         {
+            if (_certificateConfig.CertificateChain is null)
+            {
+                throw new InvalidOperationException("Certificate chain is not initialized");
+            }
+            
             yield return new CertificateMessage(_certificateConfig.CertificateChain);
         }
         
@@ -80,6 +86,11 @@ namespace Crypto.TLS.RSA
 
         private byte[] ReadMessage(byte[] body)
         {
+            if (_certificateConfig.Certificate is null)
+            {
+                throw new InvalidOperationException("Certificate is not initialized");
+            }
+            
             var length = EndianBitConverter.Big.ToUInt16(body, 0);
             SecurityAssert.Assert(body.Length == length + 2);
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.ConstrainedExecution;
 using Crypto.Certificates;
 using Crypto.EC.Maths;
 using Crypto.EC.Parameters;
@@ -85,6 +86,11 @@ namespace Crypto.TLS.EC.KeyExchanges
 
         public virtual IEnumerable<HandshakeMessage> GenerateServerHandshakeMessages()
         {
+            if (CertificateConfig.CertificateChain is null)
+            {
+                throw new InvalidOperationException("Certificate chain is not initialized");
+            }
+            
             yield return new CertificateMessage(CertificateConfig.CertificateChain);
         }
 
@@ -112,6 +118,11 @@ namespace Crypto.TLS.EC.KeyExchanges
 
         private Point ReadMessage(ClientKeyExchangeMessage message)
         {
+            if (ECDHExchangeConfig.Parameters is null)
+            {
+                throw new InvalidOperationException("ECDHE parematers are not initialized");
+            }
+            
             SecurityAssert.Assert(message.Body.Length > 0);
             var length = message.Body[0];
             SecurityAssert.Assert(message.Body.Length == length + 1);
@@ -124,10 +135,15 @@ namespace Crypto.TLS.EC.KeyExchanges
 
         protected Point CalculatePoint(Point b)
         {
+            if (ECDHExchangeConfig.Parameters is null || ECDHExchangeConfig.D is null)
+            {
+                throw new InvalidOperationException("ECDHE parameters are not initialized");
+            }
+            
             return Point.Multiply(
                 ECDHExchangeConfig.Parameters.Curve,
                 ECDHExchangeConfig.D,
-                b);
+                b)!;
         }
     }
 }

@@ -32,6 +32,11 @@ namespace Crypto.TLS.EC
 
             var randomConfig = _serviceProvider.GetRequiredService<RandomConfig>();
 
+            if (randomConfig.Client is null || randomConfig.Server is null)
+            {
+                throw new InvalidOperationException("Random config is not initialized");
+            }
+            
             // signature needs these but the output doesn't
             stream.HashAlgorithm.Update(randomConfig.Client, 0, 32);
             stream.HashAlgorithm.Update(randomConfig.Server, 0, 32);

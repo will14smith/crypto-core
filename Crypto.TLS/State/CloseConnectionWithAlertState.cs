@@ -34,7 +34,7 @@ namespace Crypto.TLS.State
             );
         }
 
-        public IState Run()
+        public IState? Run()
         {
             _connection.WriteRecord(new Record(RecordType.Alert, _versionConfig.Version, AlertMessage.GetBytes()));
             return null;

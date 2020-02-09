@@ -104,7 +104,7 @@ namespace Crypto.TLS.Extensions
 
         public class Config
         {
-            public IReadOnlyCollection<(TLSHashAlgorithm, TLSSignatureAlgorithm)> SupportedAlgorithms { get; internal set; }
+            public IReadOnlyCollection<(TLSHashAlgorithm, TLSSignatureAlgorithm)>? SupportedAlgorithms { get; internal set; }
         }
     }
 }

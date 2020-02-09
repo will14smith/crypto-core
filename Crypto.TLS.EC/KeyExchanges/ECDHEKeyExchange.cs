@@ -48,6 +48,11 @@ namespace Crypto.TLS.EC.KeyExchanges
         
         public override IEnumerable<HandshakeMessage> GenerateServerHandshakeMessages()
         {
+            if (ECDHExchangeConfig.Parameters is null)
+            {
+                throw new InvalidOperationException("ECDHE parameters are not initialized");
+            }
+            
             var ecParameters = NegotiateParameters();
 
             foreach (var message in base.GenerateServerHandshakeMessages())
@@ -77,6 +82,11 @@ namespace Crypto.TLS.EC.KeyExchanges
 
         private Option<NamedCurve> GetFirstSupportedCurve()
         {
+            if (_supportedGroupsConfig.SupportedGroups is null)
+            {
+                throw new InvalidOperationException("Supported groups is not initialized");
+            }
+            
             foreach (var group in _supportedGroupsConfig.SupportedGroups)
             {
                 if (_namedCurvesRegistry.IsSupported(group))

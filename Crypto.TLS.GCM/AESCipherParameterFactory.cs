@@ -35,9 +35,9 @@ namespace Crypto.TLS.GCM
                     switch (direction)
                     {
                         case ConnectionDirection.Read:
-                            return _keyConfig.Server;
+                            return _keyConfig.Server ?? throw new InvalidOperationException("Server key is not initialized");
                         case ConnectionDirection.Write:
-                            return _keyConfig.Client;
+                            return _keyConfig.Client ?? throw new InvalidOperationException("Client key is not initialized");
                         default:
                             throw new ArgumentOutOfRangeException(nameof(direction), direction, null);
                     }
@@ -45,9 +45,9 @@ namespace Crypto.TLS.GCM
                     switch (direction)
                     {
                         case ConnectionDirection.Read:
-                            return _keyConfig.Client;
+                            return _keyConfig.Client ?? throw new InvalidOperationException("Client key is not initialized");
                         case ConnectionDirection.Write:
-                            return _keyConfig.Server;
+                            return _keyConfig.Server ?? throw new InvalidOperationException("Server key is not initialized");
                         default:
                             throw new ArgumentOutOfRangeException(nameof(direction), direction, null);
                     }

@@ -15,7 +15,7 @@ namespace Crypto.EC.Tests.Maths
             var a = new Point(intField.Value(1), intField.Value(2));
             var b = new Point(intField.Value(3), intField.Value(4));
 
-            var c = Point.Add(curve, a, b);
+            var c = Point.Add(curve, a, b)!;
 
             Assert.Equal(intField.Value(-3), c.X);
             Assert.Equal(intField.Value(2), c.Y);
@@ -29,7 +29,7 @@ namespace Crypto.EC.Tests.Maths
 
             var a = new Point(intField.Value(1), intField.Value(2));
 
-            var c = Point.Add(curve, a, a);
+            var c = Point.Add(curve, a, a)!;
 
             Assert.Equal(intField.Value(-1), c.X);
             Assert.Equal(intField.Value(-4), c.Y);

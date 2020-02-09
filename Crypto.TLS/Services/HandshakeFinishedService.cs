@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using Crypto.TLS.Config;
 using Crypto.TLS.Hashing;
 using Crypto.TLS.Messages.Handshakes;
@@ -32,6 +33,11 @@ namespace Crypto.TLS.Services
         
         public bool Verify(FinishedMessage message)
         {
+            if (_keyConfig.Master is null)
+            {
+                throw new InvalidOperationException("Key config is not initialized");
+            }
+            
             var prfDigest = _cipherSuitesProvider.ResolvePRFHash(_cipherSuiteConfig.CipherSuite);
             var prf = new PRF(prfDigest);
 
@@ -46,6 +52,11 @@ namespace Crypto.TLS.Services
 
         public FinishedMessage Generate()
         {
+            if (_keyConfig.Master is null)
+            {
+                throw new InvalidOperationException("Key config is not initialized");
+            }
+            
             var prfDigest = _cipherSuitesProvider.ResolvePRFHash(_cipherSuiteConfig.CipherSuite);
             var prf = new PRF(prfDigest);
 

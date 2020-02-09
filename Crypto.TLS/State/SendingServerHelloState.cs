@@ -67,6 +67,15 @@ namespace Crypto.TLS.State
 
         private HandshakeMessage CreateHello()
         {
+            if (_randomConfig.Server is null)
+            {
+                throw new InvalidOperationException("Random config is not initialized");
+            }
+            if (_sessionConfig.Id is null)
+            {
+                throw new InvalidOperationException("Session config is not initialized");
+            }
+
             var extensionHellos = CreateHelloExtensions();
 
             return new ServerHelloMessage(

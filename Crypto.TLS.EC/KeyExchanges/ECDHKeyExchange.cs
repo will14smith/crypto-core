@@ -81,13 +81,18 @@ namespace Crypto.TLS.EC.KeyExchanges
 
         private ECPrivateKey GetPrivateKey()
         {
+            if (CertificateConfig.Certificate is null)
+            {
+                throw new InvalidOperationException("Certificate is not initialized");
+            }
+            
             var cert = CertificateConfig.Certificate;
             var key = _certificateManager.GetPrivateKey(cert.SubjectPublicKey);
 
             var ecKey = key as ECPrivateKey;
             SecurityAssert.NotNull(ecKey);
 
-            return ecKey;
+            return ecKey!;
         }
     }
 }

@@ -23,6 +23,11 @@ namespace Crypto.TLS.EC
 
         public ICipherParameters Create(ConnectionEnd end, ConnectionDirection direction)
         {
+            if (_certificateConfig.Certificate is null)
+            {
+                throw new InvalidOperationException("Certificate is not initialized");
+            }
+            
             var publicKey = (ECPublicKey)_certificateConfig.Certificate.SubjectPublicKey;
 
             switch (end)
