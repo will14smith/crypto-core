@@ -18,7 +18,7 @@ namespace Crypto.RC4.Tests
 
             rc4.Encrypt(input, 0, output, 0, input.Length);
 
-            Assert.Equal(rc4.KeySize, 16);
+            Assert.Equal(16, rc4.KeySize);
             Assert.Equal("720c94b63edf44e131d950ca211a5a30", HexConverter.ToHex(output));
         }
         
@@ -35,7 +35,7 @@ namespace Crypto.RC4.Tests
 
             rc4.Decrypt(input, 0, output, 0, input.Length);
 
-            Assert.Equal(rc4.KeySize, 16);
+            Assert.Equal(16, rc4.KeySize);
             Assert.Equal("540be91c8d1b503cacf2290801feb197", HexConverter.ToHex(output));
         }
     }

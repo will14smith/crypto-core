@@ -88,7 +88,6 @@ namespace Crypto.ASN1.Tests.Objects
         [Theory]
         [InlineData("1.3", new byte[] { 43 })]
         [InlineData("1.3.4", new byte[] { 43, 4 })]
-        [InlineData("1.3.4", new byte[] { 43, 4 })]
         [InlineData("1.3.132.1", new byte[] { 43, 129, 4, 1 })]
         public void GetBytes_WorksCorrectly(string input, byte[] expected)
         {
