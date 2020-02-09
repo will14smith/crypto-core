@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System;
+using System.Runtime.CompilerServices;
 using System.Security;
 using JetBrains.Annotations;
 
@@ -44,6 +45,34 @@ namespace Crypto.Utils
             InnerAssert(offset >= 0, callerName, callerLine, callerFile);
             InnerAssert(length >= 0, callerName, callerLine, callerFile);
             InnerAssert(offset + length <= buffer!.Length, callerName, callerLine, callerFile);
+        } 
+        [AssertionMethod]
+        public static void AssertBuffer<T>(ReadOnlySpan<T> buffer, int length, [CallerMemberName] string? callerName = null, [CallerLineNumber] int callerLine = 0, [CallerFilePath] string? callerFile = null)
+        {
+            InnerAssert(buffer != null, callerName, callerLine, callerFile);
+
+            InnerAssert(length >= 0, callerName, callerLine, callerFile);
+            InnerAssert( length <= buffer!.Length, callerName, callerLine, callerFile);
+        }
+        [AssertionMethod]
+        public static void AssertBuffer<T>(Span<T> buffer, int length, [CallerMemberName] string? callerName = null, [CallerLineNumber] int callerLine = 0, [CallerFilePath] string? callerFile = null)
+        {
+            InnerAssert(buffer != null, callerName, callerLine, callerFile);
+
+            InnerAssert(length >= 0, callerName, callerLine, callerFile);
+            InnerAssert( length <= buffer!.Length, callerName, callerLine, callerFile);
+        }
+        
+        [AssertionMethod]
+        public static void AssertInputOutputBuffers(ReadOnlySpan<byte> input, Span<byte> output, [CallerMemberName] string? callerName = null, [CallerLineNumber] int callerLine = 0, [CallerFilePath] string? callerFile = null)
+        {
+            AssertInputOutputBuffers(input, output, input.Length, callerName, callerLine, callerFile);
+        }
+        [AssertionMethod]
+        public static void AssertInputOutputBuffers(ReadOnlySpan<byte> input, Span<byte> output, int length, [CallerMemberName] string? callerName = null, [CallerLineNumber] int callerLine = 0, [CallerFilePath] string? callerFile = null)
+        {
+            InnerAssert(input.Length >= length, callerName, callerLine, callerFile);
+            InnerAssert(output.Length >= length, callerName, callerLine, callerFile);
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Text;
 
 namespace Crypto.Utils
 {
@@ -37,11 +38,19 @@ namespace Crypto.Utils
             throw new ArgumentOutOfRangeException(nameof(c));
         }
 
-        public static string ToHex(byte[] buffer)
+        public static string ToHex(ReadOnlySpan<byte> buffer)
         {
-            return string.Concat(buffer.Select(x => ToHex((byte)(x >> 4)).ToString() + ToHex((byte)(x & 0xf))).ToArray());
+            var sb = new StringBuilder();
+
+            foreach (var x in buffer)
+            {
+                sb.Append(ToHexNibble((byte)(x >> 4)));
+                sb.Append(ToHexNibble((byte)(x & 0xf)));
+            }
+
+            return sb.ToString();
         }
-        private static char ToHex(byte nibble)
+        public static char ToHexNibble(byte nibble)
         {
             if (nibble < 10)
             {

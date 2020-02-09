@@ -1,4 +1,5 @@
-﻿using Crypto.Core.Encryption.Parameters;
+﻿using System;
+using Crypto.Core.Encryption.Parameters;
 
 namespace Crypto.Core.Encryption
 {
@@ -10,12 +11,28 @@ namespace Crypto.Core.Encryption
 
         void Init(ICipherParameters parameters);
 
-        //TODO other functions...
+        AEADResult Encrypt(ReadOnlySpan<byte> input, Span<byte> output);
+        AEADResult EncryptFinal(AEADResult previousResult);
 
-        int Encrypt(byte[] input, int inputOffset, byte[] output, int outputOffset, int length);
-        int EncryptFinal(byte[] output, int offset, byte[] tag);
+        AEADResult Decrypt(ReadOnlySpan<byte> input, Span<byte> output);
+        AEADResult DecryptFinal(AEADResult previousResult);
+    }
+    
+    public ref struct AEADResult
+    {
+        public readonly ReadOnlySpan<byte> RemainingInput;
+        public readonly Span<byte> RemainingOutput;
 
-        int Decrypt(byte[] input, int inputOffset, byte[] output, int outputOffset, int length);
-        int DecryptFinal(byte[] input, int inputOffset, byte[] output, int outputOffset);
+        public AEADResult(ReadOnlySpan<byte> remainingInput, Span<byte> remainingOutput)
+        {
+            RemainingInput = remainingInput;
+            RemainingOutput = remainingOutput;
+        }
+
+        public void Deconstruct(out ReadOnlySpan<byte> input, out Span<byte> output)
+        {
+            input = RemainingInput;
+            output = RemainingOutput;
+        }
     }
 }

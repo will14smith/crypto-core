@@ -27,11 +27,7 @@ namespace Crypto.Core.Encryption.Adapters
             SecurityAssert.AssertBuffer(input, inputOffset, length);
             SecurityAssert.AssertBuffer(output, outputOffset, length + TagLength);
 
-            var tag = new byte[TagLength];
-            
-            var offset = Cipher.Encrypt(input, inputOffset, output, outputOffset, length);
-            offset += Cipher.EncryptFinal(output, outputOffset + offset, tag);
-            Array.Copy(tag, 0, output, outputOffset + offset, tag.Length);
+            Cipher.EncryptFinal(Cipher.Encrypt(input, output));
         }
 
         public void Decrypt(byte[] input, int inputOffset, byte[] output, int outputOffset, int length)
@@ -39,8 +35,7 @@ namespace Crypto.Core.Encryption.Adapters
             SecurityAssert.AssertBuffer(input, inputOffset, length);
             SecurityAssert.AssertBuffer(output, outputOffset, length - TagLength);
 
-            var offset = Cipher.Decrypt(input, inputOffset, output, outputOffset, length);
-            Cipher.DecryptFinal(input, inputOffset + offset, output, outputOffset + offset);
+            Cipher.DecryptFinal(Cipher.Decrypt(input, output));
         }
     }
 }

@@ -84,30 +84,29 @@ namespace Crypto.GCM
             
             _state = new State(aSize, BlockLength, TagLength, j0, tagHash, ctr, _cipher);
         }
-        
-        public int Encrypt(byte[] input, int inputOffset, byte[] output, int outputOffset, int length)
+
+        public AEADResult Encrypt(ReadOnlySpan<byte> input, Span<byte> output)
         {
             if(_state == null) throw new InvalidOperationException("GCM is not initialized");
-            return _state.Encrypt(input, inputOffset, output, outputOffset, length);
+            return _state.Encrypt(input, output);
         }
 
-       
-        public int EncryptFinal(byte[] output, int offset, byte[] tag)
+        public AEADResult EncryptFinal(AEADResult previousResult)
         {
             if(_state == null) throw new InvalidOperationException("GCM is not initialized");
-            return _state.EncryptFinal(output, offset, tag);
+            return _state.EncryptFinal(previousResult);
         }
 
-        public int Decrypt(byte[] input, int inputOffset, byte[] output, int outputOffset, int length)
+        public AEADResult Decrypt(ReadOnlySpan<byte> input, Span<byte> output)
         {
             if(_state == null) throw new InvalidOperationException("GCM is not initialized");
-            return _state.Decrypt(input, inputOffset, output, outputOffset, length);
+            return _state.Decrypt(input, output);
         }
-        
-        public int DecryptFinal(byte[] input, int inputOffset, byte[] output, int outputOffset)
+
+        public AEADResult DecryptFinal(AEADResult previousResult)
         {
             if(_state == null) throw new InvalidOperationException("GCM is not initialized");
-            return _state.DecryptFinal(input, inputOffset, output, outputOffset);
+            return _state.DecryptFinal(previousResult);
         }
         
         private class State
@@ -139,142 +138,140 @@ namespace Crypto.GCM
                 _tagSize = tagSize;
             }
             
-            public int Encrypt(byte[] input, int inputOffset, byte[] output, int outputOffset, int length)
+            public AEADResult Encrypt(ReadOnlySpan<byte> input, Span<byte> output)
             {
-                var total = 0;
-
-                for (var i = 0; i < length; i++)
+                foreach (var t in input)
                 {
-                    _buffer[_bufferOffset++] = input[inputOffset + i];
+                    _buffer[_bufferOffset++] = t;
 
                     if (_bufferOffset == _blockSize)
                     {
-                        EncryptBlock(output, outputOffset);
-                        outputOffset += _blockSize;
-                        total += _blockSize;
+                        output = EncryptBlock(output);
                     }
                 }
 
-                return total;
+                return new AEADResult(new ReadOnlySpan<byte>(), output);
             }
             
-            public int EncryptFinal(byte[] output, int offset, byte[] tag)
+            public AEADResult EncryptFinal(AEADResult previousResult)
             {
-                SecurityAssert.AssertBuffer(tag, 0, _tagSize);
-
-                var total = 0;
+                var output = previousResult.RemainingOutput; 
 
                 if (_bufferOffset != 0)
                 {
-                    total += _bufferOffset;
-
-                    EncryptBlock(output, offset);
+                    output = EncryptBlock(output);
                 }
 
                 var tagCiphertextPaddingLength = (16 - (int)(_cSize / 8) % 16) % 16;
-                _tagHash.Update(new byte[tagCiphertextPaddingLength], 0, tagCiphertextPaddingLength);
-                _tagHash.Update(EndianBitConverter.Big.GetBytes(_aSize), 0, sizeof(long));
-                _tagHash.Update(EndianBitConverter.Big.GetBytes(_cSize), 0, sizeof(long));
+                _tagHash.Update(new byte[tagCiphertextPaddingLength]);
+                _tagHash.Update(EndianBitConverter.Big.GetBytes(_aSize));
+                _tagHash.Update(EndianBitConverter.Big.GetBytes(_cSize));
 
                 var ctr = new CTRBlockCipher(_cipher);
-                ctr.Init(new IVParameter(_j0));
+                ctr.Init(new IVParameter(new NullCipherParameter(), _j0));
 
-                ctr.EncryptBlock(_tagHash.Digest(), 0, tag, 0);
+                ctr.EncryptBlock(_tagHash.Digest(), output);
 
-                return total;
+                return new AEADResult(previousResult.RemainingInput, output);
             }
             
-            public int Decrypt(byte[] input, int inputOffset, byte[] output, int outputOffset, int length)
+            public AEADResult Decrypt(ReadOnlySpan<byte> input, Span<byte> output)
             {
-                SecurityAssert.AssertBuffer(input, inputOffset, length);
+                // Don't consume what could be the tag
+                var length = input.Length - _tagSize;
+
                 // TODO round length up to BlockLength
-                SecurityAssert.AssertBuffer(output, outputOffset, length);
+                SecurityAssert.AssertInputOutputBuffers(input, output, length);
 
-                var total = 0;
-
-                for (var i = 0; i < length; i++)
+                for (var index = 0; index < length; index++)
                 {
-                    _buffer[_bufferOffset++] = input[inputOffset + i];
+                    var t = input[index];
+                    _buffer[_bufferOffset++] = t;
 
                     if (_bufferOffset == _blockSize)
                     {
-                        DecryptBlock(output, outputOffset);
-                        outputOffset += _blockSize;
-                        total += _blockSize;
+                        output = DecryptBlock(output);
                     }
                 }
 
-                return total;
+                return new AEADResult(input.Slice(length), output);
             }
             
-            public int DecryptFinal(byte[] input, int inputOffset, byte[] output, int outputOffset)
+            public AEADResult DecryptFinal(AEADResult previousResult)
             {
-                SecurityAssert.AssertBuffer(input, inputOffset, _bufferOffset + _tagSize);
-                SecurityAssert.AssertBuffer(output, outputOffset, _bufferOffset);
+                // TODO SecurityAssert.AssertBuffer(input, inputOffset, _bufferOffset + TagLength);
+                // TODO SecurityAssert.AssertBuffer(output, outputOffset, _bufferOffset);
 
-                var total = 0;
+                // Consume everything but the Tag
+                previousResult = Decrypt(previousResult.RemainingInput, previousResult.RemainingOutput);
+                var input = previousResult.RemainingInput;
+                var output = previousResult.RemainingOutput;
+            
                 if (_bufferOffset != 0)
                 {
-                    total += _bufferOffset;
-                    inputOffset += _bufferOffset;
-
-                    DecryptBlock(output, outputOffset);
+                    output = DecryptBlock(output);
                 }
 
                 var tagCiphertextPaddingLength = (16 - (int)(_cSize / 8) % 16) % 16;
-                _tagHash.Update(new byte[tagCiphertextPaddingLength], 0, tagCiphertextPaddingLength);
-                _tagHash.Update(EndianBitConverter.Big.GetBytes(_aSize), 0, sizeof(long));
-                _tagHash.Update(EndianBitConverter.Big.GetBytes(_cSize), 0, sizeof(long));
+                _tagHash.Update(new byte[tagCiphertextPaddingLength]);
+                _tagHash.Update(EndianBitConverter.Big.GetBytes(_aSize));
+                _tagHash.Update(EndianBitConverter.Big.GetBytes(_cSize));
 
                 var tagCtr = new CTRBlockCipher(_cipher);
-                tagCtr.Init(new IVParameter(_j0));
+                tagCtr.Init(new IVParameter(new NullCipherParameter(), _j0));
 
                 var digest = _tagHash.Digest();
                 var calculatedTag = new byte[16];
-                tagCtr.EncryptBlock(digest, 0, calculatedTag, 0);
+                tagCtr.EncryptBlock(digest, calculatedTag);
 
-                var tag = new byte[16];
-                Array.Copy(input, inputOffset, tag, 0, _tagSize);
-
+                var tag = input.Slice(0, _tagSize).ToArray();
                 SecurityAssert.AssertHash(calculatedTag, tag);
 
-                return total;
+                return new AEADResult(input.Slice(_tagSize), output);
             }
 
-            private void EncryptBlock(byte[] output, int outputOffset)
+            private Span<byte> EncryptBlock(Span<byte> output)
             {
+                var bufferLength = _bufferOffset;
+
                 // encrypt block
                 var ciphertext = new byte[_blockSize];
-                _ctr.EncryptBlock(_buffer, 0, ciphertext, 0);
+                _ctr.EncryptBlock(_buffer, ciphertext);
 
                 // copy to output
-                Array.Copy(ciphertext, 0, output, outputOffset, _bufferOffset);
+                ciphertext.AsSpan().Slice(0, bufferLength).CopyTo(output);
 
                 // update tag hash
-                _tagHash.Update(output, outputOffset, _bufferOffset);
-                _cSize += _bufferOffset * 8;
+                _tagHash.Update(output.Slice(0, bufferLength));
+                _cSize += bufferLength * 8;
 
                 // clear buffer
                 _bufferOffset = 0;
                 Array.Clear(_buffer, 0, _blockSize);
+
+                return output.Slice(bufferLength);
             }
             
-            private void DecryptBlock(byte[] output, int outputOffset)
+            private Span<byte> DecryptBlock(Span<byte> output)
             {
+                var bufferLength = _bufferOffset;
+
                 // encrypt block
                 var plaintext = new byte[_blockSize];
-                _ctr.DecryptBlock(_buffer, 0, plaintext, 0);
+                _ctr.DecryptBlock(_buffer, plaintext);
 
                 // copy to output
-                Array.Copy(plaintext, 0, output, outputOffset, _bufferOffset);
-
+                plaintext.AsSpan().Slice(0, bufferLength).CopyTo(output);
+                
                 // update tag hash
-                _tagHash.Update(_buffer, 0, _bufferOffset);
-                _cSize += _bufferOffset * 8;
+                _tagHash.Update(_buffer.AsSpan().Slice(0, bufferLength));
+                _cSize += bufferLength * 8;
 
                 // clear buffer
                 _bufferOffset = 0;
                 Array.Clear(_buffer, 0, _blockSize);
+
+                return output.Slice(bufferLength);
             }
         }
     }

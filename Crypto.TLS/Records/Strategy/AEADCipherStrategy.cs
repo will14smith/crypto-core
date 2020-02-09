@@ -62,10 +62,13 @@ namespace Crypto.TLS.Records.Strategy
             cipher.Init(GetParameters(ConnectionDirection.Read, aad, nonce));
 
             var plaintext = new byte[payload.Length - cipher.TagLength];
-            var plaintextLength = cipher.Decrypt(payload, 0, plaintext, 0, payload.Length - cipher.TagLength);
-            plaintextLength += cipher.DecryptFinal(payload, plaintextLength, plaintext, plaintextLength);
 
-            Array.Resize(ref plaintext, plaintextLength);
+            var input = payload.AsSpan();
+            var output = plaintext.AsSpan();
+            
+            var result = cipher.DecryptAll(input, output);
+
+            Array.Resize(ref plaintext, plaintext.Length - result.RemainingOutput.Length);
 
             return new Record(type, version, plaintext);
         }
@@ -88,14 +91,13 @@ namespace Crypto.TLS.Records.Strategy
 
             cipher.Init(GetParameters(ConnectionDirection.Write, aad, nonce));
 
-            var tag = new byte[cipher.TagLength];
+            var input = data.AsSpan();
+            var output = payload.AsSpan(explicitNonceLength);
             
-            var payloadLength = explicitNonceLength;
-            payloadLength += cipher.Encrypt(data, 0, payload, payloadLength, data.Length);
-            payloadLength += cipher.EncryptFinal(payload, payloadLength, tag);
-            
-            Array.Copy(tag, 0, payload, payloadLength, tag.Length);
-            payloadLength += tag.Length;
+            var result = cipher.EncryptAll(input, output);
+            var payloadLength = payload.Length - result.RemainingOutput.Length;
+
+ 
             
             _connection.Writer.Write(type);
             _connection.Writer.Write(version);
