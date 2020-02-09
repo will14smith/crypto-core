@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using Crypto.Core.Signing;
 using Crypto.SHA;
 using Crypto.Utils;
@@ -40,6 +41,22 @@ namespace Toxon.GitLibrary.Packs
             var length = obj.Content.Length;
             WriteTypeAndLength(writer, obj.Type, length);
 
+            switch (obj.Type)
+            {
+                case PackObjectType.Commit:
+                case PackObjectType.Tree:
+                case PackObjectType.Blob:
+                case PackObjectType.Tag: break;
+
+                case PackObjectType.OfsDelta: throw new NotImplementedException();
+                case PackObjectType.RefDelta:
+                    writer.Write(((PackObject.RefDelta)obj).ObjectRef.Hash);
+                    break;
+
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
             Zlib.Deflate(writer.BaseStream, obj.Content);
         }
 
@@ -53,7 +70,7 @@ namespace Toxon.GitLibrary.Packs
 
             while (length != 0)
             {
-                writer.Write(b | 0x80);
+                writer.Write((byte)(b | 0x80));
 
                 b = (byte)(length & 0x7f);
                 length >>= 7;

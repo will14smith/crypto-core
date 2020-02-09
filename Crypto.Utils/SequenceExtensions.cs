@@ -93,6 +93,34 @@ namespace Crypto.Utils
             }
         }
 
+        public static (ReadOnlySequence<T>, ReadOnlySequence<T>) Split<T>(this ReadOnlySequence<T> memory, int offset)
+        {
+            var pre = memory.Slice(0, offset);
+            var post = memory.Slice(offset);
+
+            return (pre, post);
+        }
+        public static (ReadOnlySequence<T>, ReadOnlySequence<T>) Split<T>(this ReadOnlySequence<T> memory, SequencePosition offset)
+        {
+            var pre = memory.Slice(0, offset);
+            var post = memory.Slice(offset);
+
+            return (pre, post);
+        }
+
+        public static (ReadOnlySequence<T> Record, ReadOnlySequence<T> RemainingInput) SplitFirst<T>(this ReadOnlySequence<T> input, T search) where T : IEquatable<T>
+        {
+            var index = input.PositionOf(search);
+            if (!index.HasValue)
+            {
+                throw new Exception("invalid format");
+            }
+
+            ReadOnlySequence<T> buffer;
+            (buffer, input) = input.Split(index.Value);
+            return (buffer, input.Slice(1));
+        }
+
         public static bool SequenceEquals<T>(in this ReadOnlySequence<T> a, in ReadOnlySequence<T> b)
             where T : IEquatable<T>
         {
@@ -260,6 +288,5 @@ namespace Crypto.Utils
             }
             return true;
         }
-
     }
 }

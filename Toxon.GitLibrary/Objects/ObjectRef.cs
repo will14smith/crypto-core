@@ -6,6 +6,8 @@ namespace Toxon.GitLibrary.Objects
 {
     public class ObjectRef
     {
+        public static ObjectRef Zero { get; } = new ObjectRef(new byte[20]);
+        
         public ReadOnlySequence<byte> Hash { get; }
 
         public ObjectRef(in ReadOnlyMemory<byte> hash)

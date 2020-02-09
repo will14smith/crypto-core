@@ -103,8 +103,8 @@ namespace Crypto.Utils
             {
                 foreach (var x in segment.Span)
                 {
-                    sb.Append(ToHex((byte)(x >> 4)));
-                    sb.Append(ToHex((byte)(x & 0xf)));
+                    sb.Append(ToHexNibble((byte)(x >> 4)));
+                    sb.Append(ToHexNibble((byte)(x & 0xf)));
                 }
             }
 
@@ -119,8 +119,8 @@ namespace Crypto.Utils
             {
                 foreach (var x in segment.Span)
                 {
-                    result[i++] = (byte)ToHex((byte)(x >> 4));
-                    result[i++] = (byte)ToHex((byte)(x & 0xf));
+                    result[i++] = (byte)ToHexNibble((byte)(x >> 4));
+                    result[i++] = (byte)ToHexNibble((byte)(x & 0xf));
                 }
             }
 
@@ -135,13 +135,14 @@ namespace Crypto.Utils
             {
                 var x = buffer[i];
 
-                sb.Append(ToHex((byte)(x >> 4)));
-                sb.Append(ToHex((byte)(x & 0xf)));
+                sb.Append(ToHexNibble((byte)(x >> 4)));
+                sb.Append(ToHexNibble((byte)(x & 0xf)));
             }
 
             return sb.ToString();
         }
-        private static char ToHex(byte nibble)
+
+        public static char ToHexNibble(byte nibble)
         {
             if (nibble < 10)
             {
