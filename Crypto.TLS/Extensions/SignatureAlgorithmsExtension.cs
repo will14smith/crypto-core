@@ -17,6 +17,9 @@ namespace Crypto.TLS.Extensions
         private readonly ICipherSuitesProvider _cipherSuiteProvider;
         private readonly CipherSuitesRegistry _cipherSuitesRegistry;
 
+        private readonly HashAlgorithmRegistry _hashAlgorithmRegistry;
+        private readonly SignatureAlgorithmsRegistry _signatureAlgorithmsRegistry;
+        
         private readonly EndConfig _endConfig;
         private readonly Config _config;
 
@@ -24,11 +27,17 @@ namespace Crypto.TLS.Extensions
             ICipherSuitesProvider cipherSuiteProvider,
             CipherSuitesRegistry cipherSuitesRegistry,
 
+            HashAlgorithmRegistry hashAlgorithmRegistry,
+            SignatureAlgorithmsRegistry signatureAlgorithmsRegistry,
+
             EndConfig endConfig,
             Config config)
         {
             _cipherSuiteProvider = cipherSuiteProvider;
             _cipherSuitesRegistry = cipherSuitesRegistry;
+
+            _hashAlgorithmRegistry = hashAlgorithmRegistry;
+            _signatureAlgorithmsRegistry = signatureAlgorithmsRegistry;
 
             _endConfig = endConfig;
             _config = config;
@@ -82,7 +91,15 @@ namespace Crypto.TLS.Extensions
                 algorithms.Add((hash, sig));
             }
 
-            _config.SupportedAlgorithms = algorithms;
+            _config.SupportedAlgorithms = algorithms.Where(IsSupported).ToList();
+        }
+
+        private bool IsSupported((TLSHashAlgorithm, TLSSignatureAlgorithm) algorithms)
+        {
+            var (hash, sig) = algorithms;
+
+            return _hashAlgorithmRegistry.IsSupported(hash)
+                   && _signatureAlgorithmsRegistry.IsSupported(sig);
         }
 
         public class Config

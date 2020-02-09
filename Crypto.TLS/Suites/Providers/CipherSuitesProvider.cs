@@ -16,7 +16,7 @@ namespace Crypto.TLS.Suites.Providers
         private readonly HashAlgorithmRegistry _hashAlgorithmRegistry;
         private readonly PRFHashRegistry _prfHashRegistry;
         private readonly SignatureAlgorithmsRegistry _signatureAlgorithmsRegistry;
-        private readonly KeyExchangeRegistry _keyExchangeRegistry;
+        private readonly IKeyExchangeProvider _keyExchangeProvider;
 
         private readonly ICipherParameterFactoryProvider _cipherParameterFactoryProvider;
         private readonly ISignatureCipherParameterFactoryProvider _signatureCipherParameterFactoryProvider;
@@ -28,7 +28,7 @@ namespace Crypto.TLS.Suites.Providers
             HashAlgorithmRegistry hashAlgorithmRegistry,
             PRFHashRegistry prfHashRegistry,
             SignatureAlgorithmsRegistry signatureAlgorithmsRegistry,
-            KeyExchangeRegistry keyExchangeRegistry,
+            IKeyExchangeProvider keyExchangeProvider,
 
             ICipherParameterFactoryProvider cipherParameterFactoryProvider,
             ISignatureCipherParameterFactoryProvider signatureCipherParameterFactoryProvider)
@@ -39,7 +39,7 @@ namespace Crypto.TLS.Suites.Providers
             _hashAlgorithmRegistry = hashAlgorithmRegistry;
             _prfHashRegistry = prfHashRegistry;
             _signatureAlgorithmsRegistry = signatureAlgorithmsRegistry;
-            _keyExchangeRegistry = keyExchangeRegistry;
+            _keyExchangeProvider = keyExchangeProvider;
 
             _cipherParameterFactoryProvider = cipherParameterFactoryProvider;
             _signatureCipherParameterFactoryProvider = signatureCipherParameterFactoryProvider;
@@ -55,7 +55,7 @@ namespace Crypto.TLS.Suites.Providers
             if (!_prfHashRegistry.IsSupported(_registry.MapHashAlgorithm(suite))) return false;
             if (!_signatureAlgorithmsRegistry.IsSupported(_registry.MapSignatureAlgorithm(suite))) return false;
             if (!_signatureCipherParameterFactoryProvider.IsSupported(_registry.MapSignatureAlgorithm(suite))) return false;
-            if (!_keyExchangeRegistry.IsSupported(_registry.MapKeyExchange(suite))) return false;
+            if (!_keyExchangeProvider.IsSupported(_registry.MapKeyExchange(suite))) return false;
 
             return true;
         }
@@ -80,8 +80,7 @@ namespace Crypto.TLS.Suites.Providers
         }
         public IKeyExchange ResolveKeyExchange(CipherSuite suite)
         {
-            throw new NotImplementedException();
-            //return _keyExchangeRegistry.Resolve(_registry.MapKeyExchange(suite));
+            return _keyExchangeProvider.Create(_registry.MapKeyExchange(suite));
         }
 
         public ICipherParameterFactory ResolveCipherParameterFactory(CipherSuite suite)

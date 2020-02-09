@@ -40,12 +40,17 @@ namespace Crypto.TLS
         private static void AddCipherSuiteServices(this IServiceCollection services)
         {
             services.AddSingleton<CipherSuitesRegistry>();
-            services.AddSingleton<ICipherSuitesProvider, CipherSuitesProvider>();
+            services.AddSingleton<ICipherSuitesProvider,CipherSuitesProvider>();
             services.AddSingleton<CipherAlgorithmRegistry>();
             services.AddSingleton<HashAlgorithmRegistry>();
             services.AddSingleton<SignatureAlgorithmsRegistry>();
             services.AddSingleton<KeyExchangeRegistry>();
-            services.AddSingleton<CipherParameterFactoryProvider>();
+            
+            services.AddTransient<ICipherSuitesProvider, CipherSuitesProvider>();
+            services.AddTransient<IKeyExchangeProvider, KeyExchangeProvider>();
+            
+            services.AddTransient<ICipherParameterFactoryProvider, CipherParameterFactoryProvider>();
+            services.AddTransient<ISignatureCipherParameterFactoryProvider, SignatureCipherParameterFactoryProvider>();
         }
 
         private static void AddStates(this IServiceCollection services)

@@ -1,6 +1,5 @@
 ﻿using System;
 using Crypto.TLS.Identifiers;
-using Crypto.TLS.Suites.Registries;
 
 namespace Crypto.TLS.Suites.Parameters
 {
