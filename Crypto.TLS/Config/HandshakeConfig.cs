@@ -32,7 +32,7 @@ namespace Crypto.TLS.Config
         {
             foreach (var message in _messages)
             {
-                digest.Update(message, 0, message.Length);
+                digest.Update(message);
             }
 
             return digest.DigestBuffer();

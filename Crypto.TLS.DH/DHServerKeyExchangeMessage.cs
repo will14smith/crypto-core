@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Numerics;
+using Crypto.Core.Hashing;
 using Crypto.TLS.Config;
 using Crypto.TLS.Messages.Handshakes;
-using Crypto.TLS.Services;
 using Crypto.Utils;
 using Crypto.Utils.IO;
 using Microsoft.Extensions.DependencyInjection;
@@ -47,8 +47,8 @@ namespace Crypto.TLS.DH
             }
 
             // signature needs these but the output doesn't
-            stream.HashAlgorithm.Update(randomConfig.Client, 0, 32);
-            stream.HashAlgorithm.Update(randomConfig.Server, 0, 32);
+            stream.HashAlgorithm.Update(randomConfig.Client.AsSpan(0, 32));
+            stream.HashAlgorithm.Update(randomConfig.Server.AsSpan(0, 32));
 
             var pBuffer = P.ToByteArray(Endianness.BigEndian);
             var gBuffer = G.ToByteArray(Endianness.BigEndian);
@@ -82,8 +82,8 @@ namespace Crypto.TLS.DH
                     throw new InvalidOperationException("Random config is not initialized");
                 }
                 
-                stream.HashAlgorithm.Update(randomConfig.Client, 0, 32);
-                stream.HashAlgorithm.Update(randomConfig.Server, 0, 32);
+                stream.HashAlgorithm.Update(randomConfig.Client.AsSpan(0, 32));
+                stream.HashAlgorithm.Update(randomConfig.Server.AsSpan(0, 32));
 
                 var plength = reader.ReadUInt16();
                 var pbuffer = reader.ReadBytes(plength);

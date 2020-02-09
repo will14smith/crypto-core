@@ -43,7 +43,7 @@ namespace Crypto.Core.Hashing
         {
             SecurityAssert.Assert(_state == HMACState.InnerHashing);
 
-            _digest.Update(buffer, offset, length);
+            _digest.Update(buffer.AsSpan(offset, length));
         }
 
         public byte[] Digest()
@@ -56,8 +56,8 @@ namespace Crypto.Core.Hashing
 
             var oPadKey = XorKey(_key, 0x5c);
             _digest.Reset();
-            _digest.Update(oPadKey, 0, oPadKey.Length);
-            _digest.Update(innerHash, 0, innerHash.Length);
+            _digest.Update(oPadKey);
+            _digest.Update(innerHash);
 
             return _digest.DigestBuffer();
         }
@@ -69,7 +69,7 @@ namespace Crypto.Core.Hashing
             var iPadKey = XorKey(_key, 0x36);
 
             _digest.Reset();
-            _digest.Update(iPadKey, 0, iPadKey.Length);
+            _digest.Update(iPadKey);
 
             _state = HMACState.InnerHashing;
         }
@@ -88,7 +88,7 @@ namespace Crypto.Core.Hashing
                 _state = HMACState.Uninitialised;
 
                 _digest.Reset();
-                _digest.Update(bytes, 0, bytes.Length);
+                _digest.Update(bytes);
                 _digest.Digest(_key.AsSpan());
             }
             else

@@ -164,7 +164,7 @@ namespace Crypto.SHA
             // TODO messagesize should be 128-bits, this only 64 bits and the upper 64 are implicity zeroed in the padding
             Array.Copy(EndianBitConverter.Big.GetBytes(MessageSize), 0, padding, paddingLength - 8, 8);
 
-            Update(padding, 0, padding.Length);
+            this.Update(padding);
             SecurityAssert.Assert(WorkBufferEmpty);
 
             _complete = true;

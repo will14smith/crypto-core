@@ -34,12 +34,12 @@ namespace Crypto.TLS.Hashing
             while (true)
             {
                 hmac.Reset();
-                hmac.Update(a, 0, a.Length);
+                hmac.Update(a);
                 a = hmac.DigestBuffer();
 
                 hmac.Reset();
-                hmac.Update(a, 0, a.Length);
-                hmac.Update(seed, 0, seed.Length);
+                hmac.Update(a);
+                hmac.Update(seed);
 
                 var b = hmac.DigestBuffer();
                 foreach (var x in b)

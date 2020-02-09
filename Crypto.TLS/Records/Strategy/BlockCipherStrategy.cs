@@ -200,10 +200,10 @@ namespace Crypto.TLS.Records.Strategy
 
         private byte[] ComputeMAC(IDigest macAlgo, long seqNum, RecordType type, TLSVersion version, byte[] content)
         {
-            macAlgo.Update(EndianBitConverter.Big.GetBytes(seqNum), 0, sizeof(long));
-            macAlgo.Update(new[] { (byte)type, version.Major, version.Major }, 0, 3);
-            macAlgo.Update(EndianBitConverter.Big.GetBytes((ushort)content.Length), 0, sizeof(ushort));
-            macAlgo.Update(content, 0, content.Length);
+            macAlgo.Update(EndianBitConverter.Big.GetBytes(seqNum));
+            macAlgo.Update(new[] { (byte)type, version.Major, version.Major });
+            macAlgo.Update(EndianBitConverter.Big.GetBytes((ushort)content.Length));
+            macAlgo.Update(content);
 
             return macAlgo.DigestBuffer();
         }

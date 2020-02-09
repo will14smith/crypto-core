@@ -54,7 +54,7 @@ namespace Crypto.EC.Encryption
             }
 
             // e = HASH(input)
-            hash.Update(input, 0, input.Length);
+            hash.Update(input);
             var e = hash.DigestBuffer();
 
             // z = the Ln leftmost bits of e, where Ln is the bit length of the group order n.
@@ -146,7 +146,7 @@ namespace Crypto.EC.Encryption
             // check r and s are in [1, n-1]
 
             // e = HASH(input)
-            hash.Update(input, 0, input.Length);
+            hash.Update(input);
             var e = hash.DigestBuffer();
 
             // z = the Ln leftmost bits of e, where Ln is the bit length of the group order n.

@@ -50,9 +50,9 @@ namespace Crypto.GCM
 
             // setup tag hash
             var tagHash = new GHash(h);
-            tagHash.Update(a, 0, a.Length);
+            tagHash.Update(a);
             var tagAADPaddingLength = 16 - a.Length % 16;
-            tagHash.Update(new byte[tagAADPaddingLength], 0, tagAADPaddingLength);
+            tagHash.Update(new byte[tagAADPaddingLength]);
             
             // setup pre-counter block
             byte[] j0;
@@ -71,9 +71,9 @@ namespace Crypto.GCM
                 var j0PaddingLength = 8 + (16 - iv.Length % 16) % 16;
             
                 var j0Hash = new GHash(h);
-                j0Hash.Update(iv, 0, iv.Length);
-                j0Hash.Update(new byte[j0PaddingLength], 0, j0PaddingLength);
-                j0Hash.Update(EndianBitConverter.Big.GetBytes(ivSize), 0, sizeof(long));
+                j0Hash.Update(iv);
+                j0Hash.Update(new byte[j0PaddingLength]);
+                j0Hash.Update(EndianBitConverter.Big.GetBytes((long)ivSize));
             
                 j0 = j0Hash.DigestBuffer();
             }

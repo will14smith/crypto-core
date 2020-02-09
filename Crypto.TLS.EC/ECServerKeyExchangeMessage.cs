@@ -1,8 +1,8 @@
 ﻿using System;
+using Crypto.Core.Hashing;
 using Crypto.TLS.Config;
 using Crypto.TLS.EC.KeyExchanges;
 using Crypto.TLS.Messages.Handshakes;
-using Crypto.TLS.Services;
 using Crypto.Utils.IO;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -38,8 +38,8 @@ namespace Crypto.TLS.EC
             }
             
             // signature needs these but the output doesn't
-            stream.HashAlgorithm.Update(randomConfig.Client, 0, 32);
-            stream.HashAlgorithm.Update(randomConfig.Server, 0, 32);
+            stream.HashAlgorithm.Update(randomConfig.Client.AsSpan(0, 32));
+            stream.HashAlgorithm.Update(randomConfig.Server.AsSpan(0, 32));
 
             Parameters.Write(writer);
 

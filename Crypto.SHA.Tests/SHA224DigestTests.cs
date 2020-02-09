@@ -25,7 +25,7 @@ namespace Crypto.SHA.Tests
             var digest = new SHA256Digest(SHA256Digest.Mode.SHA224);
 
             var buffer = new byte[] { 0x24 };
-            digest.Update(buffer, 0, buffer.Length);
+            digest.Update(buffer);
 
             var result = digest.DigestBuffer();
 
@@ -38,7 +38,7 @@ namespace Crypto.SHA.Tests
             var digest = new SHA256Digest(SHA256Digest.Mode.SHA224);
 
             var buffer = Encoding.UTF8.GetBytes("The quick brown fox jumps over the lazy dog");
-            digest.Update(buffer, 0, buffer.Length);
+            digest.Update(buffer);
 
             var result = digest.DigestBuffer();
 
@@ -50,11 +50,11 @@ namespace Crypto.SHA.Tests
         {
             var digest = new SHA256Digest(SHA256Digest.Mode.SHA224);
             var buffer = Encoding.UTF8.GetBytes("The quick brown fox jumps");
-            digest.Update(buffer, 0, buffer.Length);
+            digest.Update(buffer);
 
             var digest2 = digest.Clone();
             buffer = Encoding.UTF8.GetBytes(" over the lazy dog");
-            digest2.Update(buffer, 0, buffer.Length);
+            digest2.Update(buffer);
 
             var result1 = digest.DigestBuffer();
             var result2 = digest2.DigestBuffer();
@@ -87,7 +87,7 @@ namespace Crypto.SHA.Tests
                 var msg = HexConverter.FromHex(lines[i + 1].Substring(6));
                 var expectedHash = lines[i + 2].Substring(5);
 
-                digest.Update(msg, 0, len);
+                digest.Update(msg.AsSpan(0, len));
                 var hash = digest.DigestBuffer();
 
                 AssertSHA224(expectedHash, hash);

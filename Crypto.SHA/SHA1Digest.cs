@@ -139,7 +139,7 @@ namespace Crypto.SHA
 
             Array.Copy(EndianBitConverter.Big.GetBytes(MessageSize), 0, padding, paddingLength - 8, 8);
 
-            Update(padding, 0, padding.Length);
+            this.Update(padding);
             SecurityAssert.Assert(WorkBufferEmpty);
 
             _complete = true;
