@@ -5,11 +5,10 @@ namespace Crypto.Certificates
 {
     internal static class ASN1ObjectExtensions
     {
-        public static string FromDirectoryString(this ASN1Object asn1)
+        public static string FromDirectoryString(this ASN1Object? asn1)
         {
             //TODO UTF8String
-            var utf8 = asn1 as ASN1UTF8String;
-            if (utf8 != null)
+            if (asn1 is ASN1UTF8String utf8)
             {
                 return utf8.Value;
             }
@@ -22,15 +21,14 @@ namespace Crypto.Certificates
             throw new NotImplementedException();
         }
 
-        public static string FromPrintableString(this ASN1Object asn1)
+        public static string FromPrintableString(this ASN1Object? asn1)
         {
             throw new NotImplementedException();
         }
 
-        public static DateTimeOffset GetTime(this ASN1Object asn1)
+        public static DateTimeOffset GetTime(this ASN1Object? asn1)
         {
-            var utc = asn1 as ASN1UTCTime;
-            if (utc != null)
+            if (asn1 is ASN1UTCTime utc)
             {
                 return utc.Value;
             }

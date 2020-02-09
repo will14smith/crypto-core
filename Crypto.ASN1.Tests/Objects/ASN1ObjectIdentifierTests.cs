@@ -20,14 +20,14 @@ namespace Crypto.ASN1.Tests.Objects
             var a = new ASN1ObjectIdentifier("1.3.6");
             var b = new ASN1ObjectIdentifier("1.3.7");
 
-            Assert.False(a.Equals(null));
-            Assert.False(a.Equals(b));
+            Assert.False(a.Equals(null!));
+            Assert.False(a!.Equals(b));
         }
 
         [Fact]
         public void Format_Null_FailsAssertion()
         {
-            Assert.Throws<SecurityException>(() => ASN1ObjectIdentifier.Format(null));
+            Assert.Throws<SecurityException>(() => ASN1ObjectIdentifier.Format(null!));
         }
         [Fact]
         public void Format_Empty_FailsAssertion()

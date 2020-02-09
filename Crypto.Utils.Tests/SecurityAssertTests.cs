@@ -17,7 +17,7 @@ namespace Crypto.Utils.Tests
         [Fact]
         public void NotNull_WhenNull_ShouldThrowSecurityException()
         {
-            Thread a = null;
+            Thread? a = null;
 
             Assert.Throws<SecurityException>(() => SecurityAssert.NotNull(a));
         }

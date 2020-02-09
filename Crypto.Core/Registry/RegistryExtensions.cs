@@ -6,7 +6,8 @@ namespace Crypto.Core.Registry
 {
     public static class RegistryExtensions
     {
-        public static IServiceCollection Update<TRegistry>(this IServiceCollection collection, Func<TRegistry, TRegistry> updateFunc)
+        public static IServiceCollection Update<TRegistry>(this IServiceCollection collection, Func<TRegistry?, TRegistry> updateFunc)
+            where TRegistry : class
         {
             var serviceType = typeof(TRegistry);
 
@@ -16,7 +17,7 @@ namespace Crypto.Core.Registry
                 collection.Remove(registeredServiceDescriptor);
             }
             
-            collection.Add(new ServiceDescriptor(serviceType, updateFunc((TRegistry)registeredServiceDescriptor?.ImplementationInstance)));
+            collection.Add(new ServiceDescriptor(serviceType, updateFunc((TRegistry?)registeredServiceDescriptor?.ImplementationInstance)));
             
             return collection;
         }

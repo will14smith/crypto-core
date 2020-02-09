@@ -166,38 +166,38 @@ namespace Crypto.Certificates
         }
 
         // helpers
-        private ASN1Sequence ToSeq(ASN1Object asn1, int minLength = 0, int maxLength = int.MaxValue)
+        private static ASN1Sequence ToSeq(ASN1Object asn1, int minLength = 0, int maxLength = int.MaxValue)
         {
             var seq = asn1 as ASN1Sequence;
 
             SecurityAssert.NotNull(seq);
-            SecurityAssert.Assert(seq.Count >= minLength && seq.Count <= maxLength);
+            SecurityAssert.Assert(seq!.Count >= minLength && seq!.Count <= maxLength);
 
             return seq;
         }
-        private ASN1Set ToSet(ASN1Object asn1, int minLength = 0, int maxLength = int.MaxValue)
+        private static ASN1Set ToSet(ASN1Object asn1, int minLength = 0, int maxLength = int.MaxValue)
         {
             var seq = asn1 as ASN1Set;
 
             SecurityAssert.NotNull(seq);
-            SecurityAssert.Assert(seq.Count >= minLength && seq.Count <= maxLength);
+            SecurityAssert.Assert(seq!.Count >= minLength && seq!.Count <= maxLength);
 
             return seq;
         }
 
-        private ASN1Object GetElement(ASN1Object asn1, int index)
+        private static ASN1Object GetElement(ASN1Object asn1, int index)
         {
             SecurityAssert.Assert(index >= 0 && index < asn1.Count);
 
             return asn1.Elements[index];
         }
-        private T GetElement<T>(ASN1Object asn1, int index)
+        private static T GetElement<T>(ASN1Object asn1, int index)
             where T : ASN1Object
         {
             var obj = GetElement(asn1, index) as T;
             SecurityAssert.NotNull(obj);
 
-            return obj;
+            return obj!;
         }
     }
 }

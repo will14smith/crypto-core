@@ -14,10 +14,9 @@ namespace Crypto.Certificates
             Values = values.ToDictionary(x => x.Key, x => x.Value);
         }
 
-        public ASN1Object Get(string oid, bool assertNotMissing = true)
+        public ASN1Object? Get(string oid, bool assertNotMissing = true)
         {
-            ASN1Object result;
-            if (Values.TryGetValue(oid, out result))
+            if (Values.TryGetValue(oid, out var result))
             {
                 return result;
             }

@@ -10,7 +10,7 @@ namespace Crypto.Certificates
 
         private readonly List<X509Certificate> _certificates;
         private readonly Dictionary<PublicKey, PrivateKey> _keys;
-        private X509Certificate _defaultCertificate;
+        private X509Certificate? _defaultCertificate;
 
         private readonly PublicKeyReaderRegistry _publicKeyReaderRegistry;
         private readonly PrivateKeyReaderRegistry _privateKeyReaderRegistry;
@@ -46,7 +46,7 @@ namespace Crypto.Certificates
             _keys.Add(key.PublicKey, key);
         }
 
-        public X509Certificate GetDefaultCertificate()
+        public X509Certificate? GetDefaultCertificate()
         {
             return _defaultCertificate;
         }

@@ -51,7 +51,17 @@ namespace Crypto.Utils
         public static Option<TCast> Cast<TValue, TCast>(this Option<TValue> opt) 
             where TCast : class
         {
-            return opt.Select(x => x as TCast);
+            if (!opt.HasValue)
+            {
+                return new Option<TCast>();
+            }
+            
+            if (opt.Value is TCast cast)
+            {
+                return new Option<TCast>(cast);
+            }
+
+            return new Option<TCast>();
         }
         
         public static Option<TValue> TryGet<TKey, TValue>(this IReadOnlyDictionary<TKey, TValue> dict, TKey key)

@@ -23,20 +23,20 @@ namespace Crypto.Certificates.Keys
 
             var seq = asn1.Value as ASN1Sequence;
             SecurityAssert.NotNull(seq);
-            SecurityAssert.Assert(seq.Count == 3);
+            SecurityAssert.Assert(seq!.Count == 3);
 
-            var version = seq.Elements[0] as ASN1Integer;
+            var version = seq!.Elements[0] as ASN1Integer;
             SecurityAssert.NotNull(version);
-            SecurityAssert.Assert(version.Value == 0);
+            SecurityAssert.Assert(version!.Value == 0);
 
             var algorithm = X509AlgorithmIdentifier.FromObject(seq.Elements[1]);
             
-            var keyOctetString = seq.Elements[2] as ASN1OctetString;
+            var keyOctetString = seq!.Elements[2] as ASN1OctetString;
             SecurityAssert.NotNull(keyOctetString);
             
             var reader = _keyReaderRegistry.Resolve(algorithm.Algorithm);
 
-            return reader.ReadPrivateKey(algorithm, keyOctetString.Value);
+            return reader.ReadPrivateKey(algorithm, keyOctetString!.Value);
         }
 
         private Option<ASN1Object> GetASN1(byte[] input)

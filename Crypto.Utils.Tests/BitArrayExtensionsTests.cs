@@ -9,7 +9,7 @@ namespace Crypto.Utils.Tests
         [Fact]
         public void GetByte_Null_FailsAssertion()
         {
-            Assert.Throws<SecurityException>(() => BitArrayExtensions.GetByte(null, 0));
+            Assert.Throws<SecurityException>(() => BitArrayExtensions.GetByte(null!, 0));
         }
 
         [Fact]
@@ -37,7 +37,7 @@ namespace Crypto.Utils.Tests
         [Fact]
         public void GetBytes_Null_FailsAssertion()
         {
-            Assert.Throws<SecurityException>(() => BitArrayExtensions.GetBytes(null, 0, 0));
+            Assert.Throws<SecurityException>(() => BitArrayExtensions.GetBytes(null!, 0, 0));
         }
         [Fact]
         public void GetBytes_OutOfRange_FailsAssertion()
@@ -73,7 +73,7 @@ namespace Crypto.Utils.Tests
         [Fact]
         public void ToArray_Null_FailsAssertion()
         {
-            Assert.Throws<SecurityException>(() => BitArrayExtensions.ToArray(null));
+            Assert.Throws<SecurityException>(() => BitArrayExtensions.ToArray(null!));
         }
 
         [Fact]

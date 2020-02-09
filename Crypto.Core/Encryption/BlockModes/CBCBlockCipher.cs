@@ -9,6 +9,7 @@ namespace Crypto.Core.Encryption.BlockModes
 
         public CBCBlockCipher(IBlockCipher cipher) : base(cipher)
         {
+            _workingIV = new byte[BlockLength];
         }
 
         protected override void Reset()

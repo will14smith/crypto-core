@@ -17,13 +17,13 @@ namespace Crypto.Certificates
         {
             var seq = asn1 as ASN1Sequence;
             SecurityAssert.NotNull(seq);
-            SecurityAssert.Assert(seq.Count >= 1);
+            SecurityAssert.Assert(seq!.Count >= 1);
 
             var algorithmOid = seq.Elements[0] as ASN1ObjectIdentifier;
             SecurityAssert.NotNull(algorithmOid);
             var parameters = seq.Elements.Skip(1).ToList();
 
-            return new X509AlgorithmIdentifier(algorithmOid, parameters);
+            return new X509AlgorithmIdentifier(algorithmOid!, parameters);
         }
 
 

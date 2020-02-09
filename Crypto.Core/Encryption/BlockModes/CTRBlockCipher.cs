@@ -9,6 +9,7 @@ namespace Crypto.Core.Encryption.BlockModes
 
         public CTRBlockCipher(IBlockCipher cipher) : base(cipher)
         {
+            _counter = new byte[BlockLength];
         }
 
         protected override void Reset()

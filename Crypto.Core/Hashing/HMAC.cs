@@ -35,7 +35,7 @@ namespace Crypto.Core.Hashing
             Reset();
         }
 
-        public ASN1ObjectIdentifier Id => null;
+        public ASN1ObjectIdentifier Id => throw new NotImplementedException();
         public int BlockSize => _digest.BlockSize;
         public int HashSize => _digest.HashSize;
 

@@ -5,7 +5,7 @@ namespace Crypto.Core.Randomness
     public class DefaultRandomGenerator : IRandom
     {
         private static readonly Random Global = new Random();
-        [ThreadStatic] private static Random _local;
+        [ThreadStatic] private static Random? _local;
 
         public DefaultRandomGenerator()
         {
@@ -24,14 +24,14 @@ namespace Crypto.Core.Randomness
 
         public int RandomInt(int min, int max)
         {
-            return _local.Next(min, max);
+            return _local!.Next(min, max);
         }
 
         public byte[] RandomBytes(int length)
         {
             var buffer = new byte[length];
             
-            _local.NextBytes(buffer);
+            _local!.NextBytes(buffer);
 
             return buffer;
         }
