@@ -55,11 +55,11 @@ namespace Crypto.SHA
             return new SHA1Digest(this);
         }
 
-        public override void Update(byte[] buffer, int offset, int length)
+        public override void Update(ReadOnlySpan<byte> input)
         {
             SecurityAssert.Assert(!_complete);
 
-            base.Update(buffer, offset, length);
+            base.Update(input);
         }
 
         protected override void UpdateBlock(byte[] buffer)
@@ -128,9 +128,11 @@ namespace Crypto.SHA
             return a | b;
         }
 
-        public override byte[] Digest()
+        public override void Digest(Span<byte> output)
         {
-            var paddingLength = 64 - (MessageSize % BlockSize) / 8;
+            SecurityAssert.AssertBuffer(output, HashSize / 8);
+            
+            var paddingLength = 64 - MessageSize % BlockSize / 8;
             if (paddingLength <= 8) paddingLength += 64;
 
             var padding = new byte[paddingLength];
@@ -139,20 +141,16 @@ namespace Crypto.SHA
 
             Array.Copy(EndianBitConverter.Big.GetBytes(MessageSize), 0, padding, paddingLength - 8, 8);
 
-            this.Update(padding);
+            Update(padding);
             SecurityAssert.Assert(WorkBufferEmpty);
 
             _complete = true;
-
-            var digest = new byte[20];
-
-            Array.Copy(EndianBitConverter.Big.GetBytes(_h0), 0, digest, 0, 4);
-            Array.Copy(EndianBitConverter.Big.GetBytes(_h1), 0, digest, 4, 4);
-            Array.Copy(EndianBitConverter.Big.GetBytes(_h2), 0, digest, 8, 4);
-            Array.Copy(EndianBitConverter.Big.GetBytes(_h3), 0, digest, 12, 4);
-            Array.Copy(EndianBitConverter.Big.GetBytes(_h4), 0, digest, 16, 4);
-
-            return digest;
+            
+            EndianBitConverter.Big.GetBytes(_h0).CopyTo(output);
+            EndianBitConverter.Big.GetBytes(_h1).CopyTo(output.Slice(4));
+            EndianBitConverter.Big.GetBytes(_h2).CopyTo(output.Slice(8));
+            EndianBitConverter.Big.GetBytes(_h3).CopyTo(output.Slice(12));
+            EndianBitConverter.Big.GetBytes(_h4).CopyTo(output.Slice(16));
         }
     }
 }

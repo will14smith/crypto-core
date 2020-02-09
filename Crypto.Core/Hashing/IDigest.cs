@@ -1,4 +1,5 @@
-﻿using Crypto.ASN1;
+﻿using System;
+using Crypto.ASN1;
 
 namespace Crypto.Core.Hashing
 {
@@ -9,8 +10,8 @@ namespace Crypto.Core.Hashing
         int BlockSize { get; }
         int HashSize { get; }
 
-        void Update(byte[] buffer, int offset, int length);
-        byte[] Digest();
+        void Update(ReadOnlySpan<byte> input);
+        void Digest(Span<byte> output);
 
         void Reset();
 

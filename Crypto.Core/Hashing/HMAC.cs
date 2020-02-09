@@ -39,14 +39,14 @@ namespace Crypto.Core.Hashing
         public int BlockSize => _digest.BlockSize;
         public int HashSize => _digest.HashSize;
 
-        public void Update(byte[] buffer, int offset, int length)
+        public void Update(ReadOnlySpan<byte> input)
         {
             SecurityAssert.Assert(_state == HMACState.InnerHashing);
 
-            _digest.Update(buffer.AsSpan(offset, length));
+            _digest.Update(input);
         }
 
-        public byte[] Digest()
+        public void Digest(Span<byte> output)
         {
             SecurityAssert.Assert(_state == HMACState.InnerHashing);
 
@@ -59,7 +59,7 @@ namespace Crypto.Core.Hashing
             _digest.Update(oPadKey);
             _digest.Update(innerHash);
 
-            return _digest.DigestBuffer();
+            _digest.Digest(output);
         }
 
         public void Reset()

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Crypto.ASN1;
 using Crypto.Utils;
 
@@ -33,23 +34,21 @@ namespace Crypto.Core.Hashing
             Array.Copy(source._workBuffer, _workBuffer, _workBufferLength);
         }
 
-        public virtual void Update(byte[] buffer, int offset, int length)
+        public virtual void Update(ReadOnlySpan<byte> input)
         {
-            SecurityAssert.NotNull(buffer);
-            SecurityAssert.Assert(offset >= 0 && length >= 0);
-            SecurityAssert.Assert(offset + length <= buffer.Length);
-
-            while (length > 0)
+            var workBuffer = _workBuffer.AsSpan();
+            
+            while (input.Length > 0)
             {
                 SecurityAssert.Assert(_workBufferLength < BlockSize / 8);
 
-                var lengthToTake = Math.Min(length, _workBuffer.Length - _workBufferLength);
+                var lengthToTake = Math.Min(input.Length, _workBuffer.Length - _workBufferLength);
 
-                Array.Copy(buffer, offset, _workBuffer, _workBufferLength, lengthToTake);
-
-                length -= lengthToTake;
-                offset += lengthToTake;
+                var (inputToCopy, inputRemaining) = input.Split(lengthToTake);
+                
+                inputToCopy.CopyTo(workBuffer.Slice(_workBufferLength));
                 _workBufferLength += lengthToTake;
+                input = inputRemaining;
 
                 MessageSize += lengthToTake * 8;
 
@@ -63,11 +62,11 @@ namespace Crypto.Core.Hashing
                 UpdateBlock(_workBuffer);
 
                 _workBufferLength = 0;
-                Array.Clear(_workBuffer, 0, _workBuffer.Length);
+                workBuffer.Fill(0);
             }
         }
 
-        public abstract byte[] Digest();
+        public abstract void Digest(Span<byte> output);
         public virtual void Reset()
         {
             MessageSize = 0;

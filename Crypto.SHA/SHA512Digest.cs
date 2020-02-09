@@ -73,11 +73,11 @@ namespace Crypto.SHA
             _complete = source._complete;
         }
 
-        public override void Update(byte[] buffer, int offset, int length)
+        public override void Update(ReadOnlySpan<byte> input)
         {
             SecurityAssert.Assert(!_complete);
 
-            base.Update(buffer, offset, length);
+            base.Update(input);
         }
 
         public override IDigest Clone()
@@ -150,11 +150,13 @@ namespace Crypto.SHA
             return a | b;
         }
 
-        public override byte[] Digest()
+        public override void Digest(Span<byte> output)
         {
+            SecurityAssert.AssertBuffer(output, HashSize / 8);
+
             // TODO same as SHA1...
 
-            var paddingLength = 128 - (MessageSize % BlockSize) / 8;
+            var paddingLength = 128 - MessageSize % BlockSize / 8;
             if (paddingLength <= 16) paddingLength += 128;
 
             var padding = new byte[paddingLength];
@@ -164,26 +166,23 @@ namespace Crypto.SHA
             // TODO messagesize should be 128-bits, this only 64 bits and the upper 64 are implicity zeroed in the padding
             Array.Copy(EndianBitConverter.Big.GetBytes(MessageSize), 0, padding, paddingLength - 8, 8);
 
-            this.Update(padding);
+            Update(padding);
             SecurityAssert.Assert(WorkBufferEmpty);
 
             _complete = true;
 
-            var digest = _mode == Mode.SHA384 ? new byte[48] : new byte[64];
+            EndianBitConverter.Big.GetBytes(_h0).CopyTo(output);
+            EndianBitConverter.Big.GetBytes(_h1).CopyTo(output.Slice(8));
+            EndianBitConverter.Big.GetBytes(_h2).CopyTo(output.Slice(16));
+            EndianBitConverter.Big.GetBytes(_h3).CopyTo(output.Slice(24));
+            EndianBitConverter.Big.GetBytes(_h4).CopyTo(output.Slice(32));
+            EndianBitConverter.Big.GetBytes(_h5).CopyTo(output.Slice(40));
 
-            Array.Copy(EndianBitConverter.Big.GetBytes(_h0), 0, digest, 0, 8);
-            Array.Copy(EndianBitConverter.Big.GetBytes(_h1), 0, digest, 8, 8);
-            Array.Copy(EndianBitConverter.Big.GetBytes(_h2), 0, digest, 16, 8);
-            Array.Copy(EndianBitConverter.Big.GetBytes(_h3), 0, digest, 24, 8);
-            Array.Copy(EndianBitConverter.Big.GetBytes(_h4), 0, digest, 32, 8);
-            Array.Copy(EndianBitConverter.Big.GetBytes(_h5), 0, digest, 40, 8);
             if (_mode == Mode.SHA512)
             {
-                Array.Copy(EndianBitConverter.Big.GetBytes(_h6), 0, digest, 48, 8);
-                Array.Copy(EndianBitConverter.Big.GetBytes(_h7), 0, digest, 56, 8);
+                EndianBitConverter.Big.GetBytes(_h6).CopyTo(output.Slice(48));
+                EndianBitConverter.Big.GetBytes(_h7).CopyTo(output.Slice(56));
             }
-
-            return digest;
         }
 
         public override void Reset()

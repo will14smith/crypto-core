@@ -77,14 +77,12 @@ namespace Crypto.GCM
             Array.Copy(z, _y, 16);
         }
 
-        public override byte[] Digest()
+        public override void Digest(Span<byte> output)
         {
+            SecurityAssert.AssertBuffer(output, HashSize / 8);
             SecurityAssert.Assert(WorkBufferEmpty);
 
-            var digest = new byte[16];
-            Array.Copy(_y, 0, digest, 0, 16);
-
-            return _y;
+            _y.CopyTo(output);
         }
 
         public override void Reset()
