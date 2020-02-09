@@ -77,7 +77,7 @@ namespace Crypto.RSA.Encryption
         internal static byte[] EMSA_PKCS1_v1_5_Encode(byte[] input, int emLen, IDigest hash)
         {
             hash.Update(input, 0, input.Length);
-            var h = hash.Digest();
+            var h = hash.DigestBuffer();
 
             byte[] t;
             using (var mem = new MemoryStream())

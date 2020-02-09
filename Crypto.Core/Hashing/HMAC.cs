@@ -52,14 +52,14 @@ namespace Crypto.Core.Hashing
 
             _state = HMACState.HashingDone;
 
-            var innerHash = _digest.Digest();
+            var innerHash = _digest.DigestBuffer();
 
             var oPadKey = XorKey(_key, 0x5c);
             _digest.Reset();
             _digest.Update(oPadKey, 0, oPadKey.Length);
             _digest.Update(innerHash, 0, innerHash.Length);
 
-            return _digest.Digest();
+            return _digest.DigestBuffer();
         }
 
         public void Reset()
@@ -89,9 +89,7 @@ namespace Crypto.Core.Hashing
 
                 _digest.Reset();
                 _digest.Update(bytes, 0, bytes.Length);
-                var keyHash = _digest.Digest();
-
-                Array.Copy(keyHash, _key, keyHash.Length);
+                _digest.Digest(_key.AsSpan());
             }
             else
             {

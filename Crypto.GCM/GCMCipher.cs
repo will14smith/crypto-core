@@ -75,7 +75,7 @@ namespace Crypto.GCM
                 j0Hash.Update(new byte[j0PaddingLength], 0, j0PaddingLength);
                 j0Hash.Update(EndianBitConverter.Big.GetBytes(ivSize), 0, sizeof(long));
             
-                j0 = j0Hash.Digest();
+                j0 = j0Hash.DigestBuffer();
             }
             
             var ctr = new CTRBlockCipher(_cipher);
@@ -170,7 +170,7 @@ namespace Crypto.GCM
                 var ctr = new CTRBlockCipher(_cipher);
                 ctr.Init(new IVParameter(new NullCipherParameter(), _j0));
 
-                ctr.EncryptBlock(_tagHash.Digest(), output);
+                ctr.EncryptBlock(_tagHash.DigestBuffer(), output);
 
                 return new AEADResult(previousResult.RemainingInput, output);
             }
@@ -220,7 +220,7 @@ namespace Crypto.GCM
                 var tagCtr = new CTRBlockCipher(_cipher);
                 tagCtr.Init(new IVParameter(new NullCipherParameter(), _j0));
 
-                var digest = _tagHash.Digest();
+                var digest = _tagHash.DigestBuffer();
                 var calculatedTag = new byte[16];
                 tagCtr.EncryptBlock(digest, calculatedTag);
 

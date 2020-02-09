@@ -55,7 +55,7 @@ namespace Crypto.EC.Encryption
 
             // e = HASH(input)
             hash.Update(input, 0, input.Length);
-            var e = hash.Digest();
+            var e = hash.DigestBuffer();
 
             // z = the Ln leftmost bits of e, where Ln is the bit length of the group order n.
             var z = ToZ(e, _ln).Value;
@@ -147,7 +147,7 @@ namespace Crypto.EC.Encryption
 
             // e = HASH(input)
             hash.Update(input, 0, input.Length);
-            var e = hash.Digest();
+            var e = hash.DigestBuffer();
 
             // z = the Ln leftmost bits of e, where Ln is the bit length of the group order n.
             var z = ToZ(e, _ln);

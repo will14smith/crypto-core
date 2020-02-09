@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Text;
+using Crypto.Core.Hashing;
 using Crypto.Utils;
 using Xunit;
 
@@ -13,7 +14,7 @@ namespace Crypto.SHA.Tests
         {
             var digest = new SHA1Digest();
 
-            var result = digest.Digest();
+            var result = digest.DigestBuffer();
 
             AssertSHA1("da39a3ee5e6b4b0d3255bfef95601890afd80709", result);
         }
@@ -26,7 +27,7 @@ namespace Crypto.SHA.Tests
             var buffer = new byte[] { 0x24 };
             digest.Update(buffer, 0, buffer.Length);
 
-            var result = digest.Digest();
+            var result = digest.DigestBuffer();
 
             AssertSHA1("3cdf2936da2fc556bfa533ab1eb59ce710ac80e5", result);
         }
@@ -39,7 +40,7 @@ namespace Crypto.SHA.Tests
             var buffer = Encoding.UTF8.GetBytes("The quick brown fox jumps over the lazy dog");
             digest.Update(buffer, 0, buffer.Length);
 
-            var result = digest.Digest();
+            var result = digest.DigestBuffer();
 
             AssertSHA1("2fd4e1c67a2d28fced849ee1bb76e7391b93eb12", result);
         }
@@ -55,8 +56,8 @@ namespace Crypto.SHA.Tests
             buffer = Encoding.UTF8.GetBytes(" over the lazy dog");
             digest2.Update(buffer, 0, buffer.Length);
 
-            var result1 = digest.Digest();
-            var result2 = digest2.Digest();
+            var result1 = digest.DigestBuffer();
+            var result2 = digest2.DigestBuffer();
 
             AssertSHA1("743e27565bb39d4cf6cdf7b19450f94ef12b2206", result1);
             AssertSHA1("2fd4e1c67a2d28fced849ee1bb76e7391b93eb12", result2);
@@ -88,7 +89,7 @@ namespace Crypto.SHA.Tests
                 var expectedHash = lines[i + 2].Substring(5);
 
                 digest.Update(msg, 0, len);
-                var hash = digest.Digest();
+                var hash = digest.DigestBuffer();
 
                 AssertSHA1(expectedHash, hash);
             }

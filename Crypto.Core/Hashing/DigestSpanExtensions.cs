@@ -18,6 +18,10 @@ namespace Crypto.Core.Hashing
             
             var buffer = digest.Digest();
             buffer.CopyTo(output);
+        }   
+        public static byte[] DigestBuffer(this IDigest digest)
+        {
+            return digest.Digest();
         }
     }
 }

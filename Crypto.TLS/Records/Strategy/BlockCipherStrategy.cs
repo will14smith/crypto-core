@@ -205,7 +205,7 @@ namespace Crypto.TLS.Records.Strategy
             macAlgo.Update(EndianBitConverter.Big.GetBytes((ushort)content.Length), 0, sizeof(ushort));
             macAlgo.Update(content, 0, content.Length);
 
-            return macAlgo.Digest();
+            return macAlgo.DigestBuffer();
         }
     }
 }

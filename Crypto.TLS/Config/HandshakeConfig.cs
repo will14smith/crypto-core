@@ -35,7 +35,7 @@ namespace Crypto.TLS.Config
                 digest.Update(message, 0, message.Length);
             }
 
-            return digest.Digest();
+            return digest.DigestBuffer();
         }
     }
 }

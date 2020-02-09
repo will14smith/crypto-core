@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Text;
+using Crypto.Core.Hashing;
 using Crypto.Utils;
 using Xunit;
 
@@ -13,7 +14,7 @@ namespace Crypto.SHA.Tests
         {
             var digest = new SHA256Digest(SHA256Digest.Mode.SHA224);
 
-            var result = digest.Digest();
+            var result = digest.DigestBuffer();
 
             AssertSHA224("d14a028c2a3a2bc9476102bb288234c415a2b01f828ea62ac5b3e42f", result);
         }
@@ -26,7 +27,7 @@ namespace Crypto.SHA.Tests
             var buffer = new byte[] { 0x24 };
             digest.Update(buffer, 0, buffer.Length);
 
-            var result = digest.Digest();
+            var result = digest.DigestBuffer();
 
             AssertSHA224("23fa1e672a6c2acdc4d7bfae713e0c9337ba057b5d5ace2685b59321", result);
         }
@@ -39,7 +40,7 @@ namespace Crypto.SHA.Tests
             var buffer = Encoding.UTF8.GetBytes("The quick brown fox jumps over the lazy dog");
             digest.Update(buffer, 0, buffer.Length);
 
-            var result = digest.Digest();
+            var result = digest.DigestBuffer();
 
             AssertSHA224("730e109bd7a8a32b1cb9d9a09aa2325d2430587ddbc0c38bad911525", result);
         }
@@ -55,8 +56,8 @@ namespace Crypto.SHA.Tests
             buffer = Encoding.UTF8.GetBytes(" over the lazy dog");
             digest2.Update(buffer, 0, buffer.Length);
 
-            var result1 = digest.Digest();
-            var result2 = digest2.Digest();
+            var result1 = digest.DigestBuffer();
+            var result2 = digest2.DigestBuffer();
 
             AssertSHA224("51e20e8548cc6b25a948cbda204d8dd970246d31203f97e8effaf368", result1);
             AssertSHA224("730e109bd7a8a32b1cb9d9a09aa2325d2430587ddbc0c38bad911525", result2);
@@ -87,7 +88,7 @@ namespace Crypto.SHA.Tests
                 var expectedHash = lines[i + 2].Substring(5);
 
                 digest.Update(msg, 0, len);
-                var hash = digest.Digest();
+                var hash = digest.DigestBuffer();
 
                 AssertSHA224(expectedHash, hash);
             }

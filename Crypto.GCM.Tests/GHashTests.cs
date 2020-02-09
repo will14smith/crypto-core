@@ -1,4 +1,5 @@
-﻿using Crypto.Utils;
+﻿using Crypto.Core.Hashing;
+using Crypto.Utils;
 using Xunit;
 
 namespace Crypto.GCM.Tests
@@ -16,7 +17,7 @@ namespace Crypto.GCM.Tests
 
             var hashInput = HexConverter.FromHex(input);
             hash.Update(hashInput, 0, hashInput.Length);
-            var hashOutput = hash.Digest();
+            var hashOutput = hash.DigestBuffer();
 
             Assert.Equal(expected, HexConverter.ToHex(hashOutput));
         }

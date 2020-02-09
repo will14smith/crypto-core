@@ -35,13 +35,13 @@ namespace Crypto.TLS.Hashing
             {
                 hmac.Reset();
                 hmac.Update(a, 0, a.Length);
-                a = hmac.Digest();
+                a = hmac.DigestBuffer();
 
                 hmac.Reset();
                 hmac.Update(a, 0, a.Length);
                 hmac.Update(seed, 0, seed.Length);
 
-                var b = hmac.Digest();
+                var b = hmac.DigestBuffer();
                 foreach (var x in b)
                 {
                     yield return x;
