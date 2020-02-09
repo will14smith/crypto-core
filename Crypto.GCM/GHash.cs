@@ -32,7 +32,7 @@ namespace Crypto.GCM
             Array.Copy(clone._y, 0, _y, 0, 16);
         }
 
-        public override ASN1ObjectIdentifier Id => null;
+        public override ASN1ObjectIdentifier Id => throw new InvalidOperationException();
 
         public override int BlockSize => 128;
         public override int HashSize => 128;
