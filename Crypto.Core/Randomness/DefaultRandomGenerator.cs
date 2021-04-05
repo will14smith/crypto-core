@@ -7,31 +7,35 @@ namespace Crypto.Core.Randomness
         private static readonly Random Global = new Random();
         [ThreadStatic] private static Random? _local;
 
-        public DefaultRandomGenerator()
+        private static Random Local
         {
-            if (_local != null)
+            get
             {
-                return;
-            }
+                if (_local != null)
+                {
+                    return _local;
+                }
 
-            int seed;
-            lock (Global)
-            {
-                seed = Global.Next();
+                int seed;
+                lock (Global)
+                {
+                    seed = Global.Next();
+                }
+                _local = new Random(seed);
+                return _local;
             }
-            _local = new Random(seed);
         }
-
+        
         public int RandomInt(int min, int max)
         {
-            return _local!.Next(min, max);
+            return Local.Next(min, max);
         }
 
         public byte[] RandomBytes(int length)
         {
             var buffer = new byte[length];
             
-            _local!.NextBytes(buffer);
+            Local.NextBytes(buffer);
 
             return buffer;
         }

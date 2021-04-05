@@ -31,7 +31,6 @@ namespace Crypto.TestProgram
             var reader = new StreamReader(stream);
             var writer = new StreamWriter(stream) { AutoFlush = true };
 
-            writer.WriteLine("Hi there, please reply!");
             var msg = reader.ReadLine();
             writer.WriteLine("Thanks! Your message was: " + msg);
         }
@@ -43,7 +42,7 @@ namespace Crypto.TestProgram
 
             LoadCertificates(serviceProvider.GetRequiredService<CertificateManager>());
 
-            var server = new TcpListener(IPAddress.Any, 443);
+            var server = new TcpListener(IPAddress.Any, 4433);
             server.Start();
 
             while (true)
@@ -52,24 +51,30 @@ namespace Crypto.TestProgram
 
                 Console.WriteLine("Client connected: " + client.Client.RemoteEndPoint);
 
-                var stream = new TLSStream(client.GetStream(), serviceProvider);
-
                 try
                 {
-                    stream.AuthenticateAsServer();
-                }
-                catch (UnableToEstablishSecureConnectionException ex)
-                {
-                    Console.WriteLine(ex);
-                    continue;
-                }
-                 
-                var reader = new StreamReader(stream);
-                var writer = new StreamWriter(stream) { AutoFlush = true };
+                    var stream = new TLSStream(client.GetStream(), serviceProvider);
 
-                writer.WriteLine("Please enter a message to be echoed:");
-                var msg = reader.ReadLine();
-                writer.WriteLine("Thanks! Your message was: " + msg);
+                    try
+                    {
+                        stream.AuthenticateAsServer();
+                    }
+                    catch (UnableToEstablishSecureConnectionException ex)
+                    {
+                        Console.WriteLine(ex);
+                        continue;
+                    }
+
+                    var reader = new StreamReader(stream);
+                    var writer = new StreamWriter(stream) {AutoFlush = true};
+
+                    var msg = reader.ReadLine();
+                    writer.WriteLine("Thanks! Your message was: " + msg);
+                }
+                catch (Exception ex)
+                {
+                    Console.Error.WriteLine(ex);
+                }
             }
         }
 

@@ -36,11 +36,29 @@ namespace Crypto.TLS
         {
             foreach (var x in supportedCipherSuites)
             {
-                if (_cipherSuitesProvider.IsSupported(x))
-                    return Option.Some(x);
+                if (!_cipherSuitesProvider.IsSupported(x))
+                    continue;
+
+                if (!HasCertificateFor(x))
+                    continue;
+                
+                return Option.Some(x);
             }
 
             return Option.None<CipherSuite>();
+        }
+
+        private bool HasCertificateFor(CipherSuite cipherSuite)
+        {
+            var keyExchange = _cipherSuitesProvider.ResolveKeyExchange(cipherSuite);
+
+            foreach (var certificate in _certificateManager.GetAllCertificates())
+            {
+                if (keyExchange.IsCompatible(cipherSuite, certificate))
+                    return true;
+            }
+
+            return false;
         }
 
         public Option<CompressionMethod> DecideCompression(CompressionMethod[] supportedCompressionMethods)

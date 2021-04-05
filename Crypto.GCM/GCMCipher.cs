@@ -170,7 +170,8 @@ namespace Crypto.GCM
                 var ctr = new CTRBlockCipher(_cipher);
                 ctr.Init(new IVParameter(new NullCipherParameter(), _j0));
 
-                ctr.EncryptBlock(_tagHash.DigestBuffer(), output);
+                var blockResult = ctr.EncryptBlock(_tagHash.DigestBuffer(), output);
+                output = blockResult.RemainingOutput;
 
                 return new AEADResult(previousResult.RemainingInput, output);
             }

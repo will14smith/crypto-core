@@ -2,6 +2,7 @@
 using System.IO;
 using System.Threading;
 using Crypto.TLS.Config;
+using Crypto.TLS.Messages.Alerts;
 using Crypto.TLS.Records;
 using Crypto.TLS.State;
 using Crypto.TLS.State.Client;
@@ -75,21 +76,51 @@ namespace Crypto.TLS.IO
         }
         private void ReadThread()
         {
-            while (true)
+            try
             {
-                var connection = Services.GetRequiredService<Connection>();
-                var record = connection.ReadRecord();
-
-                switch (record.Type)
+                while (true)
                 {
-                    case RecordType.Application:
-                        _readQueue.Put(record.Data);
-                        break;
-                    // TODO handle alerts
-                    default:
-                        // TODO terminate connection
-                        throw new InvalidOperationException();
+                    var connection = Services.GetRequiredService<Connection>();
+                    var record = connection.ReadRecord();
+
+                    switch (record.Type)
+                    {
+                        case RecordType.Application:
+                            _readQueue.Put(record.Data);
+                            break;
+                        
+                        case RecordType.Alert:
+                            HandleAlert(record);
+                            break;
+                        
+                        // TODO handle alerts
+                        default:
+                            // TODO terminate connection
+                            throw new InvalidOperationException();
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine(ex);
+                // TODO handle error and close stuff
+            }
+        }
+
+        private void HandleAlert(Record record)
+        {
+            var alert = AlertMessage.Read(record.Data);
+
+            if (alert.Level == AlertLevel.Warning && alert.Description == AlertDescription.CloseNotify)
+            {
+                var versionConfig = Services.GetRequiredService<VersionConfig>();
+                var closeAlert = new AlertMessage(AlertLevel.Warning, AlertDescription.CloseNotify);
+                var closeRecord = new Record(RecordType.Alert, versionConfig.Version, closeAlert.GetBytes());
+
+                var connection = Services.GetRequiredService<Connection>();
+                connection.WriteRecord(closeRecord);
+                
+                throw new Exception("Closing connection");
             }
         }
 

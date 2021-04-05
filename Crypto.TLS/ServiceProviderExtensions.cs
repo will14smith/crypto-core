@@ -15,9 +15,10 @@ namespace Crypto.TLS
     {
         public static (TLSHashAlgorithm, TLSSignatureAlgorithm) GetSigningAlgorithms(this IServiceProvider serviceProvider)
         {
+            var end = serviceProvider.GetRequiredService<EndConfig>().End;
             var config = serviceProvider.GetRequiredService<SignatureAlgorithmsExtension.Config>();
-
-            if (config.SupportedAlgorithms.Any())
+            
+            if (end == ConnectionEnd.Client && config.SupportedAlgorithms != null && config.SupportedAlgorithms.Any())
             {
                 return config.SupportedAlgorithms.First();
             }
