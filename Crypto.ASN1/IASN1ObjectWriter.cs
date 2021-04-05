@@ -13,6 +13,7 @@
         void Write(ASN1Tagged value);
         void Write(ASN1TaggedPrimitive value);
         void Write(ASN1UTCTime value);
+        void Write(ASN1PrintableString value);
         void Write(ASN1UTF8String value);
     }
 }

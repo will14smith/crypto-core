@@ -126,6 +126,7 @@ namespace Crypto.ASN1
                     case ASN1UniversalTag.ObjectIdentifier:
                         return ReadObjectIdentifier(length);
                     case ASN1UniversalTag.PrintableString:
+                        return ReadPrintableString(length);
                     case ASN1UniversalTag.UTF8String:
                         return ReadUTF8String(length);
                     case ASN1UniversalTag.UTCTime:
@@ -194,6 +195,14 @@ namespace Crypto.ASN1
             return new ASN1ObjectIdentifier(ASN1ObjectIdentifier.Format(bytes));
         }
 
+        private ASN1PrintableString ReadPrintableString(uint length)
+        {
+            var bytes = _reader.ReadBytes((int)length);
+            var value = Encoding.ASCII.GetString(bytes);
+
+            return new ASN1PrintableString(value);
+        }
+        
         private ASN1UTF8String ReadUTF8String(uint length)
         {
             var bytes = _reader.ReadBytes((int)length);

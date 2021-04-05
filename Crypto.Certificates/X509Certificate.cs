@@ -8,7 +8,7 @@ namespace Crypto.Certificates
 {
     public class X509Certificate
     {
-        public byte Version { get; }
+        public byte? Version { get; }
         public BigInteger SerialNumber { get; }
 
         public X509Validity Validity { get; }
@@ -24,7 +24,7 @@ namespace Crypto.Certificates
 
         public IReadOnlyList<X509Extension> Extensions { get; }
 
-        public X509Certificate(byte version, BigInteger serialNumber, X509Validity validity,
+        public X509Certificate(byte? version, BigInteger serialNumber, X509Validity validity,
             X509Name issuer, X509Name subject, X509AlgorithmIdentifier subjectPublicKeyAlgorithm, PublicKey subjectPublicKey,
             X509AlgorithmIdentifier signatureAlgorithm, BitArray signature, IEnumerable<X509Extension> extensions)
         {

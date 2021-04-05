@@ -44,8 +44,7 @@ namespace Crypto.Certificates
 
             var tbsOffset = 0;
             
-            byte version;
-
+            byte? version = null;
             if (tbsCertSeq.Elements[0] is ASN1Tagged)
             {
                 SecurityAssert.Assert(tbsCertSeq.Elements.Count >= 7);
@@ -55,10 +54,6 @@ namespace Crypto.Certificates
                 var versionInt = GetElement<ASN1Integer>(taggedVersion, 0);
                 SecurityAssert.Assert(versionInt.Value >= 0 && versionInt.Value <= 2);
                 version = (byte) (versionInt.Value + 1);
-            }
-            else
-            {
-                version = 1;
             }
 
             var serialNumber = GetElement<ASN1Integer>(tbsCertSeq, tbsOffset++).Value;

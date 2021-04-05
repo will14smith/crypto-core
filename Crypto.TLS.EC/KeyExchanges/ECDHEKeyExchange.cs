@@ -48,16 +48,16 @@ namespace Crypto.TLS.EC.KeyExchanges
         
         public override IEnumerable<HandshakeMessage> GenerateServerHandshakeMessages()
         {
-            if (ECDHExchangeConfig.Parameters is null)
-            {
-                throw new InvalidOperationException("ECDHE parameters are not initialized");
-            }
-            
             var ecParameters = NegotiateParameters();
 
             foreach (var message in base.GenerateServerHandshakeMessages())
             {
                 yield return message;
+            }
+            
+            if (ECDHExchangeConfig.Parameters is null)
+            {
+                throw new InvalidOperationException("ECDHE parameters are not initialized");
             }
 
             var qs = CalculatePoint(ECDHExchangeConfig.Parameters.Generator);

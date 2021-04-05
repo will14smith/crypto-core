@@ -138,6 +138,13 @@ namespace Crypto.ASN1
             _writer.Write(Encoding.UTF8.GetBytes(value.Value.ToString("yyMMddHHmmssZ")));
         }
 
+        public void Write(ASN1PrintableString value)
+        {
+            WriteIdentifier(ASN1Class.Universal, false, ASN1UniversalTag.PrintableString);
+            WriteLength(value.ByteLength);
+            _writer.Write(Encoding.ASCII.GetBytes(value.Value));
+        }
+
         public void Write(ASN1UTF8String value)
         {
             WriteIdentifier(ASN1Class.Universal, false, ASN1UniversalTag.UTF8String);

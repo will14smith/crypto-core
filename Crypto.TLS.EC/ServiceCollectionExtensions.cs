@@ -47,6 +47,7 @@ namespace Crypto.TLS.EC
             var namedCurves = new NamedCurvesRegistry();
 
             namedCurves.Register(Secp256K1.Id, Secp256K1.OID, Secp256K1.Parameters);
+            namedCurves.Register(Secp256R1.Id, Secp256R1.OID, Secp256R1.Parameters);
             namedCurves.Register(Sect283K1.Id, Sect283K1.OID, Sect283K1.Parameters);
 
             return namedCurves;

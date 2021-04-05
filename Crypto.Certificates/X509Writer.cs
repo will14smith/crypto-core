@@ -25,8 +25,7 @@ namespace Crypto.Certificates
 
         private ASN1Object GetASN1(X509Certificate cert)
         {
-            var version = new ASN1Integer(cert.Version - 1);
-            var taggedVersion = new ASN1Tagged(0, new[] { version });
+            var taggedVersion = cert.Version.HasValue ? new ASN1Tagged(0, new[] {new ASN1Integer(cert.Version.Value - 1)}) : null;
             var serialNumber = new ASN1Integer(cert.SerialNumber);
             var signatureAlgo = GetAlgorithmIdentifier(cert.SignatureAlgorithm);
             var issuer = GetName(cert.Issuer);
@@ -38,16 +37,18 @@ namespace Crypto.Certificates
                 new ASN1BitString(cert.SubjectPublicKey.GetBytes())
             });
 
-            var tbs = new List<ASN1Object>
+            var tbs = new List<ASN1Object>();
+            if (taggedVersion != null)
             {
-                taggedVersion,
-                serialNumber,
-                signatureAlgo,
-                issuer,
-                validity,
-                subject,
-                subjectPublicKeyInfo
-            };
+                tbs.Add(taggedVersion);
+            }
+
+            tbs.Add(serialNumber);
+            tbs.Add(signatureAlgo);
+            tbs.Add(issuer);
+            tbs.Add(validity);
+            tbs.Add(subject);
+            tbs.Add(subjectPublicKeyInfo);
 
             if (cert.Version >= 2)
             {
