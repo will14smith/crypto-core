@@ -6,13 +6,13 @@ using Crypto.Utils;
 
 namespace Crypto.TLS
 {
-    public class DefaultNegotiatior : INegotiatior
+    public class DefaultNegotiator : INegotiatior
     {
         private readonly ICipherSuitesProvider _cipherSuitesProvider;
         private readonly CertificateManager _certificateManager;
         private readonly CipherSuiteConfig _cipherSuiteConfig;
 
-        public DefaultNegotiatior(
+        public DefaultNegotiator(
             ICipherSuitesProvider cipherSuitesProvider,
             CertificateManager certificateManager,
             CipherSuiteConfig cipherSuiteConfig)

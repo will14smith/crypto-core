@@ -1,7 +1,7 @@
 ﻿using System;
 using Crypto.TLS.Messages.Handshakes;
 
-namespace Crypto.TLS.State
+namespace Crypto.TLS.State.Client
 {
     public class HandleCertificateRequestState : IState
     {

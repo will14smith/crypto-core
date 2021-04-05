@@ -4,6 +4,8 @@ using System.Threading;
 using Crypto.TLS.Config;
 using Crypto.TLS.Records;
 using Crypto.TLS.State;
+using Crypto.TLS.State.Client;
+using Crypto.TLS.State.Server;
 using Crypto.Utils;
 using Microsoft.Extensions.DependencyInjection;
 

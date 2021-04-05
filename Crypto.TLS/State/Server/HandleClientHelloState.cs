@@ -7,7 +7,7 @@ using Crypto.TLS.Messages.Alerts;
 using Crypto.TLS.Messages.Handshakes;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Crypto.TLS.State
+namespace Crypto.TLS.State.Server
 {
     public class HandleClientHelloState : IState
     {

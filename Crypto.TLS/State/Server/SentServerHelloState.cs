@@ -3,16 +3,16 @@ using Crypto.TLS.Messages.Handshakes;
 using Crypto.TLS.Records;
 using Crypto.Utils;
 
-namespace Crypto.TLS.State
+namespace Crypto.TLS.State.Server
 {
-    public class WaitingForClientFinishedState : ReadingState
+    public class SentServerHelloState : ReadingState
     {
-        public override ConnectionState State => ConnectionState.WaitingForClientFinished;
+        public override ConnectionState State => ConnectionState.SentServerHello;
 
         private readonly HandshakeReader _reader;
 
-        public WaitingForClientFinishedState(
-            IServiceProvider serviceProvider,
+        public SentServerHelloState(
+            IServiceProvider serviceProvider, 
             Connection connection,
             HandshakeReader reader)
             : base(serviceProvider, connection)
@@ -37,12 +37,12 @@ namespace Crypto.TLS.State
         {
             var handshake = _reader.Read(record);
 
-            if (handshake.HandshakeType != HandshakeType.Finished)
+            if (handshake.HandshakeType != HandshakeType.ClientKeyExchange)
             {
                 return UnexpectedMessage();
             }
 
-            return Option.Some<IState>(HandleClientFinishedState.New(ServiceProvider, (FinishedMessage)handshake));
+            return Option.Some<IState>(HandleClientKeyExchangeState.New(ServiceProvider, (ClientKeyExchangeMessage)handshake));
         }
 
         private Option<IState> HandleAlert(Record record)

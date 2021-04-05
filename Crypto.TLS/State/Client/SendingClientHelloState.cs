@@ -10,7 +10,7 @@ using Crypto.TLS.Suites.Registries;
 using Crypto.Utils.IO;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Crypto.TLS.State
+namespace Crypto.TLS.State.Client
 {
     public class SendingClientHelloState : IState
     {

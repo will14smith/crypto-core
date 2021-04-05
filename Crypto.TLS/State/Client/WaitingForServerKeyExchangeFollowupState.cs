@@ -3,15 +3,15 @@ using Crypto.TLS.Messages.Handshakes;
 using Crypto.TLS.Records;
 using Crypto.Utils;
 
-namespace Crypto.TLS.State
+namespace Crypto.TLS.State.Client
 {
-    public class WaitingForServerHelloFollowupState : ReadingState
+    public class WaitingForServerKeyExchangeFollowupState : ReadingState
     {
-        public override ConnectionState State => ConnectionState.WaitingForServerHelloFollowup;
+        public override ConnectionState State => ConnectionState.WaitingForServerKeyExchangeFollowup;
 
         private readonly HandshakeReader _reader;
 
-        public WaitingForServerHelloFollowupState(
+        public WaitingForServerKeyExchangeFollowupState(
             IServiceProvider serviceProvider,
 
             Connection connection,
@@ -40,10 +40,6 @@ namespace Crypto.TLS.State
 
             switch (handshake.HandshakeType)
             {
-                case HandshakeType.Certificate:
-                    return Option.Some<IState>(HandleCertificateState.New(ServiceProvider, (CertificateMessage)handshake));
-                case HandshakeType.ServerKeyExchange:
-                    return Option.Some<IState>(HandleServerKeyExchangeState.New(ServiceProvider, (ServerKeyExchangeMessage)handshake));
                 case HandshakeType.CertificateRequest:
                     return Option.Some<IState>(HandleCertificateRequestState.New(ServiceProvider, (CertificateRequestMessage)handshake));
                 case HandshakeType.ServerHelloDone:

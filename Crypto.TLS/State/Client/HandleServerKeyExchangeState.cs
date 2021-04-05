@@ -4,7 +4,7 @@ using Crypto.TLS.Messages.Handshakes;
 using Crypto.TLS.Suites.Providers;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Crypto.TLS.State
+namespace Crypto.TLS.State.Client
 {
     public class HandleServerKeyExchangeState : IState
     {

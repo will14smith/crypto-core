@@ -27,7 +27,7 @@ namespace Crypto.TestProgram
             
             services.AddSingleton<IRandom, DefaultRandomGenerator>();
             services.AddTransient<IStreamAccessor, StreamAccessor>();
-            services.AddTransient<INegotiatior, DefaultNegotiatior>();
+            services.AddTransient<INegotiatior, DefaultNegotiator>();
             
             // features
             services.AddAES();

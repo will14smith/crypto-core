@@ -4,7 +4,7 @@ using Crypto.TLS.Services;
 using Crypto.Utils;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Crypto.TLS.State
+namespace Crypto.TLS.State.Client
 {
     public class HandleServerFinishedState : IState
     {

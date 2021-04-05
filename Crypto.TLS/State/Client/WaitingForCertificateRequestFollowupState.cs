@@ -1,17 +1,17 @@
-﻿using System;
+using System;
 using Crypto.TLS.Messages.Handshakes;
 using Crypto.TLS.Records;
 using Crypto.Utils;
 
-namespace Crypto.TLS.State
+namespace Crypto.TLS.State.Client
 {
-    public class WaitingForServerHelloState : ReadingState
+    public class WaitingForCertificateRequestFollowupState : ReadingState
     {
-        public override ConnectionState State => ConnectionState.WaitingForServerHello;
+        public override ConnectionState State => ConnectionState.WaitingForServerCertificateRequestFollowup;
 
         private readonly HandshakeReader _reader;
 
-        public WaitingForServerHelloState(
+        public WaitingForCertificateRequestFollowupState(
             IServiceProvider serviceProvider,
 
             Connection connection,
@@ -38,12 +38,13 @@ namespace Crypto.TLS.State
         {
             var handshake = _reader.Read(record);
 
-            if (handshake.HandshakeType != HandshakeType.ServerHello)
+            switch (handshake.HandshakeType)
             {
-                return UnexpectedMessage();
+                case HandshakeType.ServerHelloDone:
+                    return Option.Some<IState>(HandleServerHelloDoneState.New(ServiceProvider, (ServerHelloDoneMessage)handshake));
+                default:
+                    return UnexpectedMessage();
             }
-
-            return Option.Some<IState>(HandleServerHelloState.New(ServiceProvider, (ServerHelloMessage)handshake));
         }
 
         private Option<IState> HandleAlert(Record record)

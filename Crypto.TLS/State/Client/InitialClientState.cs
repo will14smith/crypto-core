@@ -2,31 +2,31 @@
 using Crypto.TLS.Config;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Crypto.TLS.State
+namespace Crypto.TLS.State.Client
 {
-    public class InitialServerState : IState
+    public class InitialClientState : IState
     {
         public ConnectionState State => ConnectionState.Initial;
 
         private readonly IServiceProvider _serviceProvider;
-        
+
         private readonly EndConfig _endConfig;
-        
-        public InitialServerState(
+
+        public InitialClientState(
             IServiceProvider serviceProvider,
-            
+
             EndConfig endConfig)
         {
             _serviceProvider = serviceProvider;
-            
+
             _endConfig = endConfig;
         }
 
         public IState Run()
         {
-            _endConfig.End = ConnectionEnd.Server;
-            
-            return _serviceProvider.GetRequiredService<WaitingForClientHelloState>();
+            _endConfig.End = ConnectionEnd.Client;
+
+            return _serviceProvider.GetRequiredService<SendingClientHelloState>();
         }
     }
 }

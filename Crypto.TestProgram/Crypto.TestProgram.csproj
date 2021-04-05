@@ -26,10 +26,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="localhost_rsa.cert">
+    <None Update="*.cert">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="localhost_rsa.key">
+    <None Update="*.key">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

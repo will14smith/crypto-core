@@ -3,7 +3,7 @@ using Crypto.TLS.Messages.Handshakes;
 using Crypto.TLS.Records;
 using Crypto.Utils;
 
-namespace Crypto.TLS.State
+namespace Crypto.TLS.State.Server
 {
     public class WaitingForClientHelloState : ReadingState
     {
