@@ -19,7 +19,7 @@ namespace Crypto.TLS.IO
 
         private IServiceProvider Services => _servicesScope.ServiceProvider;
 
-        private bool _active;
+        private volatile bool _active;
         private Thread? _reader;
         private readonly ByteQueue _readQueue = new ByteQueue();
 
@@ -78,7 +78,7 @@ namespace Crypto.TLS.IO
         {
             try
             {
-                while (true)
+                while (_active)
                 {
                     var connection = Services.GetRequiredService<Connection>();
                     var record = connection.ReadRecord();
@@ -105,6 +105,8 @@ namespace Crypto.TLS.IO
                 Console.Error.WriteLine(ex);
                 // TODO handle error and close stuff
             }
+
+            _active = false;
         }
 
         private void HandleAlert(Record record)
@@ -127,7 +129,7 @@ namespace Crypto.TLS.IO
         public override int Read(byte[] buffer, int offset, int count)
         {
             SecurityAssert.Assert(_active);
-
+            
             var data = _readQueue.Take(count);
             Array.Copy(data, 0, buffer, offset, data.Length);
 
