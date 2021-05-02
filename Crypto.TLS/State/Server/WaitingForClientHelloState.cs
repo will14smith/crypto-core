@@ -1,4 +1,5 @@
 ﻿using System;
+using Crypto.TLS.Messages.Alerts;
 using Crypto.TLS.Messages.Handshakes;
 using Crypto.TLS.Records;
 using Crypto.Utils;
@@ -49,8 +50,8 @@ namespace Crypto.TLS.State.Server
         {
             // TODO any alerts we can handle?
             // TODO report alert to external handler?
-
-            return UnexpectedMessage();
+            var alert = AlertMessage.Read(record.Data);
+            return UnexpectedMessage(alert);
         }
     }
 }

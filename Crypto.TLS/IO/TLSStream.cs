@@ -104,6 +104,8 @@ namespace Crypto.TLS.IO
             {
                 Console.Error.WriteLine(ex);
                 // TODO handle error and close stuff
+                
+                _inner.Close();
             }
 
             _active = false;

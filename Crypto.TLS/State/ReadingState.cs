@@ -41,5 +41,12 @@ namespace Crypto.TLS.State
             
             return Option.Some<IState>(CloseConnectionWithAlertState.New(ServiceProvider, alertMessage));
         }
+        
+        protected Option<IState> UnexpectedMessage(AlertMessage alert)
+        {
+            Console.Error.WriteLine($"Unexpected {alert}");
+
+            return UnexpectedMessage();
+        }
     }
 }

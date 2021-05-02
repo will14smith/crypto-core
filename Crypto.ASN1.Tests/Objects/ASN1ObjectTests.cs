@@ -21,7 +21,7 @@ namespace Crypto.ASN1.Tests.Objects
 
             public override void Accept(IASN1ObjectWriter writer)
             {
-                throw new System.NotImplementedException();
+                throw new System.NotSupportedException();
             }
         }
 

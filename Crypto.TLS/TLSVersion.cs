@@ -43,5 +43,10 @@ namespace Crypto.TLS
         {
             return !left.Equals(right);
         }
+
+        public override string ToString()
+        {
+            return $"({Major}, {Minor})";
+        }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Crypto.Core.Randomness;
 using Crypto.TLS.Config;
 using Crypto.TLS.Extensions;
@@ -74,6 +75,7 @@ namespace Crypto.TLS.State.Server
             var version = _negotiatior.DecideVersion(_handshake.Version);
             if (!version.HasValue)
             {
+                Console.Error.WriteLine($"Failed to negotiate version: {_handshake.Version}");
                 return CloseConnectionWithAlertState.New(_serviceProvider, new AlertMessage(AlertLevel.Fatal, AlertDescription.HandshakeFailure));
             }
             _versionConfig.Version = version.Value;
@@ -81,6 +83,7 @@ namespace Crypto.TLS.State.Server
             var cipherSuite = _negotiatior.DecideCipherSuite(_handshake.CipherSuites);
             if (!cipherSuite.HasValue)
             {
+                Console.Error.WriteLine($"Failed to negotiate cipher: {string.Join(", ", _handshake.CipherSuites.Select(x => $"0x{x:X}"))}");
                 return CloseConnectionWithAlertState.New(_serviceProvider, new AlertMessage(AlertLevel.Fatal, AlertDescription.HandshakeFailure));
             }
             _cipherSuiteConfig.CipherSuite = cipherSuite.Value;
@@ -88,6 +91,7 @@ namespace Crypto.TLS.State.Server
             var compression = _negotiatior.DecideCompression(_handshake.CompressionMethods);
             if (!compression.HasValue)
             {
+                Console.Error.WriteLine($"Failed to negotiate compression: {string.Join(", ", _handshake.CompressionMethods.Select(x => $"0x{x:X}"))}");
                 return CloseConnectionWithAlertState.New(_serviceProvider, new AlertMessage(AlertLevel.Fatal, AlertDescription.HandshakeFailure));
             }
             _cipherSuiteConfig.CompressionMethod = compression.Value;
@@ -104,6 +108,7 @@ namespace Crypto.TLS.State.Server
             var certificateChain = _negotiatior.DecideCertificateChain();
             if (!certificateChain.HasValue)
             {
+                Console.Error.WriteLine($"Failed to negotiate certificate");
                 return CloseConnectionWithAlertState.New(_serviceProvider, new AlertMessage(AlertLevel.Fatal, AlertDescription.HandshakeFailure));
             }
             _certificateConfig.CertificateChain = certificateChain.Value;

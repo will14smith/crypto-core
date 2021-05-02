@@ -7,10 +7,14 @@ namespace Crypto.Certificates
     {
         public static string FromDirectoryString(this ASN1Object? asn1)
         {
-            //TODO UTF8String
             if (asn1 is ASN1UTF8String utf8)
             {
                 return utf8.Value;
+            }
+            
+            if (asn1 is ASN1PrintableString printable)
+            {
+                return printable.Value;
             }
 
             //TODO TeletexString

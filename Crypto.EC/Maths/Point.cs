@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Linq;
+using System.Numerics;
+using Crypto.EC.Maths.Prime;
 using Crypto.Utils.IO;
 using Crypto.Utils;
 
@@ -19,13 +21,11 @@ namespace Crypto.EC.Maths
         // TODO different types
         public byte[] ToBytes()
         {
-            var x = X.Value.ToByteArray(Endianness.BigEndian);
-            var y = Y.Value.ToByteArray(Endianness.BigEndian);
+            var x = X.Value.ToByteArray(Endianness.BigEndian).ToList();
+            var y = Y.Value.ToByteArray(Endianness.BigEndian).ToList();
 
-            if (x.Length != y.Length)
-            {
-                throw new NotImplementedException("Padding");
-            }
+            while (x.Count < y.Count) x.Insert(0, 0);
+            while (y.Count < x.Count) y.Insert(0, 0);
 
             return new[]
             {
@@ -33,6 +33,26 @@ namespace Crypto.EC.Maths
                 (byte) 0x4
             }.Concat(x).Concat(y).ToArray();
         }
+        
+        // TODO different types
+        public byte[] ToBytes(IField field)
+        {
+            var pField = (PrimeField) field;
+            var m = (int)Math.Ceiling(BigInteger.Log(pField.Prime, 2) / 8);
+            
+            var x = X.Value.ToByteArray(Endianness.BigEndian).ToList();
+            var y = Y.Value.ToByteArray(Endianness.BigEndian).ToList();
+
+            while (x.Count < m) x.Insert(0, 0);
+            while (y.Count < m) y.Insert(0, 0);
+
+            return new[]
+            {
+                // Type
+                (byte) 0x4
+            }.Concat(x).Concat(y).ToArray();
+        }
+
 
         public override bool Equals(object obj)
         {

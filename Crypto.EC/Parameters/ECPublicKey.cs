@@ -25,7 +25,7 @@ namespace Crypto.EC.Parameters
 
         public override byte[] GetBytes()
         {
-            return Point.ToBytes();
+            return Point.ToBytes(Parameters.Field);
         }
 
         protected override int HashCode => Parameters.GetHashCode() ^ Point.GetHashCode();

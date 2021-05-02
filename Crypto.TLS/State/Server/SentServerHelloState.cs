@@ -1,4 +1,5 @@
 ﻿using System;
+using Crypto.TLS.Messages.Alerts;
 using Crypto.TLS.Messages.Handshakes;
 using Crypto.TLS.Records;
 using Crypto.Utils;
@@ -37,6 +38,12 @@ namespace Crypto.TLS.State.Server
         {
             var handshake = _reader.Read(record);
 
+            if (handshake.Type == RecordType.Alert)
+            {
+                var alert = AlertMessage.Read(record.Data);
+                return UnexpectedMessage(alert);
+            }
+            
             if (handshake.HandshakeType != HandshakeType.ClientKeyExchange)
             {
                 return UnexpectedMessage();
@@ -49,8 +56,8 @@ namespace Crypto.TLS.State.Server
         {
             // TODO any alerts we can handle?
             // TODO report alert to external handler?
-
-            return UnexpectedMessage();
+            var alert = AlertMessage.Read(record.Data);
+            return UnexpectedMessage(alert);
         }
     }
 }
